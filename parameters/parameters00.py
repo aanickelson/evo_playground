@@ -4,7 +4,8 @@ class Parameters:
 
     # Domain:
     n_agents = 1
-    n_poi = 1
+    n_agent_types = 1
+    n_pois = 1
     poi_options = [[100, 1, 0]]
     with_agents = True
     size = 30
@@ -23,7 +24,7 @@ class Parameters:
     capabilities = False
 
     # Neural Network:
-    hidden_size = 30
+    hid = 30
 
     # Evolve nn:
     sigma = 0.1
