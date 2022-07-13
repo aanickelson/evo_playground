@@ -1,11 +1,11 @@
 class Parameters:
     # This should match the file name -- parameters##
-    trial_num = 00
+    trial_num = 1
 
     # Domain:
     n_agents = 1
     n_agent_types = 1
-    n_pois = 1
+    n_pois = 2
     poi_options = [[1, 1, 0]]
     with_agents = True
     size = 30

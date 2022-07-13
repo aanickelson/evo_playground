@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from math import ceil
 from scipy.stats import sem
+from os import getcwd, path
 
 np.set_printoptions(precision=3)
 
@@ -30,15 +31,19 @@ def plot_it(avgs, sterrs, n, fname):
     else:
         plt.ylabel("Percent total reward captured")
         plt.title("Reward captured by agents")
-    plt.savefig('{}.png'.format(fname))
+    graphs_path = path.join(getcwd(), 'graphs', '{}.png'.format(fname))
+    plt.savefig(graphs_path)
 
 
 if __name__ == '__main__':
-    filename = "trial1"
-    extensions = ['_avg', '_false', "_max"]
-    for ext in extensions:
-        filename2 = filename + ext
-        data = np.loadtxt("{}.csv".format(filename2))
-        n = 20
-        avgs, sterrs = average_every_n(n, data)
-        plot_it(avgs, sterrs, n, filename2)
+    for num in ['00', '01']:
+        filename = "trial{}".format(num)
+        attributes = ['_avg', '_false', "_max"]
+        path_nm = path.join(getcwd(), 'data')
+        for att in attributes:
+            filename2 = filename + att
+            path_to_use = path.join(path_nm, "{}.csv".format(filename2))  # Done this way for csv so we can pass the filename to make the graphs
+            data = np.loadtxt(path_to_use)
+            n = 50
+            avgs, sterrs = average_every_n(n, data)
+            plot_it(avgs, sterrs, n, filename2)

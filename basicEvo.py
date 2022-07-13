@@ -6,9 +6,11 @@ from tqdm import tqdm
 import numpy as np
 from teaming.domain import DiscreteRoverDomain as Domain
 from scipy.stats import sem
-from evo_learner.evolearner.neuralnet import EvolveNN as evoNN
-from support_functions.safe_file_save import write
+from evo_playground.learning.evolve_population import EvolveNN as evoNN
+from evo_playground.parameters.parameters01 import Parameters
 from os import getcwd, path
+from evo_playground.parameters.parameters00 import Parameters as p0
+from evo_playground.parameters.parameters01 import Parameters as p1
 
 
 class BasicEvo:
@@ -34,15 +36,21 @@ class BasicEvo:
         self.avg_false[i] = np.mean(falses)
 
     def save_data(self):
+        self.evoNN.save_model(self.trial_num)
         cwd = getcwd()
 
-        attrs = [self.min_score, self.max_score, self.avg_score, self.sterr_score, self.avg_false, self.evoNN.start_weights]
-        attr_names = ["min", "max", "avg", "sterr", "false", "weights"]
+        attrs = [self.min_score, self.max_score, self.avg_score, self.sterr_score, self.avg_false]
+        attr_names = ["min", "max", "avg", "sterr", "false"]
         for j in range(len(attrs)):
             nm = attr_names[j]
             att = attrs[j]
-            fp = path.join(cwd, "/data/trial{}_{}.csv".format(self.trial_num, nm))
-            np.savetxt(fp, att, delimiter=",")
+            fp = path.join(cwd, "data")
+            filename = "trial{:02d}_{}".format(self.trial_num, nm)
+            ext = "csv"
+            path_nm = path.join(fp, "{}.{}".format(filename, ext))
+
+            # do_not_overwrite(fp, filename, ext, att, isnp=True)
+            np.savetxt(path_nm, att, delimiter=",")
 
     def run_evolution(self):
         for gen in tqdm(self.generations):
@@ -64,3 +72,9 @@ class BasicEvo:
         self.evoNN.score_genome(self.evoNN.start_weights)
         self.save_data()
 
+
+if __name__ == '__main__':
+    for p in [p0, p1]:
+        env = Domain(p)
+        evo = BasicEvo(env, p)
+        evo.run_evolution()
