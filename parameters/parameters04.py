@@ -1,7 +1,7 @@
 class Parameters:
 
     # TODO: MAKE SURE TO CHANGE THIS
-    trial_num = 00
+    trial_num = 4
 
     # Domain:
     n_agents = 1
@@ -13,7 +13,7 @@ class Parameters:
     time_steps = 100
     n_regions = 8
     sensor_range = 10
-    rand_action_rate = 0.05
+    rand_action_rate = 0.0
 
     # POI:
     value = 1

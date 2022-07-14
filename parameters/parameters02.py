@@ -1,12 +1,13 @@
 class Parameters:
-    # This should match the file name -- parameters##
+
+    # TODO: MAKE SURE TO CHANGE THIS
     trial_num = 2
 
     # Domain:
-    n_agents = 2
+    n_agents = 1
     n_agent_types = 1
     n_pois = 2
-    poi_options = [[1, 1, 0]]
+    poi_options = [[100, 1, 0]]
     with_agents = True
     size = 30
     time_steps = 100
@@ -29,7 +30,7 @@ class Parameters:
     # Evolve nn:
     sigma = 0.1
     learning_rate = 0.03
-    n_policies = 50
+    n_policies = 100
 
     # Evo learner
-    n_gen = 10000
+    n_gen = 5000

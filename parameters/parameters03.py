@@ -1,15 +1,15 @@
 class Parameters:
 
     # TODO: MAKE SURE TO CHANGE THIS
-    trial_num = 00
+    trial_num = 3
 
     # Domain:
-    n_agents = 1
+    n_agents = 2
     n_agent_types = 1
-    n_pois = 1
+    n_pois = 2
     poi_options = [[100, 1, 0]]
     with_agents = True
-    size = 10
+    size = 30
     time_steps = 100
     n_regions = 8
     sensor_range = 10

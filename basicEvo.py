@@ -9,7 +9,7 @@ from scipy.stats import sem
 from evo_playground.learning.evolve_population import EvolveNN as evoNN
 from evo_playground.parameters.parameters01 import Parameters
 from os import getcwd, path
-from evo_playground.parameters.parameters00 import Parameters as p0
+from evo_playground.parameters.parameters04 import Parameters as p4
 from evo_playground.parameters.parameters01 import Parameters as p1
 
 
@@ -65,16 +65,16 @@ class BasicEvo:
 
             self.update_logs(scores, falses, gen)
             self.evoNN.start_weights = self.evoNN.update_weights(self.evoNN.start_weights, candidates, np.array(scores))
-            if gen > 0 and not gen % 100:
-                self.save_data()
+            # if gen > 0 and not gen % 100:
+            #     self.save_data()
 
         print(f"ending score: {self.evoNN.score_genome(self.evoNN.start_weights)[0]}")
         self.evoNN.score_genome(self.evoNN.start_weights)
-        self.save_data()
+        # self.save_data()
 
 
 if __name__ == '__main__':
-    for p in [p0, p1]:
+    for p in [p4]:
         env = Domain(p)
         evo = BasicEvo(env, p)
         evo.run_evolution()

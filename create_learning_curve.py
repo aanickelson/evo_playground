@@ -25,25 +25,34 @@ def plot_it(avgs, sterrs, n, fname):
     plt.plot(x_vals, avgs, 'k-')
     plt.fill_between(x_vals, avgs-sterrs, avgs+sterrs, alpha=0.5)
     plt.xlabel("Epoch")
+    plt.ylim([0, 2.05])
+    plt.margins(y=1)
     if 'false' in fname:
         plt.ylabel("Percent of time null actions chosen")
         plt.title("Percent null actions chosen")
+    elif "avg" in fname:
+        plt.ylabel("Percent reward captured on average by entire population")
+        plt.title("Average reward captured by population")
+
     else:
-        plt.ylabel("Percent total reward captured")
-        plt.title("Reward captured by agents")
+        plt.ylabel("Percent total reward captured by best policy")
+        plt.title("Reward captured by best agent")
     graphs_path = path.join(getcwd(), 'graphs', '{}.png'.format(fname))
     plt.savefig(graphs_path)
 
 
 if __name__ == '__main__':
-    for num in ['00', '01']:
-        filename = "trial{}".format(num)
+    start_trial = 4
+    end_trial = 4
+
+    for num in range(start_trial, end_trial + 1):
+        filename = "trial{:02d}".format(num)
         attributes = ['_avg', '_false', "_max"]
         path_nm = path.join(getcwd(), 'data')
         for att in attributes:
             filename2 = filename + att
             path_to_use = path.join(path_nm, "{}.csv".format(filename2))  # Done this way for csv so we can pass the filename to make the graphs
             data = np.loadtxt(path_to_use)
-            n = 50
+            n = 100
             avgs, sterrs = average_every_n(n, data)
             plot_it(avgs, sterrs, n, filename2)

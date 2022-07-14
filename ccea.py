@@ -9,12 +9,13 @@ from scipy.stats import sem
 from evo_playground.learning.evolve_population import EvolveNN as evoNN
 from evo_playground.parameters.parameters01 import Parameters
 from os import getcwd, path
-from evo_playground.parameters.parameters00 import Parameters as p0
-from evo_playground.parameters.parameters01 import Parameters as p1
-from evo_playground.parameters.parameters01 import Parameters as p2
+from evo_playground.parameters.parameters04 import Parameters as p4
+from evo_playground.parameters.parameters05 import Parameters as p5
+from evo_playground.parameters.parameters06 import Parameters as p6
+from evo_playground.parameters.parameters07 import Parameters as p7
 
 
-class BasicEvo:
+class CCEA:
     def __init__(self, env, p):
         self.n_gen = p.n_gen
         self.trial_num = p.trial_num
@@ -39,6 +40,19 @@ class BasicEvo:
     def save_data(self):
         for i, species in enumerate(self.species):
             species.save_model(self.trial_num, species=i)
+        cwd = getcwd()
+        attrs = [self.min_score, self.max_score, self.avg_score, self.sterr_score, self.avg_false]
+        attr_names = ["min", "max", "avg", "sterr", "false"]
+        for j in range(len(attrs)):
+            nm = attr_names[j]
+            att = attrs[j]
+            fp = path.join(cwd, "data")
+            filename = "trial{:02d}_{}".format(self.trial_num, nm)
+            ext = "csv"
+            path_nm = path.join(fp, "{}.{}".format(filename, ext))
+
+            # do_not_overwrite(fp, filename, ext, att, isnp=True)
+            np.savetxt(path_nm, att, delimiter=",")
 
     def update_logs(self, scores, falses, i):
         self.min_score[i] = min(scores)
@@ -51,10 +65,13 @@ class BasicEvo:
         for gen in tqdm(self.generations):
             scores = []
             falses = []
+            # Mutate weights for all species
             mutated = [sp.mutate_weights(sp.start_weights) for sp in self.species]
 
             for pol_num in range(self.p.n_policies):
+                # Pick one policy from each species
                 wts = [mutated[i][pol_num] for i in range(self.n_agents)]
+
                 for idx, spec in enumerate(self.species):
                     spec.model.set_weights(wts[idx])
                 models = [sp.model for sp in self.species]
@@ -67,10 +84,15 @@ class BasicEvo:
             self.update_logs(scores, falses, gen)
             for idx, spec in enumerate(self.species):
                 spec.start_weights = spec.update_weights(spec.start_weights, mutated[idx], np.array(scores))
+            if gen > 0 and not gen % 100:
+                self.save_data()
+
+        self.save_data()
 
 
 if __name__ == '__main__':
-    for p in [p0, p1, p2]:
+
+    for p in [p4, p5, p6, p7]:
         env = Domain(p)
-        evo = BasicEvo(env, p)
+        evo = CCEA(env, p)
         evo.run_evolution()
