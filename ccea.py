@@ -93,7 +93,7 @@ class CCEA:
             self.update_logs(scores, falses, raw_G, all_multi_g, gen)
             entr_scores = [entropy(i) for i in all_multi_g]
             for idx, spec in enumerate(self.species):
-                spec.start_weights = spec.update_weights(spec.start_weights, mutated[idx], np.array(entr_scores))  #np.array(scores))
+                spec.start_weights = spec.update_weights(spec.start_weights, mutated[idx], np.array(scores))  # np.array(entr_scores))
             if gen > 0 and not gen % 100:
                 self.save_data()
             self.env.new_env()
@@ -113,7 +113,7 @@ class CCEA:
 
 if __name__ == '__main__':
 
-    for p in TEST_BATCH:
+    for p in BATCH3_SM:
         print("TRIAL {}".format(p.trial_num))
         env = Domain(p)
         evo = CCEA(env, p)
