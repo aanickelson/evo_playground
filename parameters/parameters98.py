@@ -1,12 +1,17 @@
 class Parameters:
+    """
+    Big world, few POIs, three types (one with 2 visits)
+    P98 uses the entropy of the reward vector to update the evolutionary method
+    P99 uses G
+    """
 
     # TODO: MAKE SURE TO CHANGE THIS
-    trial_num = 6
+    trial_num = 98
 
     # Domain:
-    n_agents = 1
+    n_agents = 2
     n_agent_types = 1
-    n_pois = 2
+    n_pois = 5
     poi_options = [[100, 1, 0]]
     with_agents = True
     size = 30
@@ -34,3 +39,4 @@ class Parameters:
 
     # Evo learner
     n_gen = 1000
+

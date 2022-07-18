@@ -1,13 +1,15 @@
 class Parameters:
-
+    """
+    Small world, more POIs, two types
+    """
     # TODO: MAKE SURE TO CHANGE THIS
-    trial_num = 6
+    trial_num = 20
 
     # Domain:
-    n_agents = 1
+    n_agents = 5
     n_agent_types = 1
-    n_pois = 2
-    poi_options = [[100, 1, 0]]
+    n_pois = 15
+    poi_options = [[100, 1, 0], [50, 1, 1]]
     with_agents = True
     size = 30
     time_steps = 100
@@ -33,4 +35,4 @@ class Parameters:
     n_policies = 100
 
     # Evo learner
-    n_gen = 1000
+    n_gen = 5000

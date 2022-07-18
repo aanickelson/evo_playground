@@ -1,13 +1,16 @@
 class Parameters:
+    """
+    Big world, few POIs, three types (one with 2 visits)
+    """
 
     # TODO: MAKE SURE TO CHANGE THIS
-    trial_num = 6
+    trial_num = 99
 
     # Domain:
-    n_agents = 1
+    n_agents = 5
     n_agent_types = 1
-    n_pois = 2
-    poi_options = [[100, 1, 0]]
+    n_pois = 15
+    poi_options = [[100, 1, 0], [50, 1, 1]]
     with_agents = True
     size = 30
     time_steps = 100

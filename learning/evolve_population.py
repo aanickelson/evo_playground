@@ -23,8 +23,8 @@ class EvolveNN:
         weights_to_try = []
         for _ in range(self.n_policies):
             noise = self.sigma * torch.normal(0, 1, size=weights[0].shape)
-            noise2 = self.sigma * torch.normal(0, 1, size=weights[1].shape)
-            weights_to_try.append([weights[0] + noise, weights[1] + noise2])
+            # noise2 = self.sigma * torch.normal(0, 1, size=weights[1].shape)
+            weights_to_try.append([weights[0] + noise]) #, weights[1] + noise2])
         return weights_to_try
 
     def update_weights(self, start_weights, weights, scores):

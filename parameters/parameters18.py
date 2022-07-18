@@ -1,12 +1,12 @@
 class Parameters:
 
     # TODO: MAKE SURE TO CHANGE THIS
-    trial_num = 6
+    trial_num = 18
 
     # Domain:
-    n_agents = 1
+    n_agents = 5
     n_agent_types = 1
-    n_pois = 2
+    n_pois = 10
     poi_options = [[100, 1, 0]]
     with_agents = True
     size = 30

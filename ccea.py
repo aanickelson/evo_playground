@@ -5,14 +5,12 @@ https://github.com/AADILab/PyTorch-Evo-Strategies
 from tqdm import tqdm
 import numpy as np
 from teaming.domain import DiscreteRoverDomain as Domain
-from scipy.stats import sem
+from scipy.stats import sem, entropy
 from evo_playground.learning.evolve_population import EvolveNN as evoNN
 from evo_playground.parameters.parameters01 import Parameters
 from os import getcwd, path
-from evo_playground.parameters.parameters04 import Parameters as p4
-from evo_playground.parameters.parameters05 import Parameters as p5
-from evo_playground.parameters.parameters06 import Parameters as p6
-from evo_playground.parameters.parameters07 import Parameters as p7
+from parameters import BATCH2, TEST_BATCH, BATCH3_SM
+from optimal_comparison import optimal_policy
 
 
 class CCEA:
@@ -24,7 +22,8 @@ class CCEA:
         self.env = env
         self.species = self.species_setup()
         self.generations = range(self.n_gen)
-        self.generations = range(self.n_gen)
+        self.raw_g = np.zeros(self.n_gen)
+        self.multi_g = np.zeros((self.n_gen, self.env.n_poi_types))
         self.min_score = np.zeros(self.n_gen)
         self.max_score = np.zeros(self.n_gen)
         self.avg_score = np.zeros(self.n_gen)
@@ -41,8 +40,8 @@ class CCEA:
         for i, species in enumerate(self.species):
             species.save_model(self.trial_num, species=i)
         cwd = getcwd()
-        attrs = [self.min_score, self.max_score, self.avg_score, self.sterr_score, self.avg_false]
-        attr_names = ["min", "max", "avg", "sterr", "false"]
+        attrs = [self.min_score, self.max_score, self.avg_score, self.sterr_score, self.avg_false, self.raw_g, self.multi_g]
+        attr_names = ["min", "max", "avg", "sterr", "false", 'avg_G', 'multi_g']
         for j in range(len(attrs)):
             nm = attr_names[j]
             att = attrs[j]
@@ -54,20 +53,27 @@ class CCEA:
             # do_not_overwrite(fp, filename, ext, att, isnp=True)
             np.savetxt(path_nm, att, delimiter=",")
 
-    def update_logs(self, scores, falses, i):
+    def update_logs(self, scores, falses, raw_G, multi_g, i):
         self.min_score[i] = min(scores)
         self.max_score[i] = max(scores)
         self.avg_score[i] = np.mean(scores)
         self.sterr_score[i] = sem(scores)
         self.avg_false[i] = np.mean(falses)
+        self.raw_g[i] = np.max(raw_G)
+        best_idx = np.argmax(scores)
+        self.multi_g[i] = multi_g[best_idx]
 
     def run_evolution(self):
+        # self.env.draw()
         for gen in tqdm(self.generations):
-            scores = []
-            falses = []
+            # print(self.env.theoretical_max_g)
+            scores = np.zeros(self.p.n_policies)
+            raw_G = np.zeros(self.p.n_policies)
+            falses = np.zeros(self.p.n_policies)
+            all_multi_g = np.zeros((self.p.n_policies, self.env.n_poi_types))
             # Mutate weights for all species
             mutated = [sp.mutate_weights(sp.start_weights) for sp in self.species]
-
+            theoretical_max_g = optimal_policy(self.env)
             for pol_num in range(self.p.n_policies):
                 # Pick one policy from each species
                 wts = [mutated[i][pol_num] for i in range(self.n_agents)]
@@ -76,23 +82,39 @@ class CCEA:
                     spec.model.set_weights(wts[idx])
                 models = [sp.model for sp in self.species]
 
-                self.env.new_env()
-                G, avg_false = self.env.run_sim(models)
-                scores.append(G)
-                falses.append(avg_false)
+                self.env.reset()
+                G, multi_g, avg_false = self.env.run_sim(models, multi_g=True)
+                rew = G / theoretical_max_g
+                raw_G[pol_num] = G
+                scores[pol_num] = rew
+                falses[pol_num] = avg_false
+                all_multi_g[pol_num] = multi_g
 
-            self.update_logs(scores, falses, gen)
+            self.update_logs(scores, falses, raw_G, all_multi_g, gen)
+            entr_scores = [entropy(i) for i in all_multi_g]
             for idx, spec in enumerate(self.species):
-                spec.start_weights = spec.update_weights(spec.start_weights, mutated[idx], np.array(scores))
+                spec.start_weights = spec.update_weights(spec.start_weights, mutated[idx], np.array(entr_scores))  #np.array(scores))
             if gen > 0 and not gen % 100:
                 self.save_data()
+            self.env.new_env()
 
         self.save_data()
 
 
+# def get_best_arr(all_g, multi_g):
+#     h = [(-all_g[i], (-entropy(multi_g[i]), i, multi_g[i])) for i in range(len(all_g))]
+#     # for i, g in enumerate(all_g):
+#     #     h.append((-g, (-entropy(all_g[i]), multi_g[i])))
+#     heapq.heapify(h)
+#     best = heapq.heappop(h)
+#     print("Heap result", best)
+#     print(best[1][2])
+#     return best[1][2]
+
 if __name__ == '__main__':
 
-    for p in [p4, p5, p6, p7]:
+    for p in TEST_BATCH:
+        print("TRIAL {}".format(p.trial_num))
         env = Domain(p)
         evo = CCEA(env, p)
         evo.run_evolution()
