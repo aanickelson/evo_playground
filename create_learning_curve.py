@@ -32,22 +32,28 @@ def plot_it(avgs, sterrs, n, fname):
     if 'false' in fname:
         plt.ylabel("Percent of time null actions chosen")
         plt.title("Percent null actions chosen")
+    elif 'G' in fname:
+        plt.ylabel("Average total G captured by population")
+
     elif "avg" in fname:
         plt.ylabel("Percent reward captured on average by entire population")
         plt.title("Average reward captured by population")
+        plt.ylim([0, 1])
     elif "sterr" in fname:
         plt.ylabel('Standard error across {} generations'.format(n))
         plt.title("Standard error from the mean across {} generations".format(n))
     else:
         plt.ylabel("Percent total reward captured by best policy")
         plt.title("Reward captured by best agent")
+        plt.ylim([0, 1])
+
     graphs_path = path.join(getcwd(), 'graphs', '{}.png'.format(fname))
     plt.savefig(graphs_path)
 
 
 if __name__ == '__main__':
-    start_trial = 99
-    end_trial = 99
+    start_trial = 98
+    end_trial = 98
 
     for num in range(start_trial, end_trial + 1):
         filename = "trial{:02d}".format(num)
@@ -57,6 +63,6 @@ if __name__ == '__main__':
             filename2 = filename + att
             path_to_use = path.join(path_nm, "{}.csv".format(filename2))  # Done this way for csv so we can pass the filename to make the graphs
             data = np.loadtxt(path_to_use)
-            n = 20
+            n = 50
             avgs, sterrs = average_every_n(n, data)
             plot_it(avgs, sterrs, n, filename2)

@@ -42,6 +42,6 @@ class EvolveNN:
             new_weights.append(nw)
         return new_weights
 
-    def save_model(self, trial, species=''):
-        pth = path.join(getcwd(), 'weights', 'weights_only_t{:02d}_s{}.pth'.format(trial, species))
+    def save_model(self, trial, gen, species=''):
+        pth = path.join(getcwd(), 'weights', 'weights_only_t{:02d}_s{}_g{}.pth'.format(trial, species, gen))
         torch.save(self.start_weights, pth)
