@@ -8,7 +8,7 @@ from teaming.domain import DiscreteRoverDomain as Domain
 from scipy.stats import sem, entropy
 from evo_playground.learning.evolve_population import EvolveNN as evoNN
 from os import getcwd, path
-from parameters import BATCH2, TEST_BATCH, BATCH3_SM
+import parameters
 from optimal_comparison import optimal_policy
 from multiprocessing import Process
 
@@ -100,7 +100,7 @@ class CCEA:
                 self.save_data(gen)
             self.env.new_env()
 
-        self.save_data()
+        self.save_data(gen=self.n_gen)
 
 
 def main(p):
@@ -109,15 +109,6 @@ def main(p):
     evo = CCEA(env, p)
     evo.run_evolution()
 
-# def get_best_arr(all_g, multi_g):
-#     h = [(-all_g[i], (-entropy(multi_g[i]), i, multi_g[i])) for i in range(len(all_g))]
-#     # for i, g in enumerate(all_g):
-#     #     h.append((-g, (-entropy(all_g[i]), multi_g[i])))
-#     heapq.heapify(h)
-#     best = heapq.heappop(h)
-#     print("Heap result", best)
-#     print(best[1][2])
-#     return best[1][2]
 
 if __name__ == '__main__':
 

@@ -26,6 +26,7 @@ from evo_playground.parameters.parameters24 import Parameters as p24
 from evo_playground.parameters.parameters25 import Parameters as p25
 from evo_playground.parameters.parameters26 import Parameters as p26
 from evo_playground.parameters.parameters27 import Parameters as p27
+from evo_playground.parameters.parameters28 import Parameters as p28
 
 from evo_playground.parameters.parameters99 import Parameters as p99
 from evo_playground.parameters.parameters98 import Parameters as p98
@@ -34,4 +35,6 @@ BATCH1 = [p0, p1, p2, p3, p4, p5, p6, p7, p8]
 BATCH2 = [p9, p10, p11, p12, p13, p14, p15, p16, p17]
 BATCH3 = [p18, p19, p20, p21, p22, p23, p24, p25, p26, p27]
 BATCH3_SM = [p23, p24, p25, p26, p27]
+BATCH4 = [p27]
+BATCH5 = [p8, p28]
 TEST_BATCH = [p98]

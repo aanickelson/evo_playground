@@ -1,16 +1,16 @@
 class Parameters:
     """
-    Medium world, MANY pois, three types
+    Medium world, more pois, one type requires two observations (comp to 08)
     """
 
     # TODO: MAKE SURE TO CHANGE THIS
-    trial_num = 27
+    trial_num = 28
 
     # Domain:
     n_agents = 5
     n_agent_types = 1
-    n_pois = 50
-    poi_options = [[100, 1, 0], [50, 1, 1], [1, 1, 2]]
+    n_pois = 10
+    poi_options = [[100, 2, 0]]
     with_agents = True
     size = 30
     time_steps = 100
