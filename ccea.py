@@ -76,6 +76,8 @@ class CCEA:
             # Mutate weights for all species
             mutated = [sp.mutate_weights(sp.start_weights) for sp in self.species]
             theoretical_max_g = optimal_policy(self.env)
+            save_wts = []
+
             for pol_num in range(self.p.n_policies):
                 # Pick one policy from each species
                 wts = [mutated[i][pol_num] for i in range(self.n_agents)]
