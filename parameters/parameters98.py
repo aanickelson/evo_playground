@@ -7,14 +7,15 @@ class Parameters:
 
     # TODO: MAKE SURE TO CHANGE THIS
     trial_num = 98
+    fname_prepend = "G_"
 
     # Domain:
     n_agents = 2
     n_agent_types = 1
-    n_pois = 5
-    poi_options = [[100, 1, 0]]
+    n_pois = 2
+    poi_options = [[1, 1, 1]]
     with_agents = True
-    size = 30
+    size = 10
     time_steps = 100
     n_regions = 8
     sensor_range = 10
@@ -34,7 +35,7 @@ class Parameters:
 
     # Evolve nn:
     sigma = 0.1
-    learning_rate = 0.03
+    learning_rate = 0.05
     n_policies = 100
 
     # Evo learner

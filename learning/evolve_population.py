@@ -23,8 +23,8 @@ class EvolveNN:
         weights_to_try = []
         for _ in range(self.n_policies):
             noise = self.sigma * torch.normal(0, 1, size=weights[0].shape)
-            # noise2 = self.sigma * torch.normal(0, 1, size=weights[1].shape)
-            weights_to_try.append([weights[0] + noise]) #, weights[1] + noise2])
+            noise2 = self.sigma * torch.normal(0, 1, size=weights[1].shape)
+            weights_to_try.append([weights[0] + noise, weights[1] + noise2])
         return weights_to_try
 
     def update_weights(self, start_weights, weights, scores):
@@ -42,6 +42,11 @@ class EvolveNN:
             new_weights.append(nw)
         return new_weights
 
-    def save_model(self, trial, gen, species=''):
-        pth = path.join(getcwd(), 'weights', 'weights_only_t{:02d}_s{}_g{}.pth'.format(trial, species, gen))
-        torch.save(self.start_weights, pth)
+    def save_model(self, trial, gen, prepend, wts=None, species=''):
+
+        pth = path.join(getcwd(), 'weights', 't{:02d}_{}weights_s{}_g{}.pth'.format(trial, prepend, species, gen))
+        if wts:
+            torch.save(wts, pth)
+
+        else:
+            torch.save(self.start_weights, pth)
