@@ -100,9 +100,9 @@ class CCEA:
             max_wts = [mutated[sp][max_g] for sp in range(self.n_agents)]
             self.update_logs(scores, falses, raw_G, all_multi_g, gen)
             for idx, spec in enumerate(self.species):
-                if p.fname_prepend == 'G_':
-                    spec.start_weights = spec.update_weights(spec.start_weights, mutated[idx], np.array(raw_G))
-                elif p.fname_prepend == 'D_':
+                if 'G_' in p.fname_prepend:
+                    spec.start_weights = spec.update_weights(spec.start_weights, mutated[idx], np.array(scores))
+                elif 'D_' in p.fname_prepend:
                     _ = np.array(d_scores[idx])
                     spec.start_weights = spec.update_weights(spec.start_weights, mutated[idx], np.array(d_scores[idx]))
                 spec.learning_rate *= 1.001
@@ -141,6 +141,6 @@ if __name__ == '__main__':
     for prepend in ['D_b', 'G_b']:
         for p in parameters.BATCH6:
             p.fname_prepend = prepend
-            main(p)
-            # multip = Process(target=main, args=(p,))
-            # multip.start()
+            # main(p)
+            multip = Process(target=main, args=(p,))
+            multip.start()
