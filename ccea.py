@@ -67,6 +67,9 @@ class CCEA:
         self.multi_g[i] = multi_g[best_idx]
 
     def run_evolution(self):
+        # Comparison of theoretical max for simple G
+        # IF CHANGING THE ENVIRONMENT, put this the loop
+        theoretical_max_g = optimal_policy(self.env)
         for gen in tqdm(self.generations):
 
             # Bookkeeping
@@ -78,9 +81,6 @@ class CCEA:
 
             # Mutate weights for all species
             mutated = [sp.mutate_weights(sp.start_weights) for sp in self.species]
-
-            # Comparison of theoretical max for simple G
-            theoretical_max_g = optimal_policy(self.env)
 
             for pol_num in range(self.p.n_policies):
                 # Pick one policy from each species
@@ -109,7 +109,6 @@ class CCEA:
                 scores[pol_num] = rew
                 falses[pol_num] = avg_false
                 all_multi_g[pol_num] = multi_g
-
             # Index of the policies that performed best over G
             max_g = np.argmax(raw_G)
             # Policies that performed best
@@ -124,26 +123,24 @@ class CCEA:
                     # Use raw G because the scores may be more noisy (since it's divided by the greedy policy)
                     spec.start_weights = spec.update_weights(spec.start_weights, mutated[idx], np.array(raw_G))
                 elif 'D_' in p.fname_prepend:
-                    _ = np.array(d_scores[idx])
                     spec.start_weights = spec.update_weights(spec.start_weights, mutated[idx], np.array(d_scores[idx]))
 
                 # Reduce the learning rate
                 spec.learning_rate /= 1.001
 
             # Bookkeeping - save data every 100 generations
-            if gen > 0 and not gen % 100:
-                self.save_data(gen)
-
             # Save models every 1000 generations
             if gen > 0 and not gen % 1000:
+                self.save_data(gen)
+
                 for i, species in enumerate(self.species):
                     species.save_model(self.trial_num, gen, p.fname_prepend, max_wts[i], species=i)
 
-            self.env.visualize = False
-            self.env.reset()
-            # if random() < 0.05:
-            #     # 5% of the time, change the location of the POIs slightly
-            #     self.env.move_pois()
+        self.env.visualize = False
+        self.env.reset()
+        # if random() < 0.05:
+        #     # 5% of the time, change the location of the POIs slightly
+        #     self.env.move_pois()
 
         self.save_data(gen=self.n_gen)
         # save the models

@@ -36,8 +36,8 @@ class Parameters:
     # Evolve nn:
     sigma = 0.1
     learning_rate = 0.05
-    n_policies = 10
+    n_policies = 100
 
     # Evo learner
-    n_gen = 300
+    n_gen = 3000
 
