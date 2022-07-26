@@ -61,7 +61,7 @@ if __name__ == '__main__':
     preps = ['G_b', 'D_b']
     for p in params.BATCH6:
         for pre in preps:
-            filename = "{}trial{:02d}b".format(pre, p.trial_num)
+            filename = "{}trial{:02d}".format(pre, p.trial_num)
             path_nm = path.join(getcwd(), 'data')
             for att in attributes:
                 filename2 = filename + att

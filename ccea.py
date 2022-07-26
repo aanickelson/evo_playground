@@ -50,7 +50,7 @@ class CCEA:
             nm = attr_names[j]
             att = attrs[j]
             fp = path.join(cwd, "data")
-            filename = self.p.fname_prepend + "trial{:02d}b_{}".format(self.trial_num, nm)
+            filename = self.p.fname_prepend + "trial{:02d}_{}".format(self.trial_num, nm)
             ext = "csv"
             path_nm = path.join(fp, "{}.{}".format(filename, ext))
 
@@ -68,26 +68,40 @@ class CCEA:
 
     def run_evolution(self):
         for gen in tqdm(self.generations):
+
+            # Bookkeeping
             scores = np.zeros(self.p.n_policies)
             d_scores = np.zeros((self.n_agents, self.p.n_policies))
             raw_G = np.zeros(self.p.n_policies)
             falses = np.zeros(self.p.n_policies)
             all_multi_g = np.zeros((self.p.n_policies, self.env.n_poi_types))
+
             # Mutate weights for all species
             mutated = [sp.mutate_weights(sp.start_weights) for sp in self.species]
+
+            # Comparison of theoretical max for simple G
             theoretical_max_g = optimal_policy(self.env)
-            save_wts = []
 
             for pol_num in range(self.p.n_policies):
                 # Pick one policy from each species
                 wts = [mutated[i][pol_num] for i in range(self.n_agents)]
 
+                # For each species
                 for idx, spec in enumerate(self.species):
+                    # Set the current policy
                     spec.model.set_weights(wts[idx])
+
+                # Array of one NN per species to use as policies
                 models = [sp.model for sp in self.species]
 
+                # Reset the environment
                 self.env.reset()
+                self.env.visualize = False
+
+                # Run the simulation
                 G, multi_g, avg_false = self.env.run_sim(models, multi_g=True)
+
+                # Bookkeeping
                 d_vec = self.env.D()
                 d_scores[:, pol_num] = d_vec
                 rew = G / theoretical_max_g
@@ -96,38 +110,52 @@ class CCEA:
                 falses[pol_num] = avg_false
                 all_multi_g[pol_num] = multi_g
 
+            # Index of the policies that performed best over G
             max_g = np.argmax(raw_G)
+            # Policies that performed best
             max_wts = [mutated[sp][max_g] for sp in range(self.n_agents)]
+
+            # Bookkeeping
             self.update_logs(scores, falses, raw_G, all_multi_g, gen)
+
+            # Update the starting weights (the policy we keep between generations) for each species
             for idx, spec in enumerate(self.species):
                 if 'G_' in p.fname_prepend:
-                    spec.start_weights = spec.update_weights(spec.start_weights, mutated[idx], np.array(scores))
+                    # Use raw G because the scores may be more noisy (since it's divided by the greedy policy)
+                    spec.start_weights = spec.update_weights(spec.start_weights, mutated[idx], np.array(raw_G))
                 elif 'D_' in p.fname_prepend:
                     _ = np.array(d_scores[idx])
                     spec.start_weights = spec.update_weights(spec.start_weights, mutated[idx], np.array(d_scores[idx]))
-                spec.learning_rate *= 1.001
+
+                # Reduce the learning rate
+                spec.learning_rate /= 1.001
+
+            # Bookkeeping - save data every 100 generations
             if gen > 0 and not gen % 100:
                 self.save_data(gen)
+
+            # Save models every 1000 generations
             if gen > 0 and not gen % 1000:
                 for i, species in enumerate(self.species):
                     species.save_model(self.trial_num, gen, p.fname_prepend, max_wts[i], species=i)
-            if gen == self.n_gen - 1:
-                for i, species in enumerate(self.species):
-                    species.save_model(self.trial_num, gen, p.fname_prepend, max_wts[i], species=i)
-                self.env.visualize = True
-                self.env.reset()
-                for idx, spec in enumerate(self.species):
-                    spec.model.set_weights(max_wts[idx])
-                models = [sp.model for sp in self.species]
-                _ = self.env.run_sim(models, multi_g=True)
 
             self.env.visualize = False
-            # self.env.new_env()
             self.env.reset()
             # if random() < 0.05:
             #     # 5% of the time, change the location of the POIs slightly
             #     self.env.move_pois()
+
         self.save_data(gen=self.n_gen)
+        # save the models
+        for i, species in enumerate(self.species):
+            species.save_model(self.trial_num, self.n_gen, p.fname_prepend, max_wts[i], species=i)
+        # Run a rollout simulation
+        self.env.reset()
+        self.env.visualize = True
+        for idx, spec in enumerate(self.species):
+            spec.model.set_weights(max_wts[idx])
+        models = [sp.model for sp in self.species]
+        _ = self.env.run_sim(models, multi_g=True)
 
 
 def main(p):
