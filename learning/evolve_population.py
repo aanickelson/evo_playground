@@ -44,7 +44,7 @@ class EvolveNN:
 
     def save_model(self, trial, gen, prepend, wts=None, species=''):
 
-        pth = path.join(getcwd(), 'weights', 't{:02d}_{}weights_s{}_g{}.pth'.format(trial, prepend, species, gen))
+        pth = path.join(getcwd(), 'weights', 't{:03d}_{}weights_s{}_g{}.pth'.format(trial, prepend, species, gen))
         if wts:
             torch.save(wts, pth)
 

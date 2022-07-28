@@ -16,7 +16,7 @@ def optimal_policy(env):
             else:
                 # Find the nearest unobserved POI not already claimed
                 for i, p in enumerate(env.pois):
-                    if p.claimed or p.observed:
+                    if (p.claimed >= p.obs_required) or p.observed or not p.active:
                         continue
                     d = sqrt((a.x - p.x)**2 + (a.y - p.y)**2)
                     if d < min_dist:
@@ -25,13 +25,14 @@ def optimal_policy(env):
             # Collect actions for all agents
             acts.append(poi)
             if poi:
-                poi.claimed = True
+                poi.claimed += 1
         # Take one step toward chosen POIs
         env.step(acts)
         # Reset POI choices
         # for poi_n in env.pois:
         #     poi_n.claimed = False
         # env.draw(t)
+    print(env.D())
     return env.G()
 
 

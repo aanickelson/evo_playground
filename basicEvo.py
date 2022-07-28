@@ -45,7 +45,7 @@ class BasicEvo:
             nm = attr_names[j]
             att = attrs[j]
             fp = path.join(cwd, "data")
-            filename = "trial{:02d}_{}".format(self.trial_num, nm)
+            filename = "trial{:03d}_{}".format(self.trial_num, nm)
             ext = "csv"
             path_nm = path.join(fp, "{}.{}".format(filename, ext))
 

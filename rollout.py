@@ -6,7 +6,7 @@ from learning.neuralnet import NeuralNetwork as NN
 
 
 def load_model(trial, gen, prepend, species=0):
-    pth = path.join(getcwd(), 'weights', 't{:02d}_{}weights_s{}_g{}.pth'.format(trial, prepend, species, gen))
+    pth = path.join(getcwd(), 'weights', 't{:03d}_{}weights_s{}_g{}.pth'.format(trial, prepend, species, gen))
     return torch.load(pth)
 
 

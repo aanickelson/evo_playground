@@ -8,10 +8,11 @@ from tqdm import tqdm
 import numpy as np
 from scipy.stats import sem, entropy
 from os import getcwd, path
-import parameters
+import parameters as param
 from optimal_comparison import optimal_policy
-from multiprocessing import Process
-from random import random
+from multiprocessing import Process, Pool
+from random import seed
+
 
 # Custom packages
 from evo_playground.learning.evolve_population import EvolveNN as evoNN
@@ -20,6 +21,7 @@ from teaming.domain import DiscreteRoverDomain as Domain
 
 class CCEA:
     def __init__(self, env, p):
+        seed()
         self.n_gen = p.n_gen
         self.trial_num = p.trial_num
         self.n_agents = p.n_agents
@@ -50,7 +52,7 @@ class CCEA:
             nm = attr_names[j]
             att = attrs[j]
             fp = path.join(cwd, "data")
-            filename = self.p.fname_prepend + "trial{:02d}_{}".format(self.trial_num, nm)
+            filename = self.p.fname_prepend + "trial{:03d}_{}".format(self.trial_num, nm)
             ext = "csv"
             path_nm = path.join(fp, "{}.{}".format(filename, ext))
 
@@ -69,7 +71,8 @@ class CCEA:
     def run_evolution(self):
         # Comparison of theoretical max for simple G
         # IF CHANGING THE ENVIRONMENT, put this the loop
-        theoretical_max_g = optimal_policy(self.env)
+        # theoretical_max_g = optimal_policy(self.env)
+        theoretical_max_g = self.env.theoretical_max_g
         for gen in tqdm(self.generations):
 
             # Bookkeeping
@@ -119,10 +122,10 @@ class CCEA:
 
             # Update the starting weights (the policy we keep between generations) for each species
             for idx, spec in enumerate(self.species):
-                if 'G_' in p.fname_prepend:
+                if 'G_' in self.p.fname_prepend:
                     # Use raw G because the scores may be more noisy (since it's divided by the greedy policy)
                     spec.start_weights = spec.update_weights(spec.start_weights, mutated[idx], np.array(raw_G))
-                elif 'D_' in p.fname_prepend:
+                elif 'D_' in self.p.fname_prepend:
                     spec.start_weights = spec.update_weights(spec.start_weights, mutated[idx], np.array(d_scores[idx]))
 
                 # Reduce the learning rate
@@ -134,7 +137,7 @@ class CCEA:
                 self.save_data(gen)
 
                 for i, species in enumerate(self.species):
-                    species.save_model(self.trial_num, gen, p.fname_prepend, max_wts[i], species=i)
+                    species.save_model(self.trial_num, gen, self.p.fname_prepend, max_wts[i], species=i)
 
         self.env.visualize = False
         self.env.reset()
@@ -145,27 +148,29 @@ class CCEA:
         self.save_data(gen=self.n_gen)
         # save the models
         for i, species in enumerate(self.species):
-            species.save_model(self.trial_num, self.n_gen, p.fname_prepend, max_wts[i], species=i)
+            species.save_model(self.trial_num, self.n_gen, self.p.fname_prepend, max_wts[i], species=i)
         # Run a rollout simulation
         self.env.reset()
-        self.env.visualize = True
-        for idx, spec in enumerate(self.species):
-            spec.model.set_weights(max_wts[idx])
-        models = [sp.model for sp in self.species]
-        _ = self.env.run_sim(models, multi_g=True)
+        # self.env.visualize = True
+        # for idx, spec in enumerate(self.species):
+        #     spec.model.set_weights(max_wts[idx])
+        # models = [sp.model for sp in self.species]
+        # _ = self.env.run_sim(models, multi_g=True)
 
 
 def main(p):
-    print("TRIAL {}".format(p.trial_num))
-    env = Domain(p)
-    evo = CCEA(env, p)
-    evo.run_evolution()
+    for prepend in ['D_b', 'G_b']:
+        p.fname_prepend = prepend
+        print("TRIAL {}".format(p.trial_num))
+        env = Domain(p)
+        evo = CCEA(env, p)
+        evo.run_evolution()
 
 
 if __name__ == '__main__':
-    for prepend in ['D_b', 'G_b']:
-        for p in parameters.BATCH6:
-            p.fname_prepend = prepend
-            # main(p)
-            multip = Process(target=main, args=(p,))
-            multip.start()
+    pool = Pool()
+    pool.map(main, param.BIG_BATCH)
+    # p = param.p97
+    # main(p)
+    # multip = Process(target=main, args=(p,))
+    # multip.start()

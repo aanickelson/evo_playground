@@ -57,16 +57,20 @@ def plot_it(avgs, sterrs, n, fname):
 
 if __name__ == '__main__':
 
-    attributes = ['_avg', "_max", '_avg_G']  #, '_sterr']
+    attributes = ['_max']   #['_avg', "_max", '_avg_G']  #, '_sterr']
     preps = ['G_b', 'D_b']
-    for p in params.BATCH6:
-        for pre in preps:
-            filename = "{}trial{:02d}".format(pre, p.trial_num)
-            path_nm = path.join(getcwd(), 'data')
-            for att in attributes:
-                filename2 = filename + att
-                path_to_use = path.join(path_nm, "{}.csv".format(filename2))  # Done this way for csv so we can pass the filename to make the graphs
-                data = np.loadtxt(path_to_use)
-                n = 5
-                avgs, sterrs = average_every_n(n, data)
-                plot_it(avgs, sterrs, n, filename2)
+    for p in params.MINI_B6:
+        for i in range(3):
+            for pre in preps:
+                filename = "{}{}trial{:02d}".format(pre, i, p.trial_num)
+                path_nm = path.join(getcwd(), 'data')
+                for att in attributes:
+                    filename2 = filename + att
+                    path_to_use = path.join(path_nm, "{}.csv".format(filename2))  # Done this way for csv so we can pass the filename to make the graphs
+                    try:
+                        data = np.loadtxt(path_to_use)
+                    except FileNotFoundError:
+                        continue
+                    n = 5
+                    avgs, sterrs = average_every_n(n, data)
+                    plot_it(avgs, sterrs, n, filename2)
