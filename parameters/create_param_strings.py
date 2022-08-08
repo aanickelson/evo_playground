@@ -6,7 +6,7 @@ def string_to_save(i, n_agents, n_pois, poi_options):
 
     s += "    # TODO: MAKE SURE TO CHANGE THIS\n"
     s += f"    trial_num = {i}\n\n"
-
+    s += f'    fname_prepend = "G_"'
     s += f"    # Domain:\n"
     s += f"    n_agents = {n_agents}\n"
     s += f"    n_agent_types = 1\n"
