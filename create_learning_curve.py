@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 from math import ceil
 from scipy.stats import sem
 from os import getcwd, path
-import parameters as params
+import parameters as param
 
 np.set_printoptions(precision=3)
 
@@ -58,19 +58,22 @@ def plot_it(avgs, sterrs, n, fname):
 if __name__ == '__main__':
 
     attributes = ['_max']   #['_avg', "_max", '_avg_G']  #, '_sterr']
-    preps = ['G_b', 'D_b']
-    for p in params.MINI_B6:
-        for i in range(3):
-            for pre in preps:
-                filename = "{}{}trial{:02d}".format(pre, i, p.trial_num)
-                path_nm = path.join(getcwd(), 'data')
-                for att in attributes:
-                    filename2 = filename + att
-                    path_to_use = path.join(path_nm, "{}.csv".format(filename2))  # Done this way for csv so we can pass the filename to make the graphs
-                    try:
-                        data = np.loadtxt(path_to_use)
-                    except FileNotFoundError:
-                        continue
-                    n = 5
-                    avgs, sterrs = average_every_n(n, data)
-                    plot_it(avgs, sterrs, n, filename2)
+    preps = ['G_binary', 'D_binary']
+    # trials = param.TEST_BATCH
+    trials = [param.p318, param.p319, param.p328, param.p329, param.p402, param.p403]
+
+    for p in trials:
+        # for i in range(3):
+        for pre in preps:
+            filename = "{}trial{:03d}".format(pre, p.trial_num)
+            path_nm = path.join(getcwd(), 'data')
+            for att in attributes:
+                filename2 = filename + att
+                path_to_use = path.join(path_nm, "{}.csv".format(filename2))  # Done this way for csv so we can pass the filename to make the graphs
+                try:
+                    data = np.loadtxt(path_to_use)
+                except FileNotFoundError:
+                    continue
+                n = 50
+                avgs, sterrs = average_every_n(n, data)
+                plot_it(avgs, sterrs, n, filename2)

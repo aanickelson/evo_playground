@@ -27,6 +27,7 @@ from evo_playground.parameters.parameters25 import Parameters as p25
 from evo_playground.parameters.parameters26 import Parameters as p26
 from evo_playground.parameters.parameters27 import Parameters as p27
 from evo_playground.parameters.parameters28 import Parameters as p28
+from evo_playground.parameters.parameters29 import Parameters as p29
 from evo_playground.parameters.parameters30 import Parameters as p30
 from evo_playground.parameters.parameters31 import Parameters as p31
 from evo_playground.parameters.parameters32 import Parameters as p32
@@ -401,6 +402,134 @@ from evo_playground.parameters.parameters456 import Parameters as p456
 from evo_playground.parameters.parameters457 import Parameters as p457
 from evo_playground.parameters.parameters458 import Parameters as p458
 from evo_playground.parameters.parameters459 import Parameters as p459
+from evo_playground.parameters.parameters500 import Parameters as p500
+from evo_playground.parameters.parameters501 import Parameters as p501
+from evo_playground.parameters.parameters502 import Parameters as p502
+from evo_playground.parameters.parameters503 import Parameters as p503
+from evo_playground.parameters.parameters504 import Parameters as p504
+from evo_playground.parameters.parameters505 import Parameters as p505
+from evo_playground.parameters.parameters506 import Parameters as p506
+from evo_playground.parameters.parameters507 import Parameters as p507
+from evo_playground.parameters.parameters508 import Parameters as p508
+from evo_playground.parameters.parameters509 import Parameters as p509
+from evo_playground.parameters.parameters510 import Parameters as p510
+from evo_playground.parameters.parameters511 import Parameters as p511
+from evo_playground.parameters.parameters512 import Parameters as p512
+from evo_playground.parameters.parameters513 import Parameters as p513
+from evo_playground.parameters.parameters514 import Parameters as p514
+from evo_playground.parameters.parameters515 import Parameters as p515
+from evo_playground.parameters.parameters516 import Parameters as p516
+from evo_playground.parameters.parameters517 import Parameters as p517
+from evo_playground.parameters.parameters518 import Parameters as p518
+from evo_playground.parameters.parameters519 import Parameters as p519
+from evo_playground.parameters.parameters520 import Parameters as p520
+from evo_playground.parameters.parameters521 import Parameters as p521
+from evo_playground.parameters.parameters522 import Parameters as p522
+from evo_playground.parameters.parameters523 import Parameters as p523
+from evo_playground.parameters.parameters524 import Parameters as p524
+from evo_playground.parameters.parameters525 import Parameters as p525
+from evo_playground.parameters.parameters526 import Parameters as p526
+from evo_playground.parameters.parameters527 import Parameters as p527
+from evo_playground.parameters.parameters528 import Parameters as p528
+from evo_playground.parameters.parameters529 import Parameters as p529
+from evo_playground.parameters.parameters530 import Parameters as p530
+from evo_playground.parameters.parameters531 import Parameters as p531
+from evo_playground.parameters.parameters532 import Parameters as p532
+from evo_playground.parameters.parameters533 import Parameters as p533
+from evo_playground.parameters.parameters534 import Parameters as p534
+from evo_playground.parameters.parameters535 import Parameters as p535
+from evo_playground.parameters.parameters536 import Parameters as p536
+from evo_playground.parameters.parameters537 import Parameters as p537
+from evo_playground.parameters.parameters538 import Parameters as p538
+from evo_playground.parameters.parameters539 import Parameters as p539
+from evo_playground.parameters.parameters540 import Parameters as p540
+from evo_playground.parameters.parameters541 import Parameters as p541
+from evo_playground.parameters.parameters542 import Parameters as p542
+from evo_playground.parameters.parameters543 import Parameters as p543
+from evo_playground.parameters.parameters544 import Parameters as p544
+from evo_playground.parameters.parameters545 import Parameters as p545
+from evo_playground.parameters.parameters546 import Parameters as p546
+from evo_playground.parameters.parameters547 import Parameters as p547
+from evo_playground.parameters.parameters548 import Parameters as p548
+from evo_playground.parameters.parameters549 import Parameters as p549
+from evo_playground.parameters.parameters550 import Parameters as p550
+from evo_playground.parameters.parameters551 import Parameters as p551
+from evo_playground.parameters.parameters552 import Parameters as p552
+from evo_playground.parameters.parameters553 import Parameters as p553
+from evo_playground.parameters.parameters554 import Parameters as p554
+from evo_playground.parameters.parameters555 import Parameters as p555
+from evo_playground.parameters.parameters556 import Parameters as p556
+from evo_playground.parameters.parameters557 import Parameters as p557
+from evo_playground.parameters.parameters558 import Parameters as p558
+from evo_playground.parameters.parameters559 import Parameters as p559
+from evo_playground.parameters.parameters560 import Parameters as p560
+from evo_playground.parameters.parameters561 import Parameters as p561
+from evo_playground.parameters.parameters562 import Parameters as p562
+from evo_playground.parameters.parameters563 import Parameters as p563
+from evo_playground.parameters.parameters564 import Parameters as p564
+from evo_playground.parameters.parameters565 import Parameters as p565
+from evo_playground.parameters.parameters566 import Parameters as p566
+from evo_playground.parameters.parameters567 import Parameters as p567
+from evo_playground.parameters.parameters568 import Parameters as p568
+from evo_playground.parameters.parameters569 import Parameters as p569
+from evo_playground.parameters.parameters570 import Parameters as p570
+from evo_playground.parameters.parameters571 import Parameters as p571
+from evo_playground.parameters.parameters572 import Parameters as p572
+from evo_playground.parameters.parameters573 import Parameters as p573
+from evo_playground.parameters.parameters574 import Parameters as p574
+from evo_playground.parameters.parameters575 import Parameters as p575
+from evo_playground.parameters.parameters576 import Parameters as p576
+from evo_playground.parameters.parameters577 import Parameters as p577
+from evo_playground.parameters.parameters578 import Parameters as p578
+from evo_playground.parameters.parameters579 import Parameters as p579
+from evo_playground.parameters.parameters580 import Parameters as p580
+from evo_playground.parameters.parameters581 import Parameters as p581
+from evo_playground.parameters.parameters582 import Parameters as p582
+from evo_playground.parameters.parameters583 import Parameters as p583
+from evo_playground.parameters.parameters584 import Parameters as p584
+from evo_playground.parameters.parameters585 import Parameters as p585
+from evo_playground.parameters.parameters586 import Parameters as p586
+from evo_playground.parameters.parameters587 import Parameters as p587
+from evo_playground.parameters.parameters588 import Parameters as p588
+from evo_playground.parameters.parameters589 import Parameters as p589
+from evo_playground.parameters.parameters590 import Parameters as p590
+from evo_playground.parameters.parameters591 import Parameters as p591
+from evo_playground.parameters.parameters592 import Parameters as p592
+from evo_playground.parameters.parameters593 import Parameters as p593
+from evo_playground.parameters.parameters594 import Parameters as p594
+from evo_playground.parameters.parameters595 import Parameters as p595
+from evo_playground.parameters.parameters596 import Parameters as p596
+from evo_playground.parameters.parameters597 import Parameters as p597
+from evo_playground.parameters.parameters598 import Parameters as p598
+from evo_playground.parameters.parameters599 import Parameters as p599
+from evo_playground.parameters.parameters600 import Parameters as p600
+from evo_playground.parameters.parameters601 import Parameters as p601
+from evo_playground.parameters.parameters602 import Parameters as p602
+from evo_playground.parameters.parameters603 import Parameters as p603
+from evo_playground.parameters.parameters604 import Parameters as p604
+from evo_playground.parameters.parameters605 import Parameters as p605
+from evo_playground.parameters.parameters606 import Parameters as p606
+from evo_playground.parameters.parameters607 import Parameters as p607
+from evo_playground.parameters.parameters608 import Parameters as p608
+from evo_playground.parameters.parameters609 import Parameters as p609
+from evo_playground.parameters.parameters610 import Parameters as p610
+from evo_playground.parameters.parameters611 import Parameters as p611
+from evo_playground.parameters.parameters612 import Parameters as p612
+from evo_playground.parameters.parameters613 import Parameters as p613
+from evo_playground.parameters.parameters614 import Parameters as p614
+from evo_playground.parameters.parameters615 import Parameters as p615
+from evo_playground.parameters.parameters616 import Parameters as p616
+from evo_playground.parameters.parameters617 import Parameters as p617
+from evo_playground.parameters.parameters618 import Parameters as p618
+from evo_playground.parameters.parameters619 import Parameters as p619
+from evo_playground.parameters.parameters620 import Parameters as p620
+from evo_playground.parameters.parameters621 import Parameters as p621
+from evo_playground.parameters.parameters622 import Parameters as p622
+from evo_playground.parameters.parameters623 import Parameters as p623
+from evo_playground.parameters.parameters624 import Parameters as p624
+from evo_playground.parameters.parameters625 import Parameters as p625
+from evo_playground.parameters.parameters626 import Parameters as p626
+from evo_playground.parameters.parameters627 import Parameters as p627
 BATCH1 = [p0, p1, p2, p3, p4, p5, p6, p7, p8]
 BATCH2 = [p9, p10, p11, p12, p13, p14, p15, p16, p17]
 BATCH3 = [p18, p19, p20, p21, p22, p23, p24, p25, p26, p27]
@@ -447,7 +576,7 @@ BATCH_42 = [p420, p421, p422, p423, p424, p425, p426, p427, p428, p429, ]
 BATCH_43 = [p430, p431, p432, p433, p434, p435, p436, p437, p438, p439, ]
 BATCH_44 = [p440, p441, p442, p443, p444, p445, p446, p447, p448, p449, ]
 BATCH_45 = [p450, p451, p452, p453, p454, p455, p456, p457, p458, p459, ]
-BIG_BATCH = [p100, p101, p102, p103, p104, p105, p106, p107, p108, p109, 
+BIG_BATCH_00 = [p100, p101, p102, p103, p104, p105, p106, p107, p108, p109, 
 p110, p111, p112, p113, p114, p115, p116, p117, p118, p119, 
 p120, p121, p122, p123, p124, p125, p126, p127, p128, p129, 
 p130, p131, p132, p133, p134, p135, p136, p137, p138, p139, 
@@ -483,4 +612,31 @@ p420, p421, p422, p423, p424, p425, p426, p427, p428, p429,
 p430, p431, p432, p433, p434, p435, p436, p437, p438, p439, 
 p440, p441, p442, p443, p444, p445, p446, p447, p448, p449, 
 p450, p451, p452, p453, p454, p455, p456, p457, p458, p459, 
+]
+BATCH_46 = [p500, p501, p502, p503, p504, p505, p506, p507, p508, p509, ]
+BATCH_47 = [p510, p511, p512, p513, p514, p515, p516, p517, p518, p519, ]
+BATCH_48 = [p520, p521, p522, p523, p524, p525, p526, p527, p528, p529, ]
+BATCH_49 = [p530, p531, p532, p533, p534, p535, p536, p537, p538, p539, ]
+BATCH_50 = [p540, p541, p542, p543, p544, p545, p546, p547, p548, p549, ]
+BATCH_51 = [p550, p551, p552, p553, p554, p555, p556, p557, p558, p559, ]
+BATCH_52 = [p560, p561, p562, p563, p564, p565, p566, p567, p568, p569, ]
+BATCH_53 = [p570, p571, p572, p573, p574, p575, p576, p577, p578, p579, ]
+BATCH_54 = [p580, p581, p582, p583, p584, p585, p586, p587, p588, p589, ]
+BATCH_55 = [p590, p591, p592, p593, p594, p595, p596, p597, p598, p599, ]
+BATCH_56 = [p600, p601, p602, p603, p604, p605, p606, p607, p608, p609, ]
+BATCH_57 = [p610, p611, p612, p613, p614, p615, p616, p617, p618, p619, ]
+BATCH_58 = [p620, p621, p622, p623, p624, p625, p626, p627, ]
+BIG_BATCH_01 = [p500, p501, p502, p503, p504, p505, p506, p507, p508, p509, 
+p510, p511, p512, p513, p514, p515, p516, p517, p518, p519, 
+p520, p521, p522, p523, p524, p525, p526, p527, p528, p529, 
+p530, p531, p532, p533, p534, p535, p536, p537, p538, p539, 
+p540, p541, p542, p543, p544, p545, p546, p547, p548, p549, 
+p550, p551, p552, p553, p554, p555, p556, p557, p558, p559, 
+p560, p561, p562, p563, p564, p565, p566, p567, p568, p569, 
+p570, p571, p572, p573, p574, p575, p576, p577, p578, p579, 
+p580, p581, p582, p583, p584, p585, p586, p587, p588, p589, 
+p590, p591, p592, p593, p594, p595, p596, p597, p598, p599, 
+p600, p601, p602, p603, p604, p605, p606, p607, p608, p609, 
+p610, p611, p612, p613, p614, p615, p616, p617, p618, p619, 
+p620, p621, p622, p623, p624, p625, p626, p627, 
 ]

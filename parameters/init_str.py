@@ -6,6 +6,8 @@ def init_strings():
         s += f"from evo_playground.parameters.parameters{i:02d} import Parameters as p{i}\n"
     for j in range(97, 460):
         s += f"from evo_playground.parameters.parameters{j:02d} import Parameters as p{j}\n"
+    for k in range(500, 628):
+        s += f"from evo_playground.parameters.parameters{k:02d} import Parameters as p{k}\n"
 
     # print(s)
     s += f"BATCH1 = [p0, p1, p2, p3, p4, p5, p6, p7, p8]\n"
@@ -21,12 +23,28 @@ def init_strings():
 
     batch_num = 10
     new_batches = []
-    big_batch = 'BIG_BATCH = ['
+    big_batch = 'BIG_BATCH_00 = ['
     for k in range(100, 460, 10):
         batch_s = f'BATCH_{batch_num} = ['
         tot_in_batch = 10
         # if k == 40:
         #     tot_in_batch = 8
+        for i in range(tot_in_batch):
+            batch_s += f'p{i + k}, '
+            big_batch += f'p{i + k}, '
+        big_batch += '\n'
+        batch_s += ']\n'
+        s += batch_s
+        batch_num += 1
+    big_batch += ']\n'
+    s += big_batch
+
+    big_batch = 'BIG_BATCH_01 = ['
+    for k in range(500, 628, 10):
+        batch_s = f'BATCH_{batch_num} = ['
+        tot_in_batch = 10
+        if k == 620:
+            tot_in_batch = 8
         for i in range(tot_in_batch):
             batch_s += f'p{i + k}, '
             big_batch += f'p{i + k}, '

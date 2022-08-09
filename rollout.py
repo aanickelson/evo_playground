@@ -16,7 +16,7 @@ def main(p):
     policies = []
     for i in range(env.n_agents):
         nn = NN(env.state_size(), p.hid, env.get_action_size())
-        nn.set_weights(load_model(p.trial_num, 200, p.fname_prepend, i))
+        nn.set_weights(load_model(p.trial_num, 3000, p.fname_prepend, i))
         policies.append(nn)
 
     G, _ = env.run_sim(policies)
@@ -24,10 +24,9 @@ def main(p):
 
 
 if __name__ == '__main__':
-    for p in parameters.TEST_BATCH:
-        for bleh in ['G_', 'D_']:
-            p.fname_prepend = bleh
-
+    for p in [parameters.p283]:
+        for prepend in ['G_b', 'D_b']:
+            p.fname_prepend = prepend
             main(p)
 
 

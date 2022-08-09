@@ -16,14 +16,12 @@ poi_options = [[60, 1, 1, 1],   # 0
                [20, 1, 2, 3],   # 11
                [20, 2, 2, 1.5], # 12
                [20, 3, 2, 1],   # 13
-               [1, 60, 1, 1],   # 14
-               [1, 60, 2, 1]]   # 15
+               [10, 4, 1, 1],   # 14
+               [10, 4, 2, 1]]   # 15
 
-print(poi_options)
-exit()
 preps = ['G', 'D']
 path_out_nm = path.join(getcwd(), 'data', 'collating_data')
-fname = "big_batch_collated"
+fname = "big_batch_collated_01"
 data_out_path = path.join(path_out_nm, "{}.csv".format(fname))  # Done this way for csv so we can pass the filename to make the graphs
 
 with open(data_out_path, 'w') as f:

@@ -32,7 +32,7 @@ def optimal_policy(env):
         # for poi_n in env.pois:
         #     poi_n.claimed = False
         # env.draw(t)
-    print(env.D())
+    # print(env.D())
     return env.G()
 
 

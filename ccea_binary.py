@@ -8,15 +8,20 @@ from tqdm import tqdm
 import numpy as np
 from scipy.stats import sem, entropy
 from os import getcwd, path
-import parameters as param
 from optimal_comparison import optimal_policy
 from multiprocessing import Process, Pool
 from random import seed
+import heapq as hq
+import torch
 
 
 # Custom packages
+import parameters as param
 from evo_playground.learning.evolve_population import EvolveNN as evoNN
 from teaming.domain import DiscreteRoverDomain as Domain
+from evo_playground.learning.neuralnet import NeuralNetwork as NN
+from evo_playground.learning.binary_species import Species
+
 
 
 class CCEA:
@@ -38,13 +43,10 @@ class CCEA:
         self.d = np.zeros((self.n_gen, self.n_agents))
 
     def species_setup(self):
-        species = []
-        for _ in range(self.n_agents):
-            species.append(evoNN(self.env, self.p))
+        species = [Species(self.env, self.p) for _ in range(self.n_agents)]
         return species
 
     def save_data(self, gen):
-
         cwd = getcwd()
         attrs = [self.max_score, self.avg_score, self.sterr_score, self.avg_false, self.raw_g, self.multi_g]
         attr_names = ["max", "avg", "sterr", "false", 'avg_G', 'multi_g']
@@ -71,8 +73,8 @@ class CCEA:
     def run_evolution(self):
         # Comparison of theoretical max for simple G
         # IF CHANGING THE ENVIRONMENT, put this the loop
-        # theoretical_max_g = optimal_policy(self.env)
-        theoretical_max_g = self.env.theoretical_max_g
+        theoretical_max_g = optimal_policy(self.env)
+        # theoretical_max_g = self.env.theoretical_max_g
         for gen in tqdm(self.generations):
 
             # Bookkeeping
@@ -83,11 +85,13 @@ class CCEA:
             all_multi_g = np.zeros((self.p.n_policies, self.env.n_poi_types))
 
             # Mutate weights for all species
-            mutated = [sp.mutate_weights(sp.start_weights) for sp in self.species]
+
+            for spec in self.species:
+                spec.mutate_weights()
 
             for pol_num in range(self.p.n_policies):
                 # Pick one policy from each species
-                wts = [mutated[i][pol_num] for i in range(self.n_agents)]
+                wts = [self.species[i].weights[pol_num] for i in range(self.n_agents)]
 
                 # For each species
                 for idx, spec in enumerate(self.species):
@@ -115,7 +119,7 @@ class CCEA:
             # Index of the policies that performed best over G
             max_g = np.argmax(raw_G)
             # Policies that performed best
-            max_wts = [mutated[sp][max_g] for sp in range(self.n_agents)]
+            max_wts = [self.species[sp].weights[max_g] for sp in range(self.n_agents)]
 
             # Bookkeeping
             self.update_logs(scores, falses, raw_G, all_multi_g, gen)
@@ -124,9 +128,9 @@ class CCEA:
             for idx, spec in enumerate(self.species):
                 if 'G_' in self.p.fname_prepend:
                     # Use raw G because the scores may be more noisy (since it's divided by the greedy policy)
-                    spec.start_weights = spec.update_weights(spec.start_weights, mutated[idx], np.array(raw_G))
+                    spec.start_weights = spec.binary_tournament(np.array(raw_G))
                 elif 'D_' in self.p.fname_prepend:
-                    spec.start_weights = spec.update_weights(spec.start_weights, mutated[idx], np.array(d_scores[idx]))
+                    spec.start_weights = spec.binary_tournament(np.array(d_scores[idx]))
 
                 # Reduce the learning rate
                 spec.learning_rate /= 1.001
@@ -157,10 +161,8 @@ class CCEA:
         models = [sp.model for sp in self.species]
         _ = self.env.run_sim(models, multi_g=True)
 
-
-
 def main(p):
-    for prepend in ['D_b', 'G_b']:
+    for prepend in ['D_binary', 'G_binary']:
         p.fname_prepend = prepend
         print("TRIAL {}".format(p.trial_num))
         env = Domain(p)
@@ -170,9 +172,8 @@ def main(p):
 
 if __name__ == '__main__':
     pool = Pool()
-    # trials = [param.p318, param.p319, param.p328, param.p329]
+    # trials = [param.p318, param.p319, param.p328, param.p329, param.p402, param.p403]
     trials = param.BIG_BATCH_01
-
     pool.map(main, trials)
     # p = param.p445
     # main(p)

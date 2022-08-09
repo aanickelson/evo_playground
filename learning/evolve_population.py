@@ -1,3 +1,11 @@
+"""
+Adapted from evolutionary code written by github user Sir-Batman
+https://github.com/AADILab/PyTorch-Evo-Strategies
+
+Structure and main functions for basic
+"""
+
+
 from evo_playground.learning.neuralnet import NeuralNetwork
 import torch
 from os import path, getcwd
