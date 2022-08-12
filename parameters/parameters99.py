@@ -11,7 +11,7 @@ class Parameters:
     n_agents = 2
     n_agent_types = 1
     n_pois = 2
-    poi_options = [[100, 1, 1]]
+    poi_options = [[60, 1, 1, 1]]       # time active, number of times active, observation_req, value
     with_agents = True
     size = 10
     time_steps = 100
@@ -37,4 +37,4 @@ class Parameters:
     n_policies = 100
 
     # Evo learner
-    n_gen = 1000
+    n_gen = 100

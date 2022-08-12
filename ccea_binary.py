@@ -133,11 +133,11 @@ class CCEA:
                     spec.start_weights = spec.binary_tournament(np.array(d_scores[idx]))
 
                 # Reduce the learning rate
-                spec.learning_rate /= 1.001
+                spec.learning_rate /= 1.0001
 
             # Bookkeeping - save data every 100 generations
             # Save models every 1000 generations
-            if gen > 0 and not gen % 1000:
+            if gen > 0 and not gen % 200:
                 self.save_data(gen)
 
                 for i, species in enumerate(self.species):
@@ -162,7 +162,7 @@ class CCEA:
         _ = self.env.run_sim(models, multi_g=True)
 
 def main(p):
-    for prepend in ['D_binary', 'G_binary']:
+    for prepend in ['D_time', 'G_time']:
         p.fname_prepend = prepend
         print("TRIAL {}".format(p.trial_num))
         env = Domain(p)
@@ -174,8 +174,9 @@ if __name__ == '__main__':
     pool = Pool()
     # trials = [param.p318, param.p319, param.p328, param.p329, param.p402, param.p403]
     trials = param.BIG_BATCH_01
+    # trials = [param.p628, param.p629]
     pool.map(main, trials)
-    # p = param.p445
+    # p = param.p98
     # main(p)
     # multip = Process(target=main, args=(p,))
     # multip.start()

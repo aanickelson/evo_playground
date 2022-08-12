@@ -21,11 +21,12 @@ poi_options = [[60, 1, 1, 1],   # 0
 
 preps = ['G', 'D']
 path_out_nm = path.join(getcwd(), 'data', 'collating_data')
-fname = "big_batch_collated_01"
+fname = "big_batch_collated_02"
+# fname = 'trial_details_lookup_500'
 data_out_path = path.join(path_out_nm, "{}.csv".format(fname))  # Done this way for csv so we can pass the filename to make the graphs
 
 with open(data_out_path, 'w') as f:
-    for p in params.BIG_BATCH:
+    for p in params.BIG_BATCH_01:
         for pre in preps:
             filename = "{}_btrial{:02d}_max".format(pre, p.trial_num)
             path_nm = path.join(getcwd(), 'data')
@@ -40,6 +41,7 @@ with open(data_out_path, 'w') as f:
                     if poi_type == poi_opt:
                         poi_types_to_save.append(i)
                         break
-            data_to_save = [p.trial_num, pre, final_g_score, p.n_pois, p.n_agents, poi_types_to_save]
+            data_to_save = [p.trial_num, final_g_score, pre, p.n_agents, p.n_pois, poi_types_to_save]
+            # data_to_save = [p.trial_num, p.n_agents, p.n_pois, poi_types_to_save]
             data_to_save = str(data_to_save) + '\n'
             f.write(data_to_save)

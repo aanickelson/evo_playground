@@ -27,7 +27,6 @@ from evo_playground.parameters.parameters25 import Parameters as p25
 from evo_playground.parameters.parameters26 import Parameters as p26
 from evo_playground.parameters.parameters27 import Parameters as p27
 from evo_playground.parameters.parameters28 import Parameters as p28
-from evo_playground.parameters.parameters29 import Parameters as p29
 from evo_playground.parameters.parameters30 import Parameters as p30
 from evo_playground.parameters.parameters31 import Parameters as p31
 from evo_playground.parameters.parameters32 import Parameters as p32
@@ -530,6 +529,9 @@ from evo_playground.parameters.parameters624 import Parameters as p624
 from evo_playground.parameters.parameters625 import Parameters as p625
 from evo_playground.parameters.parameters626 import Parameters as p626
 from evo_playground.parameters.parameters627 import Parameters as p627
+from evo_playground.parameters.parameters628 import Parameters as p628
+from evo_playground.parameters.parameters629 import Parameters as p629
+
 BATCH1 = [p0, p1, p2, p3, p4, p5, p6, p7, p8]
 BATCH2 = [p9, p10, p11, p12, p13, p14, p15, p16, p17]
 BATCH3 = [p18, p19, p20, p21, p22, p23, p24, p25, p26, p27]
@@ -638,5 +640,5 @@ p580, p581, p582, p583, p584, p585, p586, p587, p588, p589,
 p590, p591, p592, p593, p594, p595, p596, p597, p598, p599, 
 p600, p601, p602, p603, p604, p605, p606, p607, p608, p609, 
 p610, p611, p612, p613, p614, p615, p616, p617, p618, p619, 
-p620, p621, p622, p623, p624, p625, p626, p627, 
+p620, p621, p622, p623, p624, p625, p626, p627,
 ]
