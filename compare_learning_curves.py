@@ -61,7 +61,7 @@ def plot_it(avgs, sterrs, n, fname, att, trial_nums):
 if __name__ == '__main__':
 
     attributes = ['_avg_G', '_max']   #['_avg', "_max", '_avg_G']  #, '_sterr']
-    preps = ['D_b', 'D_binary']  #['G_b',
+    preps = ['D_time']  #, 'D_binary']  #['G_b',
     # trials = param.TEST_BATCH
     # trials = [param.p318, param.p319, param.p328, param.p329, param.p402, param.p403]
     # trials = param.BIG_BATCH_01
