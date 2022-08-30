@@ -33,7 +33,7 @@ class CCEA:
         self.n_agents = p.n_agents
         self.p = p
         self.env = env
-        self.n_stat_runs = 2
+        self.n_stat_runs = 10
         self.species = None
         self.generations = range(self.n_gen)
         self.raw_g = np.zeros((self.n_stat_runs, self.n_gen))
@@ -76,6 +76,7 @@ class CCEA:
     def run_evolution(self):
         # Comparison of theoretical max for simple G
         # IF CHANGING THE ENVIRONMENT, put this the loop
+        self.env.reset()
         theoretical_max_g = optimal_policy(self.env)
 
         for stat_num in range(self.n_stat_runs):
@@ -161,9 +162,12 @@ class CCEA:
 
 
 class RunPool:
-    def __init__(self, batch):
-        self.batch = batch
+    def __init__(self, params):
+        self.params = params
         self.fpath = None
+        self.n_permutations = 0
+        self.batch = self.permutations()
+        self.iter_arr = [i for i in range(self.n_permutations)]
         self.make_dirs()
 
     def make_dirs(self):
@@ -179,31 +183,44 @@ class RunPool:
                 fpath = path.join(filepath, rew + t)
                 mkdir(fpath)
 
-    def main(self, p):
+    def permutations(self):
+        perms = []
+        for p in self.params:
+            for rew in ['D', 'G']:
+                for st_time in [True, False]:
+                    perms.append([p, rew, st_time])
+                    self.n_permutations += 1
+        return perms
+
+    def main(self, perm):
+        [p, rew, st_time] = self.batch[perm]
         env = Domain(p)
         poi_fpath = path.join(self.fpath, 'poi_xy', f'poi_xy_trial{p.trial_num}')
         env.save_poi_locs(poi_fpath)
-        print("TRIAL {}".format(p.trial_num))
-        for rew in ['D', 'G']:
-            for st_time in [False, True]:
-                if st_time:
-                    time_str = 'time'
-                else:
-                    time_str = 'no_time'
-                print(rew, time_str)
-                # p.fname_prepend = rew
-                fpath = path.join(self.fpath, rew + '_' + time_str)
-                evo = CCEA(env, p, rew, st_time, time_str, fpath)
-                evo.run_evolution()
+
+        if st_time:
+            time_str = 'time'
+        else:
+            time_str = 'no_time'
+        print(f"TRIAL {p.trial_num}: {rew}, {time_str}")
+
+        # print(rew, time_str)
+        p.fname_prepend = rew
+        fpath = path.join(self.fpath, rew + '_' + time_str)
+        evo = CCEA(env, p, rew, st_time, time_str, fpath)
+        evo.run_evolution()
 
     def run_pool(self):
         pool = Pool()
-        pool.map(self.main, self.batch)
+        pool.map(self.main, self.iter_arr)
 
 
 if __name__ == '__main__':
-    # trials = param.BIG_BATCH_01
-    trials = [param.p98]
+    # trials = param.SM_BATCH_00
+    # trials_even = [p for p in param.BIG_BATCH_01 if not p.trial_num % 2]
+
+    trials = [param.p703, param.p705]
     pooling = RunPool(trials)
-    pooling.main(trials[0])
+    pooling.run_pool()
+    # pooling.main(trials[0])
 
