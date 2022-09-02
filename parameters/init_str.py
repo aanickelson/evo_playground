@@ -3,11 +3,16 @@ from os import getcwd, path
 def init_strings():
     s = ""
     for i in range(41):
+        if i == 29:
+            continue
         s += f"from evo_playground.parameters.parameters{i:02d} import Parameters as p{i}\n"
     for j in range(97, 460):
         s += f"from evo_playground.parameters.parameters{j:02d} import Parameters as p{j}\n"
     for k in range(500, 628):
-        s += f"from evo_playground.parameters.parameters{k:02d} import Parameters as p{k}\n"
+        s += f"from evo_playground.parameters.parameters{k:03d} import Parameters as p{k}\n"
+    for l in range(700, 707):
+        s += f"from evo_playground.parameters.parameters{l:03d} import Parameters as p{l}\n"
+
 
     # print(s)
     s += f"BATCH1 = [p0, p1, p2, p3, p4, p5, p6, p7, p8]\n"
@@ -54,6 +59,12 @@ def init_strings():
         batch_num += 1
     big_batch += ']\n'
     s += big_batch
+
+    sm_batch = 'SM_BATCH_00 = ['
+    for smn in range(700, 707):
+        sm_batch += f'p{smn}, '
+    sm_batch += ']\n'
+    s += sm_batch
     return s
 
 

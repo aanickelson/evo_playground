@@ -3,42 +3,50 @@ from os import getcwd, path
 
 
 def gen_all_files():
-    n_agents = 2
-    n_poi_each = 2
-    poi_options = [[60, 1, 1, 1],  # 0
-                   [60, 1, 2, 1],  # 1
-                   [60, 1, 1, 2],  # 2
-                   [60, 1, 2, 2],  # 3
-                   [30, 1, 1, 2],  # 4
-                   [30, 2, 1, 1],  # 5
-                   [30, 1, 2, 2],  # 6
-                   [30, 2, 2, 1],  # 7
-                   [20, 1, 1, 3],  # 8
-                   [20, 2, 1, 1.5],  # 9
-                   [20, 3, 1, 1],  # 10
-                   [20, 1, 2, 3],  # 11
-                   [20, 2, 2, 1.5],  # 12
-                   [20, 3, 2, 1],  # 13
-                   [10, 4, 1, 1],  # 14
-                   [10, 4, 2, 1]]  # 15
+    n_agents = 1
+    n_poi_each = 1
+    # poi_options = [[60, 1, 1, 1],  # 0
+    #                [60, 1, 2, 1],  # 1
+    #                [60, 1, 1, 2],  # 2
+    #                [60, 1, 2, 2],  # 3
+    #                [30, 1, 1, 2],  # 4
+    #                [30, 2, 1, 1],  # 5
+    #                [30, 1, 2, 2],  # 6
+    #                [30, 2, 2, 1],  # 7
+    #                [20, 1, 1, 3],  # 8
+    #                [20, 2, 1, 1.5],  # 9
+    #                [20, 3, 1, 1],  # 10
+    #                [20, 1, 2, 3],  # 11
+    #                [20, 2, 2, 1.5],  # 12
+    #                [20, 3, 2, 1],  # 13
+    #                [10, 4, 1, 1],  # 14
+    #                [10, 4, 2, 1]]  # 15
 
-    poi_base = [None, [[60, 1, 1, 1]]]
-    count = 500
+    poi_options = [[60, 1, 1, 1],  # 0
+                   [30, 1, 1, 1],  # 5
+                   [30, 2, 1, 1],  # 7
+                   [20, 3, 1, 1],  # 10
+                   [20, 2, 1, 1],  # 13
+                   [10, 4, 1, 1],  # 14
+                   [10, 2, 1, 1]]  # 15
+
+    poi_base = [None]  #, [[60, 1, 1, 1]]]
+    count = 700
     for n_ag in range(n_agents):
         n_ag += 2
         for p in range(n_poi_each):
             p += 3
             n_poi = n_ag * p
             for poi_opt in poi_options:
-                for base in poi_base:
-                    if base:
-                        poi = base.copy()
-                        poi.append(poi_opt)
-                    else:
-                        poi = [poi_opt]
-                    generated_string = str_gen(count, n_ag, n_poi, poi)
-                    filesave(generated_string, count)
-                    count += 1
+                # for base in poi_base:
+                    # if base:
+                    #     poi = base.copy()
+                    #     poi.append(poi_opt)
+                    # else:
+                poi = [poi_opt]
+                generated_string = str_gen(count, n_ag, n_poi, poi)
+                filesave(generated_string, count)
+                count += 1
 
 
 def filesave(str_to_save, filenum):
