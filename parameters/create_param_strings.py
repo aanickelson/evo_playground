@@ -5,12 +5,13 @@ def string_to_save(i, n_agents, n_pois, poi_options):
     s += "class Parameters:\n\n"
 
     s += f"    trial_num = {i}\n\n"
+    s += f"    stat_runs = 10\n"
     s += f'    fname_prepend = "G_"'
     s += f"    # Domain:\n"
     s += f"    n_agents = {n_agents}\n"
     s += f"    n_agent_types = 1\n"
     s += f"    n_pois = {n_pois}\n"
-    s += f"    poi_options = {poi_options}"
+    s += f"    poi_options = {poi_options}\n"
     s += f"    with_agents = True\n"
     s += f"    size = 20\n"
     s += f"    time_steps = 60\n"

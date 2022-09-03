@@ -2,11 +2,13 @@ class Parameters:
 
     trial_num = 101
 
+    stat_runs = 10
     fname_prepend = "G_"    # Domain:
     n_agents = 3
     n_agent_types = 1
     n_pois = 12
-    poi_options = ('sin',)    with_agents = True
+    poi_options = ('sin',)
+    with_agents = True
     size = 20
     time_steps = 60
     n_regions = 8

@@ -2,9 +2,13 @@ from os import getcwd, path
 
 def init_strings():
     s = ""
+    dummy = 1
+    s += f"from evo_playground.parameters.parameters{dummy:03d} import Parameters as p{dummy:03d}\n"
+
     for i in range(100, 107):
         s += f"from evo_playground.parameters.parameters{i:02d} import Parameters as p{i}\n"
 
+    s += '\nTEST = [p001]\n\n'
     sm_batch = 'SM_BATCH_00 = ['
     for smn in range(100, 107):
         sm_batch += f'p{smn}, '

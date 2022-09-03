@@ -58,9 +58,9 @@ def load_data(data_date, trials):
 
 
 if __name__ == '__main__':
-    date = "20220830_1518"
-    t0 = 700
-    t1 = 706
+    date = "20220902_1749"
+    t0 = 1
+    t1 = 1
     evens_only = False
     if evens_only:
         trials = [n for n in range(t0, t1 + 1) if not n % 2]

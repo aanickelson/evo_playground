@@ -22,7 +22,6 @@ from evo_playground.learning.neuralnet import NeuralNetwork as NN
 from evo_playground.learning.binary_species import Species
 
 
-
 class CCEA:
     def __init__(self, env, p, rew_type, st_time, time_str, fpath):
         seed()
@@ -31,7 +30,7 @@ class CCEA:
         self.n_agents = p.n_agents
         self.p = p
         self.env = env
-        self.n_stat_runs = 10
+        self.n_stat_runs = p.stat_runs
         self.species = None
         self.generations = range(self.n_gen)
         self.raw_g = np.zeros((self.n_stat_runs, self.n_gen))
@@ -172,10 +171,14 @@ class RunPool:
         now = datetime.now()
         now_str = now.strftime("%Y%m%d_%H%M")
         filepath = path.join(getcwd(), 'data', now_str)
+        try:
+            mkdir(filepath)
+        except FileExistsError:
+            filepath += '_01'
+            mkdir(filepath)
         poi_fpath = path.join(filepath, 'poi_xy')
-        self.fpath = filepath
-        mkdir(filepath)
         mkdir(poi_fpath)
+        self.fpath = filepath
         for rew in ['D_', 'G_']:
             for t in ['time', 'no_time']:
                 fpath = path.join(filepath, rew + t)
@@ -217,8 +220,8 @@ if __name__ == '__main__':
     # trials = param.SM_BATCH_00
     # trials_even = [p for p in param.BIG_BATCH_01 if not p.trial_num % 2]
 
-    trials = [param.p703, param.p705]
+    trials = param.SM_BATCH_00
     pooling = RunPool(trials)
     pooling.run_pool()
-    # pooling.main(trials[0])
+    # pooling.main(0)
 
