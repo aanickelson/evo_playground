@@ -31,11 +31,11 @@ def gen_all_files():
                    [10, 2, 1, 1]]  # 15
 
     poi_base = [None]  #, [[60, 1, 1, 1]]]
-    count = 700
+    count = 710
     for n_ag in range(n_agents):
-        n_ag += 2
+        n_ag += 3
         for p in range(n_poi_each):
-            p += 3
+            p += 4
             n_poi = n_ag * p
             for poi_opt in poi_options:
                 # for base in poi_base:

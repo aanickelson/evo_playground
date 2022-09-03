@@ -18,7 +18,7 @@ def plot_data(means, stes, fpre, ext, trial, data_date):
     upper_y_lim = 1
     for i, avg in enumerate(means):
         plt.plot(x_vals, avg)
-        plt.fill_between(x_vals, avg-stes[i], avg+stes[i], alpha=0.5, label='_nolegend_')
+        # plt.fill_between(x_vals, avg-stes[i], avg+stes[i], alpha=0.5, label='_nolegend_')
         max_avg = max(avg)
         if max_avg > upper_y_lim:
             upper_y_lim = max_avg
@@ -58,9 +58,9 @@ def load_data(data_date, trials):
 
 
 if __name__ == '__main__':
-    date = "20220830_1518"
-    t0 = 700
-    t1 = 706
+    date = "20220831_1033"
+    t0 = 710
+    t1 = 715
     evens_only = False
     if evens_only:
         trials = [n for n in range(t0, t1 + 1) if not n % 2]

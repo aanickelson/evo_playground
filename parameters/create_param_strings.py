@@ -37,6 +37,6 @@ def string_to_save(i, n_agents, n_pois, poi_options):
     s += f"    n_policies = 50\n\n"
 
     s += f"    # Evo learner\n"
-    s += f"    n_gen = 3000\n"
+    s += f"    n_gen = 1500\n"
     return s
 

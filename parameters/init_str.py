@@ -12,6 +12,8 @@ def init_strings():
         s += f"from evo_playground.parameters.parameters{k:03d} import Parameters as p{k}\n"
     for l in range(700, 707):
         s += f"from evo_playground.parameters.parameters{l:03d} import Parameters as p{l}\n"
+    for l in range(710, 717):
+        s += f"from evo_playground.parameters.parameters{l:03d} import Parameters as p{l}\n"
 
 
     # print(s)
@@ -65,8 +67,13 @@ def init_strings():
         sm_batch += f'p{smn}, '
     sm_batch += ']\n'
     s += sm_batch
-    return s
 
+    sm_batch1 = 'SM_BATCH_01 = ['
+    for smn in range(710, 717):
+        sm_batch1 += f'p{smn}, '
+    sm_batch1 += ']\n'
+    s += sm_batch1
+    return s
 
 def filesave(str_to_save):
     filename = "__init__.py"

@@ -536,6 +536,13 @@ from evo_playground.parameters.parameters703 import Parameters as p703
 from evo_playground.parameters.parameters704 import Parameters as p704
 from evo_playground.parameters.parameters705 import Parameters as p705
 from evo_playground.parameters.parameters706 import Parameters as p706
+from evo_playground.parameters.parameters710 import Parameters as p710
+from evo_playground.parameters.parameters711 import Parameters as p711
+from evo_playground.parameters.parameters712 import Parameters as p712
+from evo_playground.parameters.parameters713 import Parameters as p713
+from evo_playground.parameters.parameters714 import Parameters as p714
+from evo_playground.parameters.parameters715 import Parameters as p715
+from evo_playground.parameters.parameters716 import Parameters as p716
 BATCH1 = [p0, p1, p2, p3, p4, p5, p6, p7, p8]
 BATCH2 = [p9, p10, p11, p12, p13, p14, p15, p16, p17]
 BATCH3 = [p18, p19, p20, p21, p22, p23, p24, p25, p26, p27]
@@ -647,3 +654,4 @@ p610, p611, p612, p613, p614, p615, p616, p617, p618, p619,
 p620, p621, p622, p623, p624, p625, p626, p627, 
 ]
 SM_BATCH_00 = [p700, p701, p702, p703, p704, p705, p706, ]
+SM_BATCH_01 = [p710, p711, p712, p713, p714, p715, p716, ]
