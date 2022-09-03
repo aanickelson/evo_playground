@@ -6,12 +6,10 @@ https://github.com/AADILab/PyTorch-Evo-Strategies
 # Python packages
 from tqdm import tqdm
 import numpy as np
-from scipy.stats import sem, entropy
 from os import getcwd, path, mkdir
 from optimal_comparison import optimal_policy
 from multiprocessing import Process, Pool
 from random import seed
-import heapq as hq
 import torch
 from datetime import datetime
 
