@@ -33,7 +33,7 @@ class CCEA:
         self.n_agents = p.n_agents
         self.p = p
         self.env = env
-        self.n_stat_runs = 5
+        self.n_stat_runs = 1
         self.species = None
         self.generations = range(self.n_gen)
         self.raw_g = np.zeros((self.n_stat_runs, self.n_gen))
@@ -77,8 +77,10 @@ class CCEA:
         # Comparison of theoretical max for simple G
         # IF CHANGING THE ENVIRONMENT, put this the loop
         self.env.reset()
-        theoretical_max_g = optimal_policy(self.env)
-
+        # theoretical_max_g = optimal_policy(self.env)
+        # if theoretical_max_g == 0:
+        #     theoretical_max_g = 1
+        theoretical_max_g = self.p.n_pois
         for stat_num in range(self.n_stat_runs):
             self.species = self.species_setup(self.st_time)
             for gen in tqdm(self.generations):
@@ -109,8 +111,15 @@ class CCEA:
                     models = [sp.model for sp in self.species]
 
                     # Run the simulation
-                    G, D = self.env.run_sim(models, use_time=self.st_time)
-
+                    try:
+                        G, D = self.env.run_sim(models, use_time=self.st_time)
+                    except RuntimeError:
+                        print("#################### ERROR ######################")
+                        print(f"trial: {self.trial_num}, {self.rew_type}, {self.st_time}")
+                        print(f"state size: {self.env.state_size(self.st_time)}")
+                        for ag in self.env.agents:
+                            print(ag.state)
+                        continue
                     # Bookkeeping
                     d_scores[:, pol_num] = D
                     raw_G[pol_num] = G
@@ -153,12 +162,14 @@ class CCEA:
             for i, species in enumerate(self.species):
                 species.save_model(self.trial_num, stat_num, self.n_gen, self.rew_type + '_' + self.time_str, max_wts[i], species=i)
             # # Run a rollout simulation
-            # self.env.reset()
+            self.env.reset()
             # self.env.visualize = True
             # for idx, spec in enumerate(self.species):
             #     spec.model.set_weights(max_wts[idx])
             # models = [sp.model for sp in self.species]
-            # _ = self.env.run_sim(models, multi_g=True)
+            # _ = self.env.run_sim(models, use_time=self.st_time)
+            # self.env.visualize = False
+
 
 
 class RunPool:
@@ -179,7 +190,7 @@ class RunPool:
         mkdir(filepath)
         mkdir(poi_fpath)
         for rew in ['D_', 'G_']:
-            for t in ['time', 'no_time']:
+            for t in ['no_time', 'time']:
                 fpath = path.join(filepath, rew + t)
                 mkdir(fpath)
 
@@ -187,7 +198,7 @@ class RunPool:
         perms = []
         for p in self.params:
             for rew in ['D', 'G']:
-                for st_time in [True, False]:
+                for st_time in [False, True]:
                     perms.append([p, rew, st_time])
                     self.n_permutations += 1
         return perms
@@ -216,11 +227,10 @@ class RunPool:
 
 
 if __name__ == '__main__':
-    # trials = param.SM_BATCH_00
-    # trials_even = [p for p in param.BIG_BATCH_01 if not p.trial_num % 2]
-
-    trials = [param.p710, param.p713, param.p715]
+    # trials = param.TEST_01
+    trials = param.SM_BATCH_03
+    # trials = [param.p325]
     pooling = RunPool(trials)
     pooling.run_pool()
-    # pooling.main(trials[0])
+    # pooling.main(0)
 

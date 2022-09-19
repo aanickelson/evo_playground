@@ -1,15 +1,16 @@
 class Parameters:
 
-    trial_num = 1
-    stat_runs = 1
+    trial_num = 326
+
+    stat_runs = 2
     fname_prepend = "G_"    # Domain:
-    n_agents = 1
+    n_agents = 10
     n_agent_types = 1
-    n_pois = 4
-    poi_options = ('square', 'sin', 'exp')
+    n_pois = 20
+    poi_options = ('on', )
     with_agents = True
-    size = 20
-    time_steps = 3
+    size = 30
+    time_steps = 60
     n_regions = 8
     sensor_range = 10
     rand_action_rate = 0.05
@@ -17,7 +18,7 @@ class Parameters:
     # POI:
     value = 1
     obs_radius = 1
-    couple = 2
+    couple = 1
     strong_coupling = False
 
     # Agent:
@@ -29,7 +30,7 @@ class Parameters:
     # Evolve nn:
     sigma = 0.1
     learning_rate = 0.05
-    n_policies = 2
+    n_policies = 50
 
     # Evo learner
-    n_gen = 1
+    n_gen = 1000

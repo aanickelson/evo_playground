@@ -24,6 +24,7 @@ class Species:
 
     def _species_setup(self):
         # a set of randomly initilaized policies
+        # Initialized to HALF of the population size because each will be mutated at the beginning of an episode
         species = [NN(self.env.state_size(self.time_or_no), self.p.hid, self.env.get_action_size()).get_weights()
                    for _ in range(int(self.n_pol / 2))]
         return species

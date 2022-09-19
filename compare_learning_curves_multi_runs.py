@@ -7,6 +7,8 @@ from matplotlib import pyplot as plt
 def process(data):
     mu = np.mean(data, axis=0)
     ste = sem(data, axis=0)
+    # mu = data[0]
+    # ste = data[0]
     return mu, ste
 
 
@@ -44,23 +46,26 @@ def load_data(data_date, trials):
         for e in ext:
             means = []
             stes = []
+            prefixes = []
+
             for pre in fpre:
                 fname = path.join(path_nm, pre, f"{pre}_trial{trial:03d}_{e}.npy")
                 try:
                     data = np.load(fname)
                 except FileNotFoundError:
                     continue
+                prefixes.append(pre)
                 mean, ste = process(data)
                 means.append(mean)
                 stes.append(ste)
             if means:
-                plot_data(means, stes, fpre, e, trial, data_date)
+                plot_data(means, stes, prefixes, e, trial, data_date)
 
 
 if __name__ == '__main__':
-    date = "20220831_1033"
-    t0 = 710
-    t1 = 715
+    date = "20220919_1129"
+    t0 = 300
+    t1 = 327
     evens_only = False
     if evens_only:
         trials = [n for n in range(t0, t1 + 1) if not n % 2]

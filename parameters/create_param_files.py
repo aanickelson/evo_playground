@@ -4,16 +4,20 @@ from itertools import combinations
 
 
 def gen_all_files():
-    n_agents = 3
-    n_poi = 12
+    n_ag = [3, 5]
+    n_p = [[2, 3, 4], [3, 5, 7]]
+    # n_agents = 10
+    # n_poi = 60
     poi_options = ['square', 'sin', 'exp']
-    combos = list(combinations(poi_options, 1)) + list(combinations(poi_options, 2)) + list(combinations(poi_options, 3))
-    count = 100
+    combos = list(combinations(poi_options, 1)) + list(combinations(poi_options, 3))
+    count = 300
     for combo in combos:
-        poi = combo
-        generated_string = str_gen(count, n_agents, n_poi, poi)
-        filesave(generated_string, count)
-        count += 1
+        for i, ag in enumerate(n_ag):
+            for p in n_p[i]:
+                poi = combo
+                generated_string = str_gen(count, ag, p, poi)
+                filesave(generated_string, count)
+                count += 1
 
 
 def filesave(str_to_save, filenum):

@@ -2,7 +2,7 @@ class Parameters:
 
     trial_num = 105
 
-    stat_runs = 10
+    stat_runs = 5
     fname_prepend = "G_"    # Domain:
     n_agents = 3
     n_agent_types = 1

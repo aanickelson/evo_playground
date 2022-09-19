@@ -5,7 +5,7 @@ def string_to_save(i, n_agents, n_pois, poi_options):
     s += "class Parameters:\n\n"
 
     s += f"    trial_num = {i}\n\n"
-    s += f"    stat_runs = 10\n"
+    s += f"    stat_runs = 2\n"
     s += f'    fname_prepend = "G_"'
     s += f"    # Domain:\n"
     s += f"    n_agents = {n_agents}\n"
@@ -37,6 +37,6 @@ def string_to_save(i, n_agents, n_pois, poi_options):
     s += f"    n_policies = 50\n\n"
 
     s += f"    # Evo learner\n"
-    s += f"    n_gen = 1500\n"
+    s += f"    n_gen = 1000\n"
     return s
 
