@@ -33,7 +33,7 @@ class CCEA:
         self.n_agents = p.n_agents
         self.p = p
         self.env = env
-        self.n_stat_runs = 1
+        self.n_stat_runs = p.stat_runs
         self.species = None
         self.generations = range(self.n_gen)
         self.raw_g = np.zeros((self.n_stat_runs, self.n_gen))
@@ -228,7 +228,7 @@ class RunPool:
 
 if __name__ == '__main__':
     # trials = param.TEST_01
-    trials = param.SM_BATCH_03
+    trials = param.BIG_BATCH_02
     # trials = [param.p325]
     pooling = RunPool(trials)
     pooling.run_pool()

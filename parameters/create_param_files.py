@@ -4,13 +4,13 @@ from itertools import combinations
 
 
 def gen_all_files():
-    n_ag = [3, 5]
-    n_p = [[2, 3, 4], [3, 5, 7]]
+    n_ag = [3, 5, 10]
+    n_p = [[2], [7], [10, 30]]
     # n_agents = 10
     # n_poi = 60
     poi_options = ['square', 'sin', 'exp']
     combos = list(combinations(poi_options, 1)) + list(combinations(poi_options, 3))
-    count = 300
+    count = 400
     for combo in combos:
         for i, ag in enumerate(n_ag):
             for p in n_p[i]:

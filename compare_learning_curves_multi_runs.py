@@ -5,10 +5,10 @@ from matplotlib import pyplot as plt
 
 
 def process(data):
-    mu = np.mean(data, axis=0)
-    ste = sem(data, axis=0)
-    # mu = data[0]
-    # ste = data[0]
+    # mu = np.mean(data, axis=0)
+    # ste = sem(data, axis=0)
+    mu = data[0]
+    ste = data[0]
     return mu, ste
 
 
@@ -63,9 +63,9 @@ def load_data(data_date, trials):
 
 
 if __name__ == '__main__':
-    date = "20220919_1129"
-    t0 = 300
-    t1 = 327
+    date = "20220921_1214"
+    t0 = 400
+    t1 = 420
     evens_only = False
     if evens_only:
         trials = [n for n in range(t0, t1 + 1) if not n % 2]

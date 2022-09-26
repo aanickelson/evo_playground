@@ -17,6 +17,8 @@ def init_strings():
         s += f"from evo_playground.parameters.parameters{i:02d} import Parameters as p{i}\n"
     for i in range(300, 327):
         s += f"from evo_playground.parameters.parameters{i:02d} import Parameters as p{i}\n"
+    for i in range(400, 416):
+        s += f"from evo_playground.parameters.parameters{i:02d} import Parameters as p{i}\n"
     s += '\nTEST = [p001]\n\n'
     sm_batch0 = 'SM_BATCH_00 = ['
     for smn in range(100, 107):
@@ -53,6 +55,13 @@ def init_strings():
         big_batch_01 += f'p{smn}, '
     big_batch_01 += ']\n'
     s += big_batch_01
+
+    big_batch_02 = 'BIG_BATCH_02 = ['
+    for smn in range(400, 416):
+        big_batch_02 += f'p{smn}, '
+    big_batch_02 += ']\n'
+    s += big_batch_02
+
     return s
 
 
