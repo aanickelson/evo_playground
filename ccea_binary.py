@@ -33,7 +33,8 @@ class CCEA:
         self.n_agents = p.n_agents
         self.p = p
         self.env = env
-        self.n_stat_runs = p.stat_runs
+        # self.n_stat_runs = p.stat_runs
+        self.n_stat_runs = 50
         self.species = None
         self.generations = range(self.n_gen)
         self.raw_g = np.zeros((self.n_stat_runs, self.n_gen))
@@ -112,7 +113,7 @@ class CCEA:
 
                     # Run the simulation
                     try:
-                        G, D = self.env.run_sim(models, use_time=self.st_time)
+                        G = self.env.run_sim(models, use_time=self.st_time)
                     except RuntimeError:
                         print("#################### ERROR ######################")
                         print(f"trial: {self.trial_num}, {self.rew_type}, {self.st_time}")
@@ -121,7 +122,7 @@ class CCEA:
                             print(ag.state)
                         continue
                     # Bookkeeping
-                    d_scores[:, pol_num] = D
+                    # d_scores[:, pol_num] = D
                     raw_G[pol_num] = G
                     scores[pol_num] = G / theoretical_max_g
                 # Index of the policies that performed best over G
@@ -134,11 +135,13 @@ class CCEA:
 
                 # Update the starting weights (the policy we keep between generations) for each species
                 for idx, spec in enumerate(self.species):
-                    if 'G' in self.rew_type:
-                        # Use raw G because the scores may be more noisy (since it's divided by the greedy policy)
-                        spec.start_weights = spec.binary_tournament(np.array(raw_G))
-                    elif 'D' in self.rew_type:
-                        spec.start_weights = spec.binary_tournament(np.array(d_scores[idx]))
+                    spec.start_weights = spec.binary_tournament(np.array(raw_G))
+
+                    # if 'G' in self.rew_type:
+                    #     # Use raw G because the scores may be more noisy (since it's divided by the greedy policy)
+                    #     spec.start_weights = spec.binary_tournament(np.array(raw_G))
+                    # elif 'D' in self.rew_type:
+                    #     spec.start_weights = spec.binary_tournament(np.array(d_scores[idx]))
 
                     # Reduce the learning rate
                     spec.learning_rate /= 1.0001
@@ -189,7 +192,7 @@ class RunPool:
         self.fpath = filepath
         mkdir(filepath)
         mkdir(poi_fpath)
-        for rew in ['D_', 'G_']:
+        for rew in ['G_']:  # 'D_',
             for t in ['no_time', 'time']:
                 fpath = path.join(filepath, rew + t)
                 mkdir(fpath)
@@ -197,7 +200,7 @@ class RunPool:
     def permutations(self):
         perms = []
         for p in self.params:
-            for rew in ['D', 'G']:
+            for rew in ['G']:  # 'D',
                 for st_time in [False, True]:
                     perms.append([p, rew, st_time])
                     self.n_permutations += 1
@@ -228,8 +231,8 @@ class RunPool:
 
 if __name__ == '__main__':
     # trials = param.TEST_01
-    trials = param.BIG_BATCH_02
-    # trials = [param.p325]
+    trials = param.SM_BATCH_03
+    # trials = [param.p011]
     pooling = RunPool(trials)
     pooling.run_pool()
     # pooling.main(0)

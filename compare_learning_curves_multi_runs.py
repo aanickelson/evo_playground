@@ -5,10 +5,10 @@ from matplotlib import pyplot as plt
 
 
 def process(data):
-    # mu = np.mean(data, axis=0)
-    # ste = sem(data, axis=0)
-    mu = data[0]
-    ste = data[0]
+    mu = np.mean(data, axis=0)
+    ste = sem(data, axis=0)
+    # mu = data[2]
+    # ste = data[2]
     return mu, ste
 
 
@@ -39,7 +39,7 @@ def load_data(data_date, trials):
         pass
 
     fpre = ['G_time', 'G_no_time', 'D_time', 'D_no_time']
-    ext = ['max_G', 'max_norm']
+    ext = ['max_G']  #, 'max_norm']
     path_nm = path.join(getcwd(), 'data', data_date)
 
     for trial in trials:
@@ -63,9 +63,9 @@ def load_data(data_date, trials):
 
 
 if __name__ == '__main__':
-    date = "20220921_1214"
-    t0 = 400
-    t1 = 420
+    date = "20221004_1138"
+    t0 = 11
+    t1 = 16
     evens_only = False
     if evens_only:
         trials = [n for n in range(t0, t1 + 1) if not n % 2]

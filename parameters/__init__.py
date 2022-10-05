@@ -1,5 +1,11 @@
 from evo_playground.parameters.parameters001 import Parameters as p001
 from evo_playground.parameters.parameters010 import Parameters as p010
+from evo_playground.parameters.parameters011 import Parameters as p011
+from evo_playground.parameters.parameters012 import Parameters as p012
+from evo_playground.parameters.parameters013 import Parameters as p013
+from evo_playground.parameters.parameters014 import Parameters as p014
+from evo_playground.parameters.parameters015 import Parameters as p015
+
 from evo_playground.parameters.parameters100 import Parameters as p100
 from evo_playground.parameters.parameters101 import Parameters as p101
 from evo_playground.parameters.parameters102 import Parameters as p102
@@ -152,8 +158,10 @@ from evo_playground.parameters.parameters415 import Parameters as p415
 TEST = [p001]
 
 SM_BATCH_00 = [p100, p101, p102, p103, p104, p105, p106, ]
+
 SM_BATCH_01 = [p110, p111, p112, p113, p114, p115, p116, ]
 SM_BATCH_02 = [p120, p121, p122, p123, p124, p125, p126, ]
+SM_BATCH_03 = [p012, p013, p014, p015]
 BIG_BATCH_00 = [p130, p131, p132, p133, p134, p135, p136, p137, p138, p139, p140, p141, p142, p143, p144, p145, p146, p147, p148, p149, p150, p151, p152, p153, p154, p155, p156, p157, p158, p159, p160, p161, p162, p163, p164, p165, p166, p167, p168, p169, p170, p171, ]
 TEST_01 = [p230, p231, p232, p233, p234, p235, p236, p237, p238, p239, p240, p241, p242, p243, p244, p245, p246, p247, p248, p249, p250, p251, p252, p253, p254, p255, p256, p257, p258, p259, p260, p261, p262, p263, p264, p265, p266, p267, p268, p269, p270, p271, ]
 BIG_BATCH_01 = [p300, p301, p302, p303, p304, p305, p306, p307, p308, p309, p310, p311, p312, p313, p314, p315, p316, p317, p318, p319, p320, p321, p322, p323, ]
