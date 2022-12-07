@@ -26,14 +26,14 @@ from evo_playground.learning.binary_species import Species
 
 
 class CCEA:
-    def __init__(self, env, p, rew_type, st_time, time_str, fpath):
+    def __init__(self, env, p, rew_type, fpath):
         seed()
         self.n_gen = p.n_gen
         self.trial_num = p.trial_num
         self.n_agents = p.n_agents
         self.p = p
         self.env = env
-        self.n_stat_runs = 2
+        self.n_stat_runs = 1
         self.species = None
         self.generations = range(self.n_gen)
         self.raw_g = np.zeros((self.n_stat_runs, self.n_gen))
@@ -44,12 +44,10 @@ class CCEA:
         # self.avg_false = np.zeros(self.n_gen)
         self.d = np.zeros((self.n_stat_runs, self.n_gen, self.n_agents))
         self.rew_type = rew_type
-        self.st_time = st_time
-        self.time_str = time_str
         self.fpath = fpath
 
-    def species_setup(self, time_or_no):
-        species = [Species(self.env, self.p, time_or_no) for _ in range(self.n_agents)]
+    def species_setup(self):
+        species = [Species(self.env, self.p) for _ in range(self.n_agents)]
         return species
 
     def save_data(self):
@@ -76,10 +74,11 @@ class CCEA:
     def run_evolution(self):
         # Comparison of theoretical max for simple G
         # IF CHANGING THE ENVIRONMENT, put this the loop
-        theoretical_max_g = optimal_policy(self.env)
-
+        # theoretical_max_g = optimal_policy(self.env)
+        # TODO: Change this
+        theoretical_max_g = 1
         for stat_num in range(self.n_stat_runs):
-            self.species = self.species_setup(self.st_time)
+            self.species = self.species_setup()
             for gen in tqdm(self.generations):
 
                 # Bookkeeping
@@ -108,10 +107,11 @@ class CCEA:
                     models = [sp.model for sp in self.species]
 
                     # Run the simulation
-                    G, D = self.env.run_sim(models, use_time=self.st_time)
+                    self.env.run_sim(models)
+                    G = self.env.G()
 
                     # Bookkeeping
-                    d_scores[:, pol_num] = D
+                    # d_scores[:, pol_num] = D
                     raw_G[pol_num] = G
                     scores[pol_num] = G / theoretical_max_g
                 # Index of the policies that performed best over G
@@ -157,7 +157,7 @@ class CCEA:
             # for idx, spec in enumerate(self.species):
             #     spec.model.set_weights(max_wts[idx])
             # models = [sp.model for sp in self.species]
-            # _ = self.env.run_sim(models, multi_g=True)
+            # _ = self.env.run_sim(models, multi_g=True)d
 
 
 class RunPool:
@@ -168,11 +168,14 @@ class RunPool:
 
     def make_dirs(self):
         now = datetime.now()
-        now_str = now.strftime("%Y%m%d_%H%M")
+        now_str = now.strftime("%Y%m%d_%H%M%S")
         filepath = path.join(getcwd(), 'data', now_str)
         poi_fpath = path.join(filepath, 'poi_xy')
         self.fpath = filepath
-        mkdir(filepath)
+        try:
+            mkdir(filepath)
+        except FileExistsError:
+            mkdir(filepath+'_01')
         mkdir(poi_fpath)
         for rew in ['D_', 'G_']:
             for t in ['time', 'no_time']:
@@ -184,16 +187,11 @@ class RunPool:
         poi_fpath = path.join(self.fpath, 'poi_xy', f'poi_xy_trial{p.trial_num}')
         env.save_poi_locs(poi_fpath)
         print("TRIAL {}".format(p.trial_num))
-        for rew in ['D', 'G']:
-            for st_time in [False, True]:
-                if st_time:
-                    time_str = 'time'
-                else:
-                    time_str = 'no_time'
-                print(rew, time_str)
+        for rew in ['G']:  # 'D',
+                print(rew)
                 # p.fname_prepend = rew
-                fpath = path.join(self.fpath, rew + '_' + time_str)
-                evo = CCEA(env, p, rew, st_time, time_str, fpath)
+                fpath = path.join(self.fpath, rew)
+                evo = CCEA(env, p, rew, fpath)
                 evo.run_evolution()
 
     def run_pool(self):
@@ -203,7 +201,7 @@ class RunPool:
 
 if __name__ == '__main__':
     # trials = param.BIG_BATCH_01
-    trials = [param.p98]
+    trials = [param.p00]
     pooling = RunPool(trials)
     pooling.main(trials[0])
 

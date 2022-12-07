@@ -12,19 +12,21 @@ import evo_playground.parameters as param
 
 
 class Species:
-    def __init__(self, env, p, time_or_no):
+    def __init__(self, env, p):
         self.n_pol = p.n_policies
         self.p = p
         self.env = env
         self.sigma = p.sigma
         self.learning_rate = 1
-        self.time_or_no = time_or_no
-        self.model = NN(self.env.state_size(time_or_no), self.p.hid, self.env.get_action_size())
+        a = self.env.state_size()
+        b = self.p.hid
+        c = self.env.get_action_size()
+        self.model = NN(self.env.state_size(), self.p.hid, self.env.get_action_size())
         self.weights = self._species_setup()
 
     def _species_setup(self):
         # a set of randomly initilaized policies
-        species = [NN(self.env.state_size(self.time_or_no), self.p.hid, self.env.get_action_size()).get_weights()
+        species = [NN(self.env.state_size(), self.p.hid, self.env.get_action_size()).get_weights()
                    for _ in range(int(self.n_pol / 2))]
         return species
 
