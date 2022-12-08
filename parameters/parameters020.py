@@ -1,20 +1,19 @@
-"""
-Example parameters file for the rover domain.
-"""
-
-
 class Parameters:
-    # This should match the file name -- parameters##
-    trial_num = 00
 
-    # Domain:
-    n_agents = 3
+    trial_num = 20
+
+    stat_runs = 3
+    fname_prepend = "G_"    # Domain:
+    n_agents = 2
     n_agent_types = 1
-    n_poi_types = 3
-    rooms = [[1, 2, 0], [0, 2, 1], [2, 1, 0], [1, 0, 2]]
-    size = 30
-    time_threshold = 10  # How long before information drops out of the state
+    n_pois = 8
+    poi_options = ('on', 'on', 'on', 'on')
+    offset = True
+    dist_to_poi = 3
+    with_agents = True
+    size = 10
     time_steps = 50
+    n_regions = 8
     sensor_range = 10
     rand_action_rate = 0.05
 
@@ -36,4 +35,4 @@ class Parameters:
     n_policies = 50
 
     # Evo learner
-    n_gen = 1000
+    n_gen = 1500

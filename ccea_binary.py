@@ -58,7 +58,7 @@ class CCEA:
         for j in range(len(attrs)):
             nm = attr_names[j]
             att = attrs[j]
-            filename = self.rew_type + "_" + self.time_str + "_trial{:03d}_{}".format(self.trial_num, nm)
+            filename = self.rew_type + "_trial{:03d}_{}".format(self.trial_num, nm)
             ext = "npy"
             path_nm = path.join(self.fpath, "{}.{}".format(filename, ext))
 
@@ -139,7 +139,7 @@ class CCEA:
                     self.save_data()
 
                     for i, species in enumerate(self.species):
-                        species.save_model(self.trial_num, stat_num, self.n_gen, self.rew_type + '_' + self.time_str, max_wts[i], species=i)
+                        species.save_model(self.trial_num, stat_num, self.n_gen, self.rew_type, max_wts[i], species=i)
 
             self.env.visualize = False
             self.env.reset()
@@ -150,7 +150,7 @@ class CCEA:
             self.save_data()
             # save the models
             for i, species in enumerate(self.species):
-                species.save_model(self.trial_num, stat_num, self.n_gen, self.rew_type + '_' + self.time_str, max_wts[i], species=i)
+                species.save_model(self.trial_num, stat_num, self.n_gen, self.rew_type, max_wts[i], species=i)
             # # Run a rollout simulation
             # self.env.reset()
             # self.env.visualize = True
@@ -177,10 +177,9 @@ class RunPool:
         except FileExistsError:
             mkdir(filepath+'_01')
         mkdir(poi_fpath)
-        for rew in ['D_', 'G_']:
-            for t in ['time', 'no_time']:
-                fpath = path.join(filepath, rew + t)
-                mkdir(fpath)
+        for rew in ['G_']:  # 'D_'
+            fpath = path.join(filepath, rew)
+            mkdir(fpath)
 
     def main(self, p):
         env = Domain(p)

@@ -7,8 +7,8 @@ from matplotlib import pyplot as plt
 def process(data):
     mu = np.mean(data, axis=0)
     ste = sem(data, axis=0)
-    # mu = data[2]
-    # ste = data[2]
+    # mu = data[0]
+    # ste = data[0]
     return mu, ste
 
 
@@ -63,9 +63,9 @@ def load_data(data_date, trials):
 
 
 if __name__ == '__main__':
-    date = "20221004_1138"
-    t0 = 11
-    t1 = 16
+    date = "20221109_1141"
+    t0 = 20
+    t1 = 21
     evens_only = False
     if evens_only:
         trials = [n for n in range(t0, t1 + 1) if not n % 2]
