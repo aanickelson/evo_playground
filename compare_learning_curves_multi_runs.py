@@ -7,14 +7,14 @@ from matplotlib import pyplot as plt
 def process(data):
     mu = np.mean(data, axis=0)
     ste = sem(data, axis=0)
-    # mu = data[0]
-    # ste = data[0]
+    mu = data[0]
+    ste = data[0]
     return mu, ste
 
 
 def plot_data(means, stes, fpre, ext, trial, data_date):
     plt.clf()
-    fname = path.join(getcwd(), 'data', data_date, 'graphs', f"trial{trial}_{ext}.svg")
+    fname = path.join(getcwd(), 'data', data_date, 'graphs', f"trial{trial:03d}_{ext}.svg")
 
     x_vals = [i for i in range(len(means[0]))]
     upper_y_lim = 1
@@ -38,8 +38,8 @@ def load_data(data_date, trials):
     except FileExistsError:
         pass
 
-    fpre = ['G_time', 'G_no_time', 'D_time', 'D_no_time']
-    ext = ['max_G']  #, 'max_norm']
+    fpre = ['G', 'D']
+    ext = ['raw_G', 'norm_G']
     path_nm = path.join(getcwd(), 'data', data_date)
 
     for trial in trials:
@@ -63,13 +63,10 @@ def load_data(data_date, trials):
 
 
 if __name__ == '__main__':
-    date = "20221109_1141"
-    t0 = 20
-    t1 = 21
-    evens_only = False
-    if evens_only:
-        trials = [n for n in range(t0, t1 + 1) if not n % 2]
-    else:
-        trials = [n for n in range(t0, t1 + 1)]
+    date = "20221213_152035"
+    t0 = 2
+    t1 = 2
+
+    trials = [n for n in range(t0, t1 + 1)]
 
     load_data(date, trials)
