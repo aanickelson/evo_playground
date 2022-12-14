@@ -39,4 +39,4 @@ class Parameters:
     n_policies = 30
 
     # Evo learner
-    n_gen = 1000
+    n_gen = 2000

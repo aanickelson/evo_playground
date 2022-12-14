@@ -63,9 +63,9 @@ def load_data(data_date, trials):
 
 
 if __name__ == '__main__':
-    date = "20221213_152035"
-    t0 = 2
-    t1 = 2
+    date = "20221213_171406"
+    t0 = 0
+    t1 = 3
 
     trials = [n for n in range(t0, t1 + 1)]
 

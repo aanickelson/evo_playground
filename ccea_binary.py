@@ -207,7 +207,7 @@ class RunPool:
 
 if __name__ == '__main__':
     # trials = param.BIG_BATCH_01
-    from parameters import p02 as p
+    from parameters import p01 as p
     trials = [p] * p.n_stat_runs
     pooling = RunPool(trials)
     pooling.main(trials[0])

@@ -2,7 +2,7 @@ import imageio.v2 as imageio
 import evo_playground.parameters as param
 from os import getcwd, path
 
-for p in [param.p02]:
+for p in [param.p03]:
     images = []
     filenames = []
     for pre in ['G', 'D']:
