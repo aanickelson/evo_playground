@@ -210,6 +210,6 @@ if __name__ == '__main__':
     from parameters import p02 as p
     trials = [p] * p.n_stat_runs
     pooling = RunPool(trials)
-    # pooling.main(trials[0])
+    pooling.main(trials[0])
     # pooling.main(trials[1])
-    pooling.run_pool()
+    # pooling.run_pool()
