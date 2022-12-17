@@ -74,14 +74,8 @@ class CCEA:
         self.raw_g[stat][i] = max(raw_G)
 
     def run_evolution(self):
-        # Comparison of theoretical max for simple G
-        # IF CHANGING THE ENVIRONMENT, put this the loop
-        # theoretical_max_g = optimal_policy(self.env)
         theoretical_max_g = sum(sum(np.array(self.p.rooms)))
-        # print('Max G:', theoretical_max_g)
-        # for stat_num in range(self.n_stat_runs):
         self.species = self.species_setup()
-        self.env.vis = False
 
         for gen in tqdm(self.generations):
 
@@ -115,7 +109,6 @@ class CCEA:
                 G = self.env.G()
                 D = self.env.D()
                 # Bookkeeping
-                one_gen_G.append(G)
                 d_scores[:, pol_num] = D
                 raw_G[pol_num] = G
                 normalized_G[pol_num] = float(G) / theoretical_max_g
@@ -207,7 +200,7 @@ class RunPool:
 
 if __name__ == '__main__':
     # trials = param.BIG_BATCH_01
-    from parameters import p01 as p
+    from parameters import p04 as p
     trials = [p] * p.n_stat_runs
     pooling = RunPool(trials)
     pooling.main(trials[0])

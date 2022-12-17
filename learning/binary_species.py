@@ -34,15 +34,12 @@ class Species:
         # Mutate each set of weights that was kept
         new_weights = []
         for wts in self.weights:
-            noise = self.sigma * torch.normal(0, 1, size=wts[0].shape) * self.learning_rate
-            noise2 = self.sigma * torch.normal(0, 1, size=wts[1].shape) * self.learning_rate
+            noise = self.sigma * torch.normal(-1, 1, size=wts[0].shape) * self.learning_rate
+            noise2 = self.sigma * torch.normal(-1, 1, size=wts[1].shape) * self.learning_rate
             new_weights.append([wts[0] + noise, wts[1] + noise2])
         # Have to do this separately otherwise it creates an infinite loop (whoopsies)
         for wts_01 in new_weights:
             self.weights.append(wts_01)
-
-        # Reduce the learning rate slightly at each mutation
-        self.learning_rate *= 0.999
 
     def binary_tournament(self, scores):
         """
@@ -69,6 +66,37 @@ class Species:
                 keep_idx.append(idx1)
 
         self.weights = [self.weights[k] for k in keep_idx]
+
+    def binary_multi(self, scores):
+        dummy_ranking = np.random.randint(0, 10000, len(scores))
+
+        # create priority queue to randomly match two policies
+        pq = [[dummy_ranking[i], i] for i in range(len(scores))]
+        hq.heapify(pq)
+
+        # Compare two randomly matched policies and keep one
+        keep_idx = []
+        for j in range(int(len(scores)/2)):
+            sc0, idx0 = hq.heappop(pq)
+            sc1, idx1 = hq.heappop(pq)
+            [g0_a, g0_b] = scores[idx0]
+            [g1_a, g1_b] = scores[idx1]
+
+            # If one dominates the other, choose that one
+            if g0_a == g1_a and g0_b == g1_b:
+                pick_one = np.random.choice([idx0, idx1])
+                keep_idx.append(pick_one)
+            elif g0_a >= g1_a and g0_b >= g1_b:
+                keep_idx.append(idx0)
+            elif g1_a >= g0_a and g1_b >= g0_b:
+                keep_idx.append(idx1)
+            # Otherwise choose one at random
+            else:
+                pick_one = np.random.choice([idx0, idx1])
+                keep_idx.append(pick_one)
+
+        self.weights = [self.weights[k] for k in keep_idx]
+
 
     def save_model(self, trial, stat, gen, prepend, wts, species=''):
 
