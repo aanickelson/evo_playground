@@ -33,7 +33,7 @@ class CCEA:
         self.n_agents = p.n_agents
         self.p = p
         self.env = env
-        self.n_stat_runs = 5
+        self.n_stat_runs = p.n_stat_runs
         self.stat_num = 0
         self.species = None
         self.generations = range(self.n_gen)

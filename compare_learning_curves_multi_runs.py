@@ -5,8 +5,8 @@ from matplotlib import pyplot as plt
 
 
 def process(data):
-    mu = np.mean(data, axis=0)
-    ste = sem(data, axis=0)
+    # mu = np.mean(data, axis=0)
+    # ste = sem(data, axis=0)
     mu = data[0]
     ste = data[0]
     return mu, ste
@@ -63,7 +63,7 @@ def load_data(data_date, trials):
 
 
 if __name__ == '__main__':
-    date = "20221216_172131"
+    date = "20221219_145916"
     t0 = 0
     t1 = 5
 
