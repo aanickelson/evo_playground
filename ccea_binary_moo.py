@@ -36,9 +36,6 @@ class CCEA_MOO(CCEA):
             for spec in self.species:
                 spec.mutate_weights()
 
-            if not gen % 500:
-                pass
-
             normalized_G, d_scores, raw_G, multi_G = self.test_policies(gen)
             if not gen % 100:
                 pareto = self.is_pareto_efficient_simple(multi_G)
@@ -76,16 +73,21 @@ class CCEA_MOO(CCEA):
         self.env.reset()
 
         self.save_data()
+        pareto = self.is_pareto_efficient_simple(multi_G)
+        g1 = np.array([i[0] for i in multi_G])
+        g2 = np.array([j[1] for j in multi_G])
+        self.plot_it(g1, g2, pareto, 1000)
+
         # save the models
         for i, species in enumerate(self.species):
             species.save_model(self.trial_num, self.stat_num, self.n_gen, self.rew_type, max_wts[i], species=i)
-        # # Run a rollout simulation
-        # self.env.reset()
-        # self.env.vis = True
-        # for idx, spec in enumerate(self.species):
-        #     spec.model.set_weights(max_wts[idx])
-        # models = [sp.model for sp in self.species]
-        # _ = self.env.run_sim(models)
+        # Run a rollout simulation
+        self.env.reset()
+        self.env.vis = True
+        for idx, spec in enumerate(self.species):
+            spec.model.set_weights(max_wts[idx])
+        models = [sp.model for sp in self.species]
+        _ = self.env.run_sim(models)
         self.stat_num += 1
 
     def test_policies(self, gen):
@@ -110,10 +112,6 @@ class CCEA_MOO(CCEA):
 
             # Array of one NN per species to use as policies
             models = [sp.model for sp in self.species]
-
-            if gen > 0 and not gen % 100:
-                x = 1
-                pass
 
             # Run the simulation
             self.env.run_sim(models)
@@ -158,7 +156,7 @@ class RunPool:
     def __init__(self, batch):
         self.batch = batch
         self.fpath = None
-        self.rewards_to_try = ['G']  # 'G', 'D', 'multi',
+        self.rewards_to_try = ['multi']  # 'G', 'D', 'multi',
         self.make_dirs()
 
     def make_dirs(self):

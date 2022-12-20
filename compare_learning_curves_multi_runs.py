@@ -38,7 +38,7 @@ def load_data(data_date, trials):
     except FileExistsError:
         pass
 
-    fpre = ['G', 'D']
+    fpre = ['G', 'D', 'multi']
     ext = ['raw_G', 'norm_G']
     path_nm = path.join(getcwd(), 'data', data_date)
 
@@ -63,7 +63,7 @@ def load_data(data_date, trials):
 
 
 if __name__ == '__main__':
-    date = "20221219_145916"
+    date = "20221219_154214"
     t0 = 0
     t1 = 5
 
