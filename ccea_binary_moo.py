@@ -36,11 +36,13 @@ class CCEA_MOO(CCEA):
             for spec in self.species:
                 spec.mutate_weights()
 
-            normalized_G, d_scores, raw_G, multi_G = self.test_policies(gen)
+            normalized_G, d_scores, raw_G, multi_G, multi_D = self.test_policies(gen)
+            pareto = self.is_pareto_efficient_simple(multi_G)
+
             if not gen % 100:
-                pareto = self.is_pareto_efficient_simple(multi_G)
                 g1 = np.array([i[0] for i in multi_G])
                 g2 = np.array([j[1] for j in multi_G])
+                xx = [g1[pareto], g2[pareto]]
                 self.plot_it(g1, g2, pareto, gen)
 
             # Index of the policies that performed best over G
@@ -56,8 +58,10 @@ class CCEA_MOO(CCEA):
                     spec.start_weights = spec.binary_tournament(np.array(raw_G))
                 elif 'D' in self.rew_type:
                     spec.start_weights = spec.binary_tournament(np.array(d_scores[idx]))
-                elif 'multi' in self.rew_type:
-                    spec.start_weights = spec.binary_multi(np.array(multi_G))
+                elif 'multiG' in self.rew_type:
+                    spec.start_weights = spec.binary_multi(np.array(multi_G), pareto)
+                elif 'multiD' in self.rew_type:
+                    spec.start_weights = spec.binary_multi(np.array(multi_D[idx]), pareto)
                 # Reduce the learning rate
                 spec.learning_rate /= 1.0001
 
@@ -118,6 +122,7 @@ class CCEA_MOO(CCEA):
             G = self.env.G()
             D = self.env.D()
             multiG = self.env.multiG()
+            multiD = self.env.multiD()
 
             # Bookkeeping
             d_scores[:, pol_num] = D
@@ -128,7 +133,7 @@ class CCEA_MOO(CCEA):
         # Bookkeeping
         self.update_logs(normalized_G, raw_G, gen, self.stat_num)
 
-        return normalized_G, d_scores, raw_G, multi_G
+        return normalized_G, d_scores, raw_G, multi_G, multiD
 
     def plot_it(self, x, y, iseff, gen):
         plt.clf()
@@ -156,7 +161,7 @@ class RunPool:
     def __init__(self, batch):
         self.batch = batch
         self.fpath = None
-        self.rewards_to_try = ['multi']  # 'G', 'D', 'multi',
+        self.rewards_to_try = ['multiD']  # 'G', 'D', 'multi',
         self.make_dirs()
 
     def make_dirs(self):
@@ -193,7 +198,7 @@ class RunPool:
 
 if __name__ == '__main__':
     # trials = param.BIG_BATCH_01
-    from parameters import p04 as p
+    from parameters import p06 as p
     trials = [p] * p.n_stat_runs
     pooling = RunPool(trials)
     pooling.main(trials[0])

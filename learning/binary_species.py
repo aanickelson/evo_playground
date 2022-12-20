@@ -67,7 +67,8 @@ class Species:
 
         self.weights = [self.weights[k] for k in keep_idx]
 
-    def binary_multi(self, scores):
+    def binary_multi(self, scores, pareto):
+
         dummy_ranking = np.random.randint(0, 10000, len(scores))
 
         # create priority queue to randomly match two policies
@@ -75,7 +76,7 @@ class Species:
         hq.heapify(pq)
 
         # Compare two randomly matched policies and keep one
-        keep_idx = []
+        keep_idx = [i for i, val in enumerate(pareto) if val]
         for j in range(int(len(scores)/2)):
             sc0, idx0 = hq.heappop(pq)
             sc1, idx1 = hq.heappop(pq)
@@ -94,7 +95,7 @@ class Species:
             else:
                 pick_one = np.random.choice([idx0, idx1])
                 keep_idx.append(pick_one)
-
+        keep_vals = keep_idx[:int(self.n_pol / 2)]
         self.weights = [self.weights[k] for k in keep_idx]
 
 
