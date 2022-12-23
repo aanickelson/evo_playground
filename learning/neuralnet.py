@@ -20,7 +20,7 @@ class NeuralNetwork(nn.Module):
             nn.Linear(input_size, hid_size),
             nn.ReLU(inplace=True),
             nn.Linear(hid_size, out_size),
-            nn.ReLU(inplace=True),
+            nn.Sigmoid(),
         )
         self.model.requires_grad_(False)
 

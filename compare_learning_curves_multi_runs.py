@@ -12,9 +12,9 @@ def process(data):
     return mu, ste
 
 
-def plot_data(means, stes, fpre, ext, trial, data_date):
+def plot_data(means, stes, fpre, ext, trial, base_fpath):
     plt.clf()
-    fname = path.join(getcwd(), 'data', data_date, 'graphs', f"trial{trial:03d}_{ext}.svg")
+    fname = path.join(base_fpath, 'graphs', f"trial{trial:03d}_{ext}.svg")
 
     x_vals = [i for i in range(len(means[0]))]
     upper_y_lim = 1
@@ -31,16 +31,16 @@ def plot_data(means, stes, fpre, ext, trial, data_date):
     plt.savefig(fname)
 
 
-def load_data(data_date, trials):
+def load_data(path_nm, trials):
     try:
-        path_nm = path.join(getcwd(), 'data', data_date, 'graphs')
-        mkdir(path_nm)
+        graphs_path_nm = path.join(path_nm, 'graphs')
+        mkdir(graphs_path_nm)
     except FileExistsError:
         pass
 
     fpre = ['G', 'D', 'multi']
     ext = ['raw_G', 'norm_G']
-    path_nm = path.join(getcwd(), 'data', data_date)
+
 
     for trial in trials:
         for e in ext:
@@ -59,14 +59,17 @@ def load_data(data_date, trials):
                 means.append(mean)
                 stes.append(ste)
             if means:
-                plot_data(means, stes, prefixes, e, trial, data_date)
+                plot_data(means, stes, prefixes, e, trial, base_fpath=path_nm)
 
 
 if __name__ == '__main__':
-    date = "20221219_154214"
-    t0 = 0
-    t1 = 5
+    data_date = "20221222_122731"
+    data_top = '20221222_155541'
+    path_nm = path.join(getcwd(), 'data', data_date, 'top_pol', data_top)
+    t0 = 5
+    t1 = 8
 
     trials = [n for n in range(t0, t1 + 1)]
 
-    load_data(date, trials)
+    load_data(path_nm, trials)
+    path_nm = path.join(getcwd(), 'data', data_date)

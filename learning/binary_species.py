@@ -12,21 +12,22 @@ import evo_playground.parameters as param
 
 
 class Species:
-    def __init__(self, env, p):
+    def __init__(self, env, p, nn_in, nn_hid, nn_out):
         self.n_pol = p.n_policies
         self.p = p
         self.env = env
         self.sigma = p.sigma
-        self.learning_rate = 1
-        a = self.env.state_size()
-        b = self.p.hid
-        c = self.env.get_action_size()
-        self.model = NN(self.env.state_size(), self.p.hid, self.env.get_action_size())
+        self.learning_rate = p.learning_rate
+        self.nn_in = nn_in
+        self.nn_hid = nn_hid
+        self.nn_out = nn_out
+        # self.model = NN(self.env.state_size(), self.p.hid, self.env.get_action_size())
+        self.model = NN(nn_in, nn_hid, nn_out)
         self.weights = self._species_setup()
 
     def _species_setup(self):
         # a set of randomly initilaized policies
-        species = [NN(self.env.state_size(), self.p.hid, self.env.get_action_size()).get_weights()
+        species = [NN(self.nn_in, self.nn_hid, self.nn_out).get_weights()
                    for _ in range(int(self.n_pol / 2))]
         return species
 
@@ -98,12 +99,9 @@ class Species:
         keep_vals = keep_idx[:int(self.n_pol / 2)]
         self.weights = [self.weights[k] for k in keep_idx]
 
-
     def save_model(self, trial, stat, gen, prepend, wts, species=''):
-
         pth = path.join(getcwd(), 'weights', 't{:03d}_{}_{}weights_s{}_g{}.pth'.format(trial, stat, prepend, species, gen))
         torch.save(wts, pth)
-
 
 
 if __name__ == '__main__':

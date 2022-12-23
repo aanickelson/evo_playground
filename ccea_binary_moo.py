@@ -10,6 +10,7 @@ from os import getcwd, path, mkdir
 from multiprocessing import Process, Pool
 from datetime import datetime
 from matplotlib import pyplot as plt
+import joblib
 
 # Custom packages
 from teaming.domain import DiscreteRoverDomain as Domain
@@ -21,12 +22,6 @@ class CCEA_MOO(CCEA):
         super().__init__(env, p, rew_type, fpath)
         self.max_possible_G = sum(sum(np.array(self.p.rooms)))
 
-    # def save_data(self):
-    #     pass
-    #
-    # def update_logs(self, normalized_G, raw_G, i, stat):
-    #     pass
-
     def run_evolution(self):
 
         self.species = self.species_setup()
@@ -36,20 +31,31 @@ class CCEA_MOO(CCEA):
             for spec in self.species:
                 spec.mutate_weights()
 
-            normalized_G, d_scores, raw_G, multi_G, multi_D = self.test_policies(gen)
+            normalized_G, d_scores, raw_G, multi_G = self.test_policies(gen)
             pareto = self.is_pareto_efficient_simple(multi_G)
-
-            if not gen % 100:
-                g1 = np.array([i[0] for i in multi_G])
-                g2 = np.array([j[1] for j in multi_G])
-                xx = [g1[pareto], g2[pareto]]
-                self.plot_it(g1, g2, pareto, gen)
 
             # Index of the policies that performed best over G
             max_g = np.argmax(raw_G)
 
             # Policies that performed best
             max_wts = [self.species[sp].weights[max_g] for sp in range(self.n_agents)]
+
+            # Bookkeeping - save pareto plot every 100 generations
+            if not gen % 100:
+                g1 = np.array([i[0] for i in multi_G])
+                g2 = np.array([j[1] for j in multi_G])
+                self.plot_it(g1, g2, pareto, gen)
+
+            # Save data and models every 200 generations
+            if not gen % 200 or gen == self.n_gen - 1:
+                pareto_wts = []
+                for s in range(self.n_agents):
+                    # Save the weights that are on the pareto front
+                    pareto_wts.append([[multi_G[i], self.species[s].weights[i]] for i, val in enumerate(pareto) if val])
+
+                self.save_data()
+                self.multiG_save_policies(pareto_wts, gen)
+                # (self.trial_num, self.stat_num, self.n_gen, self.rew_type, max_wts[i], species=i)
 
             # Update the starting weights (the policy we keep between generations) for each species
             for idx, spec in enumerate(self.species):
@@ -58,33 +64,11 @@ class CCEA_MOO(CCEA):
                     spec.start_weights = spec.binary_tournament(np.array(raw_G))
                 elif 'D' in self.rew_type:
                     spec.start_weights = spec.binary_tournament(np.array(d_scores[idx]))
-                elif 'multiG' in self.rew_type:
+                elif 'multi' in self.rew_type:
                     spec.start_weights = spec.binary_multi(np.array(multi_G), pareto)
-                elif 'multiD' in self.rew_type:
-                    spec.start_weights = spec.binary_multi(np.array(multi_D[idx]), pareto)
                 # Reduce the learning rate
                 spec.learning_rate /= 1.0001
 
-            # Bookkeeping - save data every 100 generations
-            # Save models every 1000 generations
-            if gen > 0 and not gen % 200:
-                self.save_data()
-
-                for i, species in enumerate(self.species):
-                    species.save_model(self.trial_num, self.stat_num, self.n_gen, self.rew_type, max_wts[i], species=i)
-
-        self.env.visualize = False
-        self.env.reset()
-
-        self.save_data()
-        pareto = self.is_pareto_efficient_simple(multi_G)
-        g1 = np.array([i[0] for i in multi_G])
-        g2 = np.array([j[1] for j in multi_G])
-        self.plot_it(g1, g2, pareto, 1000)
-
-        # save the models
-        for i, species in enumerate(self.species):
-            species.save_model(self.trial_num, self.stat_num, self.n_gen, self.rew_type, max_wts[i], species=i)
         # Run a rollout simulation
         self.env.reset()
         self.env.vis = True
@@ -93,6 +77,11 @@ class CCEA_MOO(CCEA):
         models = [sp.model for sp in self.species]
         _ = self.env.run_sim(models)
         self.stat_num += 1
+
+    def multiG_save_policies(self, pareto_wts, gen):
+        # Pareto Weights are saved as Species x Policies (each policy is [[g1, g2], [wts]])
+        pth = path.join(self.base_fpath, 'weights', f't{self.p.trial_num:03d}_{self.p.rew_str}weights_g{gen}.gz')
+        joblib.dump(pareto_wts, pth)
 
     def test_policies(self, gen):
         # Bookkeeping
@@ -118,11 +107,10 @@ class CCEA_MOO(CCEA):
             models = [sp.model for sp in self.species]
 
             # Run the simulation
-            self.env.run_sim(models)
-            G = self.env.G()
+            G = self.env.run_sim(models)
+            # G = self.env.G()
             D = self.env.D()
             multiG = self.env.multiG()
-            multiD = self.env.multiD()
 
             # Bookkeeping
             d_scores[:, pol_num] = D
@@ -133,7 +121,7 @@ class CCEA_MOO(CCEA):
         # Bookkeeping
         self.update_logs(normalized_G, raw_G, gen, self.stat_num)
 
-        return normalized_G, d_scores, raw_G, multi_G, multiD
+        return normalized_G, d_scores, raw_G, multi_G
 
     def plot_it(self, x, y, iseff, gen):
         plt.clf()
@@ -161,7 +149,7 @@ class RunPool:
     def __init__(self, batch):
         self.batch = batch
         self.fpath = None
-        self.rewards_to_try = ['multiD']  # 'G', 'D', 'multi',
+        self.rewards_to_try = ['multi']  # 'G', 'D', 'multi',
         self.make_dirs()
 
     def make_dirs(self):
@@ -169,12 +157,15 @@ class RunPool:
         now_str = now.strftime("%Y%m%d_%H%M%S")
         filepath = path.join(getcwd(), 'data', now_str)
         poi_fpath = path.join(filepath, 'poi_xy')
+        wts_fpath = path.join(filepath, 'weights')
+
         self.fpath = filepath
         try:
             mkdir(filepath)
         except FileExistsError:
             mkdir(filepath+'_01')
         mkdir(poi_fpath)
+        mkdir(wts_fpath)
         for rew in self.rewards_to_try:
             fpath = path.join(filepath, rew)
             mkdir(fpath)
@@ -187,8 +178,7 @@ class RunPool:
 
         for rew in self.rewards_to_try:
             p.rew_str = rew
-            fpath = path.join(self.fpath, rew)
-            evo = CCEA_MOO(env, p, rew, fpath)
+            evo = CCEA_MOO(env, p, rew, self.fpath)
             evo.run_evolution()
 
     def run_pool(self):
@@ -198,7 +188,7 @@ class RunPool:
 
 if __name__ == '__main__':
     # trials = param.BIG_BATCH_01
-    from parameters import p06 as p
+    from parameters import p07 as p
     trials = [p] * p.n_stat_runs
     pooling = RunPool(trials)
     pooling.main(trials[0])

@@ -38,17 +38,19 @@ class CCEA:
         self.species = None
         self.generations = range(self.n_gen)
         self.raw_g = np.zeros((self.n_stat_runs, self.n_gen))
-        # self.multi_g = np.zeros((self.n_gen, self.env.n_poi_types))
         self.norm_G = np.zeros((self.n_stat_runs, self.n_gen))
         self.avg_score = np.zeros((self.n_stat_runs, self.n_gen))
         self.sterr_score = np.zeros((self.n_stat_runs, self.n_gen))
-        # self.avg_false = np.zeros(self.n_gen)
         self.d = np.zeros((self.n_stat_runs, self.n_gen, self.n_agents))
         self.rew_type = rew_type
-        self.fpath = fpath
+        self.base_fpath = fpath
+        self.nn_in = self.env.state_size()
+        self.nn_hid = self.p.hid
+        self.nn_out = self.env.get_action_size()
+        self.fpath = path.join(fpath, rew_type)
 
     def species_setup(self):
-        species = [Species(self.env, self.p) for _ in range(self.n_agents)]
+        species = [Species(self.env, self.p, self.nn_in, self.nn_hid, self.nn_out) for _ in range(self.n_agents)]
         return species
 
     def save_data(self):
@@ -105,8 +107,8 @@ class CCEA:
                 models = [sp.model for sp in self.species]
 
                 # Run the simulation
-                self.env.run_sim(models)
-                G = self.env.G()
+                G = self.env.run_sim(models)
+                # G = self.env.G()
                 D = self.env.D()
                 # Bookkeeping
                 d_scores[:, pol_num] = D
@@ -134,7 +136,7 @@ class CCEA:
 
             # Bookkeeping - save data every 100 generations
             # Save models every 1000 generations
-            if gen > 0 and not gen % 200:
+            if not gen % 200:
                 self.save_data()
 
                 for i, species in enumerate(self.species):
