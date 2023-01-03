@@ -63,11 +63,11 @@ def load_data(path_nm, trials):
 
 
 if __name__ == '__main__':
-    data_date = "20221222_122731"
-    data_top = '20221222_155541'
+    data_date = "20230102_173917"
+    data_top = '20230102_180748'
     path_nm = path.join(getcwd(), 'data', data_date, 'top_pol', data_top)
-    t0 = 5
-    t1 = 8
+    t0 = 7
+    t1 = 9
 
     trials = [n for n in range(t0, t1 + 1)]
 

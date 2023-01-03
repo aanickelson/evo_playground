@@ -65,6 +65,8 @@ def make_dirs(base_fpath):
 def main(p, date_stamp):
     base_fpath = path.join(getcwd(), 'data', date_stamp)
     data = unpack_data(base_fpath)
+    if len(data) == 1 and len(data) < p.n_agents:
+        data = data * p.n_agents
     trials_fpath = make_dirs(base_fpath)
     rew = 'G'
     p.n_gen = 1500
@@ -81,7 +83,11 @@ def unpack_data(base_fpath):
 
 
 if __name__ == '__main__':
-    from parameters import p06 as p
-    date_stamp = '20221222_122731'
+    from parameters import p08b as p
+    date_stamp = '20230102_173917'
     main(p, date_stamp)
+
+    # This plays a noise when it's done so you don't have to babysit
+    import beepy
+    beepy.beep(sound="ready")
 

@@ -30,6 +30,8 @@ class CCEA_MOO(CCEA):
             # Mutate weights for all species
             for spec in self.species:
                 spec.mutate_weights()
+                if self.thirds:
+                    spec.add_new_pols()
 
             normalized_G, d_scores, raw_G, multi_G = self.test_policies(gen)
             pareto = self.is_pareto_efficient_simple(multi_G)
@@ -40,14 +42,11 @@ class CCEA_MOO(CCEA):
             # Policies that performed best
             max_wts = [self.species[sp].weights[max_g] for sp in range(self.n_agents)]
 
-            # Bookkeeping - save pareto plot every 100 generations
-            if not gen % 100:
+            # Bookkeeping - Save data, models, and pareto plot
+            if not gen % 100 or gen == self.n_gen - 1:
                 g1 = np.array([i[0] for i in multi_G])
                 g2 = np.array([j[1] for j in multi_G])
                 self.plot_it(g1, g2, pareto, gen)
-
-            # Save data and models every 200 generations
-            if not gen % 200 or gen == self.n_gen - 1:
                 pareto_wts = []
                 for s in range(self.n_agents):
                     # Save the weights that are on the pareto front
@@ -67,7 +66,7 @@ class CCEA_MOO(CCEA):
                 elif 'multi' in self.rew_type:
                     spec.start_weights = spec.binary_multi(np.array(multi_G), pareto)
                 # Reduce the learning rate
-                spec.learning_rate /= 1.0001
+                # spec.learning_rate /= 1.0001
 
         # Run a rollout simulation
         self.env.reset()
@@ -188,9 +187,14 @@ class RunPool:
 
 if __name__ == '__main__':
     # trials = param.BIG_BATCH_01
-    from parameters import p07 as p
+    from parameters import p08 as p
     trials = [p] * p.n_stat_runs
     pooling = RunPool(trials)
     pooling.main(trials[0])
+
+    # This plays a noise when it's done so you don't have to babysit
+    import beepy
+    beepy.beep(sound=1)
+
     # pooling.main(trials[1])
     # pooling.run_pool()

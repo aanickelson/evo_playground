@@ -44,13 +44,14 @@ class CCEA:
         self.d = np.zeros((self.n_stat_runs, self.n_gen, self.n_agents))
         self.rew_type = rew_type
         self.base_fpath = fpath
+        self.thirds = p.thirds
         self.nn_in = self.env.state_size()
         self.nn_hid = self.p.hid
         self.nn_out = self.env.get_action_size()
         self.fpath = path.join(fpath, rew_type)
 
     def species_setup(self):
-        species = [Species(self.env, self.p, self.nn_in, self.nn_hid, self.nn_out) for _ in range(self.n_agents)]
+        species = [Species(self.env, self.p, self.nn_in, self.nn_hid, self.nn_out, self.thirds) for _ in range(self.n_agents)]
         return species
 
     def save_data(self):

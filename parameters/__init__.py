@@ -6,3 +6,5 @@ from evo_playground.parameters.parameters04 import Parameters as p04
 from evo_playground.parameters.parameters05 import Parameters as p05
 from evo_playground.parameters.parameters06 import Parameters as p06
 from evo_playground.parameters.parameters07 import Parameters as p07
+from evo_playground.parameters.parameters08 import Parameters as p08
+from evo_playground.parameters.parameters08b import Parameters as p08b
