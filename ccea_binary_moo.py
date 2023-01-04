@@ -44,6 +44,8 @@ class CCEA_MOO(CCEA):
 
             # Bookkeeping - Save data, models, and pareto plot
             if not gen % 100 or gen == self.n_gen - 1:
+                pareto = self.is_pareto_efficient_simple(multi_G)
+
                 g1 = np.array([i[0] for i in multi_G])
                 g2 = np.array([j[1] for j in multi_G])
                 self.plot_it(g1, g2, pareto, gen)
@@ -126,6 +128,7 @@ class CCEA_MOO(CCEA):
         plt.clf()
         plt.scatter(x, y, c='red')
         plt.scatter(x[iseff], y[iseff], c="blue")
+        plt.locator_params(axis="both", integer=True, tight=True)
         plt.savefig(self.fpath + f'pareto_gen{gen}')
 
     def is_pareto_efficient_simple(self, xyvals):
@@ -140,6 +143,11 @@ class CCEA_MOO(CCEA):
         for i, c in enumerate(costs):
             if is_efficient[i]:
                 is_efficient[is_efficient] = np.any(costs[is_efficient] > c, axis=1)  # Keep any point with a lower cost
+                # The two lines below this capture points that are equal to the current compared point
+                # Without these two lines, it will only keep one of each pareto point
+                # E.g. if there are two policies that both get [4,0], only the first will be kept. That's bad.
+                eff_add = np.all(costs == c, axis=1)
+                is_efficient += eff_add
                 is_efficient[i] = True  # And keep self
         return is_efficient
 
@@ -187,14 +195,14 @@ class RunPool:
 
 if __name__ == '__main__':
     # trials = param.BIG_BATCH_01
-    from parameters import p08 as p
+    from parameters import p09 as p
     trials = [p] * p.n_stat_runs
     pooling = RunPool(trials)
     pooling.main(trials[0])
 
     # This plays a noise when it's done so you don't have to babysit
-    import beepy
-    beepy.beep(sound=1)
+    # import beepy
+    # beepy.beep(sound=1)
 
     # pooling.main(trials[1])
     # pooling.run_pool()

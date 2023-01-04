@@ -92,17 +92,25 @@ class Species:
         hq.heapify(pq)
 
         # Compare two randomly matched policies and keep one
-        keep_idx = [i for i, val in enumerate(pareto) if val]
+        pareto_idx = [i for i, val in enumerate(pareto) if val]
+        keep_idx = []
         for j in range(int(len(scores)/2)):
             sc0, idx0 = hq.heappop(pq)
             sc1, idx1 = hq.heappop(pq)
             [g0_a, g0_b] = scores[idx0]
             [g1_a, g1_b] = scores[idx1]
 
-            # If one dominates the other, choose that one
-            if g0_a == g1_a and g0_b == g1_b:
+            # Check if pareto optimal (will only keep one if both are pareto)
+            if idx0 in pareto_idx:
+                keep_idx.append(idx0)
+            elif idx1 in pareto_idx:
+                keep_idx.append(idx1)
+
+            # If they are equal, pick one at random
+            elif g0_a == g1_a and g0_b == g1_b:
                 pick_one = np.random.choice([idx0, idx1])
                 keep_idx.append(pick_one)
+            # If one dominates the other, choose that one
             elif g0_a >= g1_a and g0_b >= g1_b:
                 keep_idx.append(idx0)
             elif g1_a >= g0_a and g1_b >= g0_b:
@@ -111,19 +119,13 @@ class Species:
             else:
                 pick_one = np.random.choice([idx0, idx1])
                 keep_idx.append(pick_one)
-        keep_vals = keep_idx[:int(self.n_pol / 3)]
+
+        div_by = 2
+        if self.p.thirds:
+            div_by = 3
+        keep_vals = keep_idx[:int(self.n_pol / div_by)]
         self.weights = [self.weights[k] for k in keep_vals]
 
     def save_model(self, trial, stat, gen, prepend, wts, species=''):
         pth = path.join(getcwd(), 'weights', 't{:03d}_{}_{}weights_s{}_g{}.pth'.format(trial, stat, prepend, species, gen))
         torch.save(wts, pth)
-
-
-if __name__ == '__main__':
-    p = param.p318
-    env = Domain(p)
-    spec = Species(env, p)
-    spec.mutate_weights()
-    dummy_scores = np.random.randint(0, 100, 50)
-    spec.binary_tournament(dummy_scores)
-    print("Nothing")
