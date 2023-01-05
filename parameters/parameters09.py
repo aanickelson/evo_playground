@@ -14,8 +14,8 @@ class Parameters:
     n_poi_types = 2
     rooms = [[4, 0], [3, 1], [1, 3], [0, 4]]
     size = 30
-    time_threshold = 10  # How long before information drops out of the state
-    time_steps = 30
+    time_threshold = 20  # How long before information drops out of the state
+    time_steps = 50
     sensor_range = 10
     rand_action_rate = 0.05
     n_stat_runs = 1
@@ -40,4 +40,4 @@ class Parameters:
     thirds = True
 
     # Evo learner
-    n_gen = 3000
+    n_gen = 1000

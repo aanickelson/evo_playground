@@ -44,8 +44,6 @@ class CCEA_MOO(CCEA):
 
             # Bookkeeping - Save data, models, and pareto plot
             if not gen % 100 or gen == self.n_gen - 1:
-                pareto = self.is_pareto_efficient_simple(multi_G)
-
                 g1 = np.array([i[0] for i in multi_G])
                 g2 = np.array([j[1] for j in multi_G])
                 self.plot_it(g1, g2, pareto, gen)
@@ -112,6 +110,7 @@ class CCEA_MOO(CCEA):
             # G = self.env.G()
             D = self.env.D()
             multiG = self.env.multiG()
+            rm_times = self.env.agent_room_times()
 
             # Bookkeeping
             d_scores[:, pol_num] = D
@@ -201,8 +200,8 @@ if __name__ == '__main__':
     pooling.main(trials[0])
 
     # This plays a noise when it's done so you don't have to babysit
-    # import beepy
-    # beepy.beep(sound=1)
+    import beepy
+    beepy.beep(sound=1)
 
     # pooling.main(trials[1])
     # pooling.run_pool()
