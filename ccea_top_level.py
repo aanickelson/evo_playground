@@ -11,36 +11,42 @@ from learning.neuralnet import NeuralNetwork as NN
 
 
 class CCEA_Top(CCEA):
-    def __init__(self, p, rew_type, fpath, policies, reselect=5):
+    def __init__(self, p, rew_type, fpath, data, reselect=5):
         self.env = Domain(p, reselect)
         super().__init__(self.env, p, rew_type, fpath)
-        self.data = policies
+        self.data = data
         self.ll_policies = None
         self.pareto_vals = None
+        self.behaviors = None
+        self.n_gen = 3
         self.unpack_data()
-        self.env.setup(self.pareto_vals, self.ll_policies)
+        self.env.setup(self.pareto_vals, self.ll_policies, self.behaviors)
         self.nn_in = self.env.global_st_size()
-        self.nn_out = 1
+        self.nn_out = self.env.top_out_size()
 
     def unpack_data(self):
 
         g_arr = []
         pols = []
-        for i, sp in enumerate(self.data):
-            sorted_list = sorted(sp, key=lambda x: x[0][0], reverse=False)
+        bh_arr = []
+        for sp in self.data:
             ag_g_arr = []
             ag_pols = []
-            for [gs, wts] in sorted_list:
+            ag_bh = []
+            for [gs, wts, bh] in sp:
                 ag_g_arr.append(gs)
+                ag_bh.append(bh)
                 nn = NN(self.env.state_size(), self.p.hid, self.env.get_action_size())
                 nn.set_weights(wts)
                 ag_pols.append(nn)
 
             g_arr.append(ag_g_arr)
             pols.append(ag_pols)
+            bh_arr.append(ag_bh)
 
         self.ll_policies = pols
-        self.pareto_vals = g_arr
+        self.pareto_vals = np.array(g_arr)
+        self.behaviors = np.array(bh_arr)
 
 
 def make_dirs(base_fpath):
@@ -69,7 +75,7 @@ def main(p, date_stamp):
         data = data * p.n_agents
     trials_fpath = make_dirs(base_fpath)
     rew = 'G'
-    p.n_gen = 1500
+    p.n_gen = 3
     evo = CCEA_Top(p, rew, trials_fpath, data)
     evo.run_evolution()
 
@@ -83,8 +89,8 @@ def unpack_data(base_fpath):
 
 
 if __name__ == '__main__':
-    from parameters import p08b as p
-    date_stamp = '20230102_173917'
+    from parameters import p09b as p
+    date_stamp = '20230105_165043'
     main(p, date_stamp)
 
     # This plays a noise when it's done so you don't have to babysit

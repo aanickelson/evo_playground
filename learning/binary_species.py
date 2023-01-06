@@ -83,7 +83,7 @@ class Species:
 
         self.weights = [self.weights[k] for k in keep_idx]
 
-    def binary_multi(self, scores, pareto):
+    def binary_multi(self, scores, bh_dist, pareto):
 
         dummy_ranking = np.random.randint(0, 10000, len(scores))
 
@@ -95,10 +95,14 @@ class Species:
         pareto_idx = [i for i, val in enumerate(pareto) if val]
         keep_idx = []
         for j in range(int(len(scores)/2)):
-            sc0, idx0 = hq.heappop(pq)
-            sc1, idx1 = hq.heappop(pq)
+            _, idx0 = hq.heappop(pq)
+            _, idx1 = hq.heappop(pq)
+            # Global objective scores
             [g0_a, g0_b] = scores[idx0]
             [g1_a, g1_b] = scores[idx1]
+            # Distance to the closest behavior
+            bh0 = bh_dist[idx0]
+            bh1 = bh_dist[idx1]
 
             # Check if pareto optimal (will only keep one if both are pareto)
             if idx0 in pareto_idx:
@@ -106,19 +110,31 @@ class Species:
             elif idx1 in pareto_idx:
                 keep_idx.append(idx1)
 
-            # If they are equal, pick one at random
+            # The order of these does matter for comparisons (cannot combine first and last statements)
+            # If they are equal, choose the one that is furthest from other behaviors
+            # If they have the exact same distance from other behaviors (unlikely), pick one at random
             elif g0_a == g1_a and g0_b == g1_b:
-                pick_one = np.random.choice([idx0, idx1])
-                keep_idx.append(pick_one)
+                if bh0 > bh1:
+                    keep_idx.append(idx0)
+                elif bh0 < bh1:
+                    keep_idx.append(idx1)
+                else:
+                    pick_one = np.random.choice([idx0, idx1])
+                    keep_idx.append(pick_one)
             # If one dominates the other, choose that one
             elif g0_a >= g1_a and g0_b >= g1_b:
                 keep_idx.append(idx0)
             elif g1_a >= g0_a and g1_b >= g0_b:
                 keep_idx.append(idx1)
-            # Otherwise choose one at random
+            # Otherwise choose the one furthest from other behaivors
             else:
-                pick_one = np.random.choice([idx0, idx1])
-                keep_idx.append(pick_one)
+                if bh0 > bh1:
+                    keep_idx.append(idx0)
+                elif bh0 < bh1:
+                    keep_idx.append(idx1)
+                else:
+                    pick_one = np.random.choice([idx0, idx1])
+                    keep_idx.append(pick_one)
 
         div_by = 2
         if self.p.thirds:

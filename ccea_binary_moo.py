@@ -11,6 +11,7 @@ from multiprocessing import Process, Pool
 from datetime import datetime
 from matplotlib import pyplot as plt
 import joblib
+from scipy.spatial.distance import cdist
 
 # Custom packages
 from teaming.domain import DiscreteRoverDomain as Domain
@@ -33,7 +34,7 @@ class CCEA_MOO(CCEA):
                 if self.thirds:
                     spec.add_new_pols()
 
-            normalized_G, d_scores, raw_G, multi_G = self.test_policies(gen)
+            normalized_G, d_scores, raw_G, multi_G, bh_dist, bh_times = self.test_policies(gen)
             pareto = self.is_pareto_efficient_simple(multi_G)
 
             # Index of the policies that performed best over G
@@ -50,7 +51,7 @@ class CCEA_MOO(CCEA):
                 pareto_wts = []
                 for s in range(self.n_agents):
                     # Save the weights that are on the pareto front
-                    pareto_wts.append([[multi_G[i], self.species[s].weights[i]] for i, val in enumerate(pareto) if val])
+                    pareto_wts.append([[multi_G[i], self.species[s].weights[i], bh_times[i]] for i, val in enumerate(pareto) if val])
 
                 self.save_data()
                 self.multiG_save_policies(pareto_wts, gen)
@@ -64,7 +65,7 @@ class CCEA_MOO(CCEA):
                 elif 'D' in self.rew_type:
                     spec.start_weights = spec.binary_tournament(np.array(d_scores[idx]))
                 elif 'multi' in self.rew_type:
-                    spec.start_weights = spec.binary_multi(np.array(multi_G), pareto)
+                    spec.start_weights = spec.binary_multi(np.array(multi_G), bh_dist, pareto)
                 # Reduce the learning rate
                 # spec.learning_rate /= 1.0001
 
@@ -88,7 +89,7 @@ class CCEA_MOO(CCEA):
         d_scores = np.zeros((self.n_agents, self.p.n_policies))
         raw_G = np.zeros(self.p.n_policies)
         multi_G = np.zeros((self.p.n_policies, self.p.n_poi_types))
-        
+        rm_times = np.zeros((self.p.n_policies, self.env.n_rooms))
         for pol_num in range(self.p.n_policies):
             # Reset the environment
             self.env.reset()
@@ -110,18 +111,23 @@ class CCEA_MOO(CCEA):
             # G = self.env.G()
             D = self.env.D()
             multiG = self.env.multiG()
-            rm_times = self.env.agent_room_times()
+            rmtime = self.env.agent_room_times()[0]
 
             # Bookkeeping
             d_scores[:, pol_num] = D
             raw_G[pol_num] = G
             normalized_G[pol_num] = float(G) / self.max_possible_G
             multi_G[pol_num] = multiG
+            rm_times[pol_num] = rmtime
 
+        # Calculate the min distances between behaviors
+        bh_distances = cdist(rm_times, rm_times)
+        # This masks the zeros then calculates the minimum distance to the closest point
+        min_bh_dist = np.where(bh_distances > 0, bh_distances, np.inf).min(axis=1)
         # Bookkeeping
         self.update_logs(normalized_G, raw_G, gen, self.stat_num)
 
-        return normalized_G, d_scores, raw_G, multi_G
+        return normalized_G, d_scores, raw_G, multi_G, min_bh_dist, rm_times
 
     def plot_it(self, x, y, iseff, gen):
         plt.clf()
