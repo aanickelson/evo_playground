@@ -122,12 +122,14 @@ class CCEA_MOO(CCEA):
 
         # Calculate the min distances between behaviors
         bh_distances = cdist(rm_times, rm_times)
+        # Fill the diagonal with an arbitrary high number. Diagonal is distance to itself.
+        # np.fill_diagonal(bh_distances, 10)
         # This masks the zeros then calculates the minimum distance to the closest point
-        min_bh_dist = np.where(bh_distances > 0, bh_distances, np.inf).min(axis=1)
+        sum_bh_dist = np.sum(bh_distances, axis=1)
         # Bookkeeping
         self.update_logs(normalized_G, raw_G, gen, self.stat_num)
 
-        return normalized_G, d_scores, raw_G, multi_G, min_bh_dist, rm_times
+        return normalized_G, d_scores, raw_G, multi_G, sum_bh_dist, rm_times
 
     def plot_it(self, x, y, iseff, gen):
         plt.clf()
@@ -167,7 +169,7 @@ class RunPool:
     def make_dirs(self):
         now = datetime.now()
         now_str = now.strftime("%Y%m%d_%H%M%S")
-        filepath = path.join(getcwd(), 'data', now_str)
+        filepath = path.join(getcwd(), 'data', f'{p.trial_num:03d}_{now_str}')
         poi_fpath = path.join(filepath, 'poi_xy')
         wts_fpath = path.join(filepath, 'weights')
 
@@ -200,14 +202,14 @@ class RunPool:
 
 if __name__ == '__main__':
     # trials = param.BIG_BATCH_01
-    from parameters import p09 as p
+    from parameters import p00 as p
     trials = [p] * p.n_stat_runs
     pooling = RunPool(trials)
     pooling.main(trials[0])
 
     # This plays a noise when it's done so you don't have to babysit
-    import beepy
-    beepy.beep(sound=1)
+    # import beepy
+    # beepy.beep(sound=1)
 
     # pooling.main(trials[1])
     # pooling.run_pool()

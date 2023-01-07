@@ -105,15 +105,15 @@ class Species:
             bh1 = bh_dist[idx1]
 
             # Check if pareto optimal (will only keep one if both are pareto)
-            if idx0 in pareto_idx:
-                keep_idx.append(idx0)
-            elif idx1 in pareto_idx:
-                keep_idx.append(idx1)
+            # if idx0 in pareto_idx:
+            #     keep_idx.append(idx0)
+            # elif idx1 in pareto_idx:
+            #     keep_idx.append(idx1)
 
             # The order of these does matter for comparisons (cannot combine first and last statements)
             # If they are equal, choose the one that is furthest from other behaviors
             # If they have the exact same distance from other behaviors (unlikely), pick one at random
-            elif g0_a == g1_a and g0_b == g1_b:
+            if g0_a == g1_a and g0_b == g1_b:
                 if bh0 > bh1:
                     keep_idx.append(idx0)
                 elif bh0 < bh1:

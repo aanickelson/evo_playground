@@ -95,7 +95,6 @@ class CCEA:
                 # Reset the environment
                 self.env.reset()
                 self.env.vis = False
-
                 # Pick one policy from each species
                 wts = [self.species[i].weights[pol_num] for i in range(self.n_agents)]
 
@@ -141,7 +140,7 @@ class CCEA:
                 self.save_data()
 
                 for i, species in enumerate(self.species):
-                    species.save_model(self.trial_num, self.stat_num, self.n_gen, self.rew_type, max_wts[i], species=i)
+                    species.save_model(self.trial_num, self.stat_num, gen, self.rew_type, max_wts[i], species=i)
 
         self.env.visualize = False
         self.env.reset()
@@ -152,7 +151,7 @@ class CCEA:
         self.save_data()
         # save the models
         for i, species in enumerate(self.species):
-            species.save_model(self.trial_num, self.stat_num, self.n_gen, self.rew_type, max_wts[i], species=i)
+            species.save_model(self.trial_num, self.stat_num, gen, self.rew_type, max_wts[i], species=i)
         # # Run a rollout simulation
         self.env.reset()
         self.env.vis = True
@@ -192,8 +191,8 @@ class RunPool:
 
         for rew in ['D', 'G']:
             p.rew_str = rew
-            fpath = path.join(self.fpath, rew)
-            evo = CCEA(env, p, rew, fpath)
+            # fpath = path.join(self.fpath, rew)
+            evo = CCEA(env, p, rew, self.fpath)
             evo.run_evolution()
 
     def run_pool(self):
@@ -203,7 +202,9 @@ class RunPool:
 
 if __name__ == '__main__':
     # trials = param.BIG_BATCH_01
-    from parameters import p04 as p
+    from parameters import p00 as p
+    p.n_agents = 2
+    p.thirds = False
     trials = [p] * p.n_stat_runs
     pooling = RunPool(trials)
     pooling.main(trials[0])

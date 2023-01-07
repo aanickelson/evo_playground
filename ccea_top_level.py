@@ -11,14 +11,13 @@ from learning.neuralnet import NeuralNetwork as NN
 
 
 class CCEA_Top(CCEA):
-    def __init__(self, p, rew_type, fpath, data, reselect=5):
+    def __init__(self, p, rew_type, fpath, data, reselect=1):
         self.env = Domain(p, reselect)
         super().__init__(self.env, p, rew_type, fpath)
         self.data = data
         self.ll_policies = None
         self.pareto_vals = None
         self.behaviors = None
-        self.n_gen = 3
         self.unpack_data()
         self.env.setup(self.pareto_vals, self.ll_policies, self.behaviors)
         self.nn_in = self.env.global_st_size()
@@ -69,13 +68,17 @@ def make_dirs(base_fpath):
 
 
 def main(p, date_stamp):
-    base_fpath = path.join(getcwd(), 'data', date_stamp)
+    base_fpath = path.join(getcwd(), 'data', f'{p.trial_num:03d}_{date_stamp}')
+
+    # base_fpath = path.join(getcwd(), 'data', date_stamp)
     data = unpack_data(base_fpath)
+    p.n_agents = 2
+    p.thirds = False
     if len(data) == 1 and len(data) < p.n_agents:
         data = data * p.n_agents
     trials_fpath = make_dirs(base_fpath)
-    rew = 'G'
-    p.n_gen = 3
+    rew = 'D'
+    p.n_gen = 1000
     evo = CCEA_Top(p, rew, trials_fpath, data)
     evo.run_evolution()
 
@@ -83,17 +86,19 @@ def main(p, date_stamp):
 def unpack_data(base_fpath):
     wts_fpath = path.join(base_fpath, 'weights')
     rew_str = 'multi'
-    pth = path.join(wts_fpath, f't{p.trial_num:03d}_{rew_str}weights_g{p.n_gen-1}.gz')
+    gen_num = p.n_gen - 1
+    # gen_num = 300
+    pth = path.join(wts_fpath, f't{p.trial_num:03d}_{rew_str}weights_g{gen_num}.gz')
     data = joblib.load(pth)
     return data
 
 
 if __name__ == '__main__':
-    from parameters import p09b as p
-    date_stamp = '20230105_165043'
+    from parameters import p00 as p
+    date_stamp = '20230107_114100'
     main(p, date_stamp)
 
     # This plays a noise when it's done so you don't have to babysit
-    import beepy
-    beepy.beep(sound="ready")
+    # import beepy
+    # beepy.beep(sound="ready")
 

@@ -31,7 +31,7 @@ def plot_data(means, stes, fpre, ext, trial, base_fpath):
     plt.savefig(fname)
 
 
-def load_data(path_nm, trials):
+def load_data(path_nm, trial):
     try:
         graphs_path_nm = path.join(path_nm, 'graphs')
         mkdir(graphs_path_nm)
@@ -41,35 +41,37 @@ def load_data(path_nm, trials):
     fpre = ['G', 'D', 'multi']
     ext = ['raw_G', 'norm_G']
 
+    for e in ext:
+        means = []
+        stes = []
+        prefixes = []
 
-    for trial in trials:
-        for e in ext:
-            means = []
-            stes = []
-            prefixes = []
-
-            for pre in fpre:
-                fname = path.join(path_nm, pre, f"{pre}_trial{trial:03d}_{e}.npy")
-                try:
-                    data = np.load(fname)
-                except FileNotFoundError:
-                    continue
-                prefixes.append(pre)
-                mean, ste = process(data)
-                means.append(mean)
-                stes.append(ste)
-            if means:
-                plot_data(means, stes, prefixes, e, trial, base_fpath=path_nm)
+        for pre in fpre:
+            fname = path.join(path_nm, pre, f"{pre}_trial{trial:03d}_{e}.npy")
+            try:
+                data = np.load(fname)
+            except FileNotFoundError:
+                print(f'no file: {fname}')
+                continue
+            prefixes.append(pre)
+            mean, ste = process(data)
+            means.append(mean)
+            stes.append(ste)
+        if means:
+            plot_data(means, stes, prefixes, e, trial, base_fpath=path_nm)
 
 
 if __name__ == '__main__':
-    data_date = "20230102_173917"
-    data_top = '20230102_180748'
-    path_nm = path.join(getcwd(), 'data', data_date, 'top_pol', data_top)
-    t0 = 7
-    t1 = 9
+    data_date = "20230107_114100"
+    top_pol = True
+    data_top = '20230107_131501'
+    trial_num = 0
+    if top_pol:
+        path_nm = path.join(getcwd(), 'data', f'{trial_num:03d}_{data_date}', 'top_pol', data_top)
+        # path_nm = path.join(getcwd(), 'data', f'{data_date}', 'top_pol', data_top)
+    else:
+        path_nm = path.join(getcwd(), 'data', f'{trial_num:03d}_{data_date}')
+        # path_nm = path.join(getcwd(), 'data', f'{data_date}')
 
-    trials = [n for n in range(t0, t1 + 1)]
-
-    load_data(path_nm, trials)
-    path_nm = path.join(getcwd(), 'data', data_date)
+    load_data(path_nm, trial_num)
+    # path_nm = path.join(getcwd(), 'data', f'{trial_num:03d}_{data_date}')
