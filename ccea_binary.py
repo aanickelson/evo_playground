@@ -108,7 +108,9 @@ class CCEA:
 
                 # Run the simulation
                 G = self.env.run_sim(models)
-                # G = self.env.G()
+                multi = self.env.multiG()
+                G = self.env.high_level_G()
+
                 D = self.env.D()
                 # Bookkeeping
                 d_scores[:, pol_num] = D
@@ -163,15 +165,16 @@ class CCEA:
 
 
 class RunPool:
-    def __init__(self, batch):
-        self.batch = batch
+    def __init__(self, p):
+        self.p = p
+        self.batch = [p] * p.n_stat_runs
         self.fpath = None
         self.make_dirs()
 
     def make_dirs(self):
         now = datetime.now()
         now_str = now.strftime("%Y%m%d_%H%M%S")
-        filepath = path.join(getcwd(), 'data', now_str)
+        filepath = path.join(getcwd(), 'data', f"{self.p.trial_num}_{now_str}")
         poi_fpath = path.join(filepath, 'poi_xy')
         self.fpath = filepath
         try:
@@ -179,7 +182,7 @@ class RunPool:
         except FileExistsError:
             mkdir(filepath+'_01')
         mkdir(poi_fpath)
-        for rew in ['D', 'G']:  # 'D'
+        for rew in ['G']:  #['D', 'G']:  # 'D'
             fpath = path.join(filepath, rew)
             mkdir(fpath)
 
@@ -189,7 +192,7 @@ class RunPool:
         env.save_poi_locs(poi_fpath)
         print("TRIAL {}".format(p.trial_num))
 
-        for rew in ['D', 'G']:
+        for rew in ['G']:  #['D', 'G']:
             p.rew_str = rew
             # fpath = path.join(self.fpath, rew)
             evo = CCEA(env, p, rew, self.fpath)
@@ -202,11 +205,12 @@ class RunPool:
 
 if __name__ == '__main__':
     # trials = param.BIG_BATCH_01
-    from parameters import p00 as p
+    from parameters import p01 as p
     p.n_agents = 2
     p.thirds = False
-    trials = [p] * p.n_stat_runs
-    pooling = RunPool(trials)
-    pooling.main(trials[0])
+    p.n_gen = 1000
+    p.n_policies = 300
+    pooling = RunPool(p)
+    # pooling.main(trials[0])
     # pooling.main(trials[1])
-    # pooling.run_pool()
+    pooling.run_pool()

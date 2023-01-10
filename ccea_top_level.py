@@ -11,7 +11,7 @@ from learning.neuralnet import NeuralNetwork as NN
 
 
 class CCEA_Top(CCEA):
-    def __init__(self, p, rew_type, fpath, data, reselect=1):
+    def __init__(self, p, rew_type, fpath, data, reselect=10):
         self.env = Domain(p, reselect)
         super().__init__(self.env, p, rew_type, fpath)
         self.data = data
@@ -60,7 +60,7 @@ def make_dirs(base_fpath):
     fpath_now = path.join(filepath, now_str)
     mkdir(fpath_now)
 
-    for rew in ['D', 'G']:  # 'D'
+    for rew in ['G']:  # 'D'
         fpath = path.join(fpath_now, rew)
         mkdir(fpath)
 
@@ -68,6 +68,7 @@ def make_dirs(base_fpath):
 
 
 def main(p, date_stamp):
+
     base_fpath = path.join(getcwd(), 'data', f'{p.trial_num:03d}_{date_stamp}')
 
     # base_fpath = path.join(getcwd(), 'data', date_stamp)
@@ -77,10 +78,12 @@ def main(p, date_stamp):
     if len(data) == 1 and len(data) < p.n_agents:
         data = data * p.n_agents
     trials_fpath = make_dirs(base_fpath)
-    rew = 'D'
-    p.n_gen = 1000
-    evo = CCEA_Top(p, rew, trials_fpath, data)
-    evo.run_evolution()
+    p.n_gen = 5000
+    p.n_policies = 300
+
+    for rew in ['G', 'D']:
+        evo = CCEA_Top(p, rew, trials_fpath, data)
+        evo.run_evolution()
 
 
 def unpack_data(base_fpath):
@@ -94,8 +97,9 @@ def unpack_data(base_fpath):
 
 
 if __name__ == '__main__':
-    from parameters import p00 as p
-    date_stamp = '20230107_114100'
+    from parameters import p01 as p
+    date_stamp = '20230109_130036'
+    # for _ in range(10):
     main(p, date_stamp)
 
     # This plays a noise when it's done so you don't have to babysit

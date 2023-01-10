@@ -163,7 +163,7 @@ class RunPool:
     def __init__(self, batch):
         self.batch = batch
         self.fpath = None
-        self.rewards_to_try = ['multi']  # 'G', 'D', 'multi',
+        self.rewards_to_try = ['multi', 'G', 'D']
         self.make_dirs()
 
     def make_dirs(self):
@@ -202,7 +202,7 @@ class RunPool:
 
 if __name__ == '__main__':
     # trials = param.BIG_BATCH_01
-    from parameters import p00 as p
+    from parameters import p01 as p
     trials = [p] * p.n_stat_runs
     pooling = RunPool(trials)
     pooling.main(trials[0])

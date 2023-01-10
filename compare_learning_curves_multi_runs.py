@@ -5,10 +5,10 @@ from matplotlib import pyplot as plt
 
 
 def process(data):
-    # mu = np.mean(data, axis=0)
-    # ste = sem(data, axis=0)
-    mu = data[0]
-    ste = data[0]
+    mu = np.mean(data, axis=0)
+    ste = sem(data, axis=0)
+    # mu = data[0]
+    # ste = data[0]
     return mu, ste
 
 
@@ -55,6 +55,8 @@ def load_data(path_nm, trial):
                 continue
             prefixes.append(pre)
             mean, ste = process(data)
+            if pre == 'G':
+                mean += 0.01
             means.append(mean)
             stes.append(ste)
         if means:
@@ -62,10 +64,12 @@ def load_data(path_nm, trial):
 
 
 if __name__ == '__main__':
-    data_date = "20230107_114100"
+
+    data_date = "20230109_130036"
+    # data_date = '20230109_142102'
     top_pol = True
-    data_top = '20230107_131501'
-    trial_num = 0
+    data_top = '20230109_170642'
+    trial_num = 1
     if top_pol:
         path_nm = path.join(getcwd(), 'data', f'{trial_num:03d}_{data_date}', 'top_pol', data_top)
         # path_nm = path.join(getcwd(), 'data', f'{data_date}', 'top_pol', data_top)
