@@ -69,99 +69,98 @@ class CCEA:
             # do_not_overwrite(fp, filename, ext, att, isnp=True)
             np.save(path_nm, att)
 
-    def update_logs(self, normalized_G, raw_G, i, stat):
+    def update_logs(self, normalized_G, raw_G, i):
         # TODO: these names suck
-        self.norm_G[stat][i] = max(normalized_G)
+        self.norm_G[self.stat_num][i] = max(normalized_G)
         # self.avg_score[stat][i] = np.mean(scores)
         # self.sterr_score[stat][i] = sem(scores)
-        self.raw_g[stat][i] = max(raw_G)
+        self.raw_g[self.stat_num][i] = max(raw_G)
 
     def run_evolution(self):
         theoretical_max_g = sum(sum(np.array(self.p.rooms)))
         self.species = self.species_setup()
-        for stat_nm in range(self.n_stat_runs):
-            self.stat_num = stat_nm
-            for gen in tqdm(self.generations):
 
-                # Bookkeeping
-                normalized_G = np.zeros(self.p.n_policies)
-                d_scores = np.zeros((self.n_agents, self.p.n_policies))
-                raw_G = np.zeros(self.p.n_policies)
+        for gen in tqdm(self.generations):
 
-                # Mutate weights for all species
-                for spec in self.species:
-                    spec.mutate_weights()
-                one_gen_G = []
-                for pol_num in range(self.p.n_policies):
-                    # Reset the environment
-                    self.env.reset()
-                    self.env.vis = False
-                    # Pick one policy from each species
-                    wts = [self.species[i].weights[pol_num] for i in range(self.n_agents)]
+            # Bookkeeping
+            normalized_G = np.zeros(self.p.n_policies)
+            d_scores = np.zeros((self.n_agents, self.p.n_policies))
+            raw_G = np.zeros(self.p.n_policies)
 
-                    # For each species
-                    for idx, spec in enumerate(self.species):
-                        # Set the current policy
-                        spec.model.set_weights(wts[idx])
+            # Mutate weights for all species
+            for spec in self.species:
+                spec.mutate_weights()
+            one_gen_G = []
+            for pol_num in range(self.p.n_policies):
+                # Reset the environment
+                self.env.reset()
+                self.env.vis = False
+                # Pick one policy from each species
+                wts = [self.species[i].weights[pol_num] for i in range(self.n_agents)]
 
-                    # Array of one NN per species to use as policies
-                    models = [sp.model for sp in self.species]
-
-                    # Run the simulation
-                    G = self.env.run_sim(models)
-                    multi = self.env.multiG()
-                    G = self.env.high_level_G()
-
-                    D = self.env.D()
-                    # Bookkeeping
-                    d_scores[:, pol_num] = D
-                    raw_G[pol_num] = G
-                    normalized_G[pol_num] = float(G) / theoretical_max_g
-
-                # Index of the policies that performed best over G
-                max_g = np.argmax(raw_G)
-                # Policies that performed best
-                max_wts = [self.species[sp].weights[max_g] for sp in range(self.n_agents)]
-
-                # Bookkeeping
-                self.update_logs(normalized_G, raw_G, gen, self.stat_num)
-
-                # Update the starting weights (the policy we keep between generations) for each species
+                # For each species
                 for idx, spec in enumerate(self.species):
-                    if 'G' in self.rew_type:
-                        # Use raw G because the scores may be more noisy (since it's divided by the greedy policy)
-                        spec.start_weights = spec.binary_tournament(np.array(raw_G))
-                    elif 'D' in self.rew_type:
-                        spec.start_weights = spec.binary_tournament(np.array(d_scores[idx]))
+                    # Set the current policy
+                    spec.model.set_weights(wts[idx])
 
-                    # Reduce the learning rate
-                    spec.learning_rate /= 1.0001
+                # Array of one NN per species to use as policies
+                models = [sp.model for sp in self.species]
 
-                # Bookkeeping - save data every 100 generations
-                # Save models every 1000 generations
-                if not gen % 100:
-                    self.save_data()
+                # Run the simulation
+                G = self.env.run_sim(models)
+                multi = self.env.multiG()
+                G = self.env.high_level_G()
 
-                    for i, species in enumerate(self.species):
-                        species.save_model(self.trial_num, self.stat_num, gen, self.rew_type, max_wts[i], species=i)
+                D = self.env.D()
+                # Bookkeeping
+                d_scores[:, pol_num] = D
+                raw_G[pol_num] = G
+                normalized_G[pol_num] = float(G) / theoretical_max_g
 
-            self.env.visualize = False
-            self.env.reset()
-            # if random() < 0.05:
-            #     # 5% of the time, change the location of the POIs slightly
-            #     self.env.move_pois()
+            # Index of the policies that performed best over G
+            max_g = np.argmax(raw_G)
+            # Policies that performed best
+            max_wts = [self.species[sp].weights[max_g] for sp in range(self.n_agents)]
 
-            self.save_data()
-            # save the models
-            for i, species in enumerate(self.species):
-                species.save_model(self.trial_num, self.stat_num, gen, self.rew_type, max_wts[i], species=i)
-            # # Run a rollout simulation
-            self.env.reset()
-            self.env.vis = True
+            # Bookkeeping
+            self.update_logs(normalized_G, raw_G, gen)
+
+            # Update the starting weights (the policy we keep between generations) for each species
             for idx, spec in enumerate(self.species):
-                spec.model.set_weights(max_wts[idx])
-            models = [sp.model for sp in self.species]
-            _ = self.env.run_sim(models)
+                if 'G' in self.rew_type:
+                    # Use raw G because the scores may be more noisy (since it's divided by the greedy policy)
+                    spec.start_weights = spec.binary_tournament(np.array(raw_G))
+                elif 'D' in self.rew_type:
+                    spec.start_weights = spec.binary_tournament(np.array(d_scores[idx]))
+
+                # Reduce the learning rate
+                spec.learning_rate /= 1.0001
+
+            # Bookkeeping - save data every 100 generations
+            # Save models every 1000 generations
+            if not gen % 100:
+                self.save_data()
+
+                for i, species in enumerate(self.species):
+                    species.save_model(self.trial_num, self.stat_num, gen, self.rew_type, max_wts[i], species=i)
+
+        self.env.visualize = False
+        self.env.reset()
+        # if random() < 0.05:
+        #     # 5% of the time, change the location of the POIs slightly
+        #     self.env.move_pois()
+
+        self.save_data()
+        # save the models
+        for i, species in enumerate(self.species):
+            species.save_model(self.trial_num, self.stat_num, gen, self.rew_type, max_wts[i], species=i)
+        # # Run a rollout simulation
+        self.env.reset()
+        self.env.vis = True
+        for idx, spec in enumerate(self.species):
+            spec.model.set_weights(max_wts[idx])
+        models = [sp.model for sp in self.species]
+        _ = self.env.run_sim(models)
 
 
 class RunPool:
@@ -196,8 +195,10 @@ class RunPool:
         for rew in self.rew_types:
             p.rew_str = rew
             # fpath = path.join(self.fpath, rew)
-            evo = CCEA(env, p, rew, self.fpath)
-            evo.run_evolution()
+            for stat_nm in range(p.n_stat_runs):
+                evo = CCEA(env, p, rew, self.fpath)
+                evo.stat_num = stat_nm
+                evo.run_evolution()
 
     def run_pool(self):
         pool = Pool()

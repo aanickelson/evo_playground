@@ -83,9 +83,10 @@ def main(p, date_stamp):
     p.n_gen = 500
     p.n_policies = 100
 
-    for rew in ['G']:  #, 'D']:
-        evo = CCEA_Top(p, rew, trials_fpath, data)
-        evo.run_evolution()
+    for _ in range(3):
+        for rew in ['G']:  #, 'D']:
+            evo = CCEA_Top(p, rew, trials_fpath, data)
+            evo.run_evolution()
 
 
 def load_data(base_fpath):
@@ -107,8 +108,7 @@ def load_data(base_fpath):
 if __name__ == '__main__':
     from parameters import p02 as p
     date_stamp = '20230110_181842'
-    for _ in range(3):
-        main(p, date_stamp)
+    main(p, date_stamp)
 
     # This plays a noise when it's done so you don't have to babysit
     # import beepy
