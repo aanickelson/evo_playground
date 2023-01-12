@@ -5,10 +5,10 @@ from matplotlib import pyplot as plt
 
 
 def process(data):
-    mu = np.mean(data, axis=0)
-    ste = sem(data, axis=0)
-    # mu = data[0]
-    # ste = data[0]
+    # mu = np.mean(data, axis=0)
+    # ste = sem(data, axis=0)
+    mu = data[0]
+    ste = data[0]
     return mu, ste
 
 
@@ -39,7 +39,7 @@ def load_data(path_nm, trial):
         pass
 
     fpre = ['G', 'D', 'multi']
-    ext = ['raw_G', 'norm_G']
+    ext = ['raw_G']  # , 'norm_G']
 
     for e in ext:
         means = []
@@ -65,16 +65,21 @@ def load_data(path_nm, trial):
 
 if __name__ == '__main__':
 
-    data_date = "20230109_130036"
-    # data_date = '20230109_142102'
+    prefix = 'moo'
     top_pol = True
-    data_top = '20230109_170642'
-    trial_num = 1
+    data_date = '20230110_181842'
+    data_top = '20230111_175910'
+    #
+    # prefix = 'base'
+    # data_date = "20230110_130715"
+    # top_pol = False
+
+    trial_num = 2
     if top_pol:
-        path_nm = path.join(getcwd(), 'data', f'{trial_num:03d}_{data_date}', 'top_pol', data_top)
+        path_nm = path.join(getcwd(), 'data', f'{prefix}_{trial_num:03d}_{data_date}', 'top_pol', data_top)
         # path_nm = path.join(getcwd(), 'data', f'{data_date}', 'top_pol', data_top)
     else:
-        path_nm = path.join(getcwd(), 'data', f'{trial_num:03d}_{data_date}')
+        path_nm = path.join(getcwd(), 'data', f'{prefix}_{trial_num:03d}_{data_date}')
         # path_nm = path.join(getcwd(), 'data', f'{data_date}')
 
     load_data(path_nm, trial_num)

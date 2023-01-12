@@ -169,7 +169,7 @@ class RunPool:
     def make_dirs(self):
         now = datetime.now()
         now_str = now.strftime("%Y%m%d_%H%M%S")
-        filepath = path.join(getcwd(), 'data', f'{p.trial_num:03d}_{now_str}')
+        filepath = path.join(getcwd(), 'data', f'moo_{p.trial_num:03d}_{now_str}')
         poi_fpath = path.join(filepath, 'poi_xy')
         wts_fpath = path.join(filepath, 'weights')
 
@@ -202,7 +202,7 @@ class RunPool:
 
 if __name__ == '__main__':
     # trials = param.BIG_BATCH_01
-    from parameters import p01 as p
+    from parameters import p02 as p
     trials = [p] * p.n_stat_runs
     pooling = RunPool(trials)
     pooling.main(trials[0])

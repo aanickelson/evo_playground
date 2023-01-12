@@ -79,102 +79,103 @@ class CCEA:
     def run_evolution(self):
         theoretical_max_g = sum(sum(np.array(self.p.rooms)))
         self.species = self.species_setup()
+        for stat_nm in range(self.n_stat_runs):
+            self.stat_num = stat_nm
+            for gen in tqdm(self.generations):
 
-        for gen in tqdm(self.generations):
-
-            # Bookkeeping
-            normalized_G = np.zeros(self.p.n_policies)
-            d_scores = np.zeros((self.n_agents, self.p.n_policies))
-            raw_G = np.zeros(self.p.n_policies)
-
-            # Mutate weights for all species
-            for spec in self.species:
-                spec.mutate_weights()
-            one_gen_G = []
-            for pol_num in range(self.p.n_policies):
-                # Reset the environment
-                self.env.reset()
-                self.env.vis = False
-                # Pick one policy from each species
-                wts = [self.species[i].weights[pol_num] for i in range(self.n_agents)]
-
-                # For each species
-                for idx, spec in enumerate(self.species):
-                    # Set the current policy
-                    spec.model.set_weights(wts[idx])
-
-                # Array of one NN per species to use as policies
-                models = [sp.model for sp in self.species]
-
-                # Run the simulation
-                G = self.env.run_sim(models)
-                multi = self.env.multiG()
-                G = self.env.high_level_G()
-
-                D = self.env.D()
                 # Bookkeeping
-                d_scores[:, pol_num] = D
-                raw_G[pol_num] = G
-                normalized_G[pol_num] = float(G) / theoretical_max_g
+                normalized_G = np.zeros(self.p.n_policies)
+                d_scores = np.zeros((self.n_agents, self.p.n_policies))
+                raw_G = np.zeros(self.p.n_policies)
 
-            # Index of the policies that performed best over G
-            max_g = np.argmax(raw_G)
-            # Policies that performed best
-            max_wts = [self.species[sp].weights[max_g] for sp in range(self.n_agents)]
+                # Mutate weights for all species
+                for spec in self.species:
+                    spec.mutate_weights()
+                one_gen_G = []
+                for pol_num in range(self.p.n_policies):
+                    # Reset the environment
+                    self.env.reset()
+                    self.env.vis = False
+                    # Pick one policy from each species
+                    wts = [self.species[i].weights[pol_num] for i in range(self.n_agents)]
 
-            # Bookkeeping
-            self.update_logs(normalized_G, raw_G, gen, self.stat_num)
+                    # For each species
+                    for idx, spec in enumerate(self.species):
+                        # Set the current policy
+                        spec.model.set_weights(wts[idx])
 
-            # Update the starting weights (the policy we keep between generations) for each species
+                    # Array of one NN per species to use as policies
+                    models = [sp.model for sp in self.species]
+
+                    # Run the simulation
+                    G = self.env.run_sim(models)
+                    multi = self.env.multiG()
+                    G = self.env.high_level_G()
+
+                    D = self.env.D()
+                    # Bookkeeping
+                    d_scores[:, pol_num] = D
+                    raw_G[pol_num] = G
+                    normalized_G[pol_num] = float(G) / theoretical_max_g
+
+                # Index of the policies that performed best over G
+                max_g = np.argmax(raw_G)
+                # Policies that performed best
+                max_wts = [self.species[sp].weights[max_g] for sp in range(self.n_agents)]
+
+                # Bookkeeping
+                self.update_logs(normalized_G, raw_G, gen, self.stat_num)
+
+                # Update the starting weights (the policy we keep between generations) for each species
+                for idx, spec in enumerate(self.species):
+                    if 'G' in self.rew_type:
+                        # Use raw G because the scores may be more noisy (since it's divided by the greedy policy)
+                        spec.start_weights = spec.binary_tournament(np.array(raw_G))
+                    elif 'D' in self.rew_type:
+                        spec.start_weights = spec.binary_tournament(np.array(d_scores[idx]))
+
+                    # Reduce the learning rate
+                    spec.learning_rate /= 1.0001
+
+                # Bookkeeping - save data every 100 generations
+                # Save models every 1000 generations
+                if not gen % 100:
+                    self.save_data()
+
+                    for i, species in enumerate(self.species):
+                        species.save_model(self.trial_num, self.stat_num, gen, self.rew_type, max_wts[i], species=i)
+
+            self.env.visualize = False
+            self.env.reset()
+            # if random() < 0.05:
+            #     # 5% of the time, change the location of the POIs slightly
+            #     self.env.move_pois()
+
+            self.save_data()
+            # save the models
+            for i, species in enumerate(self.species):
+                species.save_model(self.trial_num, self.stat_num, gen, self.rew_type, max_wts[i], species=i)
+            # # Run a rollout simulation
+            self.env.reset()
+            self.env.vis = True
             for idx, spec in enumerate(self.species):
-                if 'G' in self.rew_type:
-                    # Use raw G because the scores may be more noisy (since it's divided by the greedy policy)
-                    spec.start_weights = spec.binary_tournament(np.array(raw_G))
-                elif 'D' in self.rew_type:
-                    spec.start_weights = spec.binary_tournament(np.array(d_scores[idx]))
-
-                # Reduce the learning rate
-                spec.learning_rate /= 1.0001
-
-            # Bookkeeping - save data every 100 generations
-            # Save models every 1000 generations
-            if not gen % 200:
-                self.save_data()
-
-                for i, species in enumerate(self.species):
-                    species.save_model(self.trial_num, self.stat_num, gen, self.rew_type, max_wts[i], species=i)
-
-        self.env.visualize = False
-        self.env.reset()
-        # if random() < 0.05:
-        #     # 5% of the time, change the location of the POIs slightly
-        #     self.env.move_pois()
-
-        self.save_data()
-        # save the models
-        for i, species in enumerate(self.species):
-            species.save_model(self.trial_num, self.stat_num, gen, self.rew_type, max_wts[i], species=i)
-        # # Run a rollout simulation
-        self.env.reset()
-        self.env.vis = True
-        for idx, spec in enumerate(self.species):
-            spec.model.set_weights(max_wts[idx])
-        models = [sp.model for sp in self.species]
-        _ = self.env.run_sim(models)
-        self.stat_num += 1
+                spec.model.set_weights(max_wts[idx])
+            models = [sp.model for sp in self.species]
+            _ = self.env.run_sim(models)
 
 
 class RunPool:
     def __init__(self, p):
         self.p = p
-        self.batch = [p] * p.n_stat_runs
+        self.batch = [p]
         self.fpath = None
+        self.rew_types = ['G']
         self.make_dirs()
 
     def make_dirs(self):
         now = datetime.now()
         now_str = now.strftime("%Y%m%d_%H%M%S")
-        filepath = path.join(getcwd(), 'data', f"{self.p.trial_num}_{now_str}")
+        filepath = path.join(getcwd(), 'data', f"base_{self.p.trial_num:03d}_{now_str}")
         poi_fpath = path.join(filepath, 'poi_xy')
         self.fpath = filepath
         try:
@@ -182,7 +183,7 @@ class RunPool:
         except FileExistsError:
             mkdir(filepath+'_01')
         mkdir(poi_fpath)
-        for rew in ['G']:  #['D', 'G']:  # 'D'
+        for rew in self.rew_types:
             fpath = path.join(filepath, rew)
             mkdir(fpath)
 
@@ -192,7 +193,7 @@ class RunPool:
         env.save_poi_locs(poi_fpath)
         print("TRIAL {}".format(p.trial_num))
 
-        for rew in ['G']:  #['D', 'G']:
+        for rew in self.rew_types:
             p.rew_str = rew
             # fpath = path.join(self.fpath, rew)
             evo = CCEA(env, p, rew, self.fpath)
@@ -205,11 +206,12 @@ class RunPool:
 
 if __name__ == '__main__':
     # trials = param.BIG_BATCH_01
-    from parameters import p01 as p
+    from parameters import p02 as p
+    p.n_stat_runs = 5
     p.n_agents = 2
     p.thirds = False
-    p.n_gen = 1000
-    p.n_policies = 300
+    p.n_gen = 500
+    p.n_policies = 100
     pooling = RunPool(p)
     # pooling.main(trials[0])
     # pooling.main(trials[1])

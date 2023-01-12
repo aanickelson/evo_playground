@@ -11,7 +11,7 @@ from learning.neuralnet import NeuralNetwork as NN
 
 
 class CCEA_Top(CCEA):
-    def __init__(self, p, rew_type, fpath, data, reselect=10):
+    def __init__(self, p, rew_type, fpath, data, reselect=1):
         self.env = Domain(p, reselect)
         super().__init__(self.env, p, rew_type, fpath)
         self.data = data
@@ -28,24 +28,28 @@ class CCEA_Top(CCEA):
         g_arr = []
         pols = []
         bh_arr = []
-        for sp in self.data:
+        for [gs, wts, bh] in self.data:
             ag_g_arr = []
             ag_pols = []
             ag_bh = []
-            for [gs, wts, bh] in sp:
-                ag_g_arr.append(gs)
-                ag_bh.append(bh)
-                nn = NN(self.env.state_size(), self.p.hid, self.env.get_action_size())
-                nn.set_weights(wts)
-                ag_pols.append(nn)
+            ag_g_arr.append(gs[0])
+            ag_bh.append(bh)
+            nn = NN(self.env.state_size(), self.p.hid, self.env.get_action_size())
+            nn.set_weights(wts)
+            ag_pols.append(nn)
 
-            g_arr.append(ag_g_arr)
-            pols.append(ag_pols)
-            bh_arr.append(ag_bh)
+            g_arr.append(gs)
+            pols.append(nn)
+            bh_arr.append(bh)
 
-        self.ll_policies = pols
-        self.pareto_vals = np.array(g_arr)
-        self.behaviors = np.array(bh_arr)
+        g_arr = np.array(g_arr)
+        bh_arr = np.array(bh_arr)
+        g_and_bh = np.concatenate((g_arr, bh_arr), axis=1)
+        _, unique_idx = np.unique(g_and_bh, axis=0, return_index=True)
+        unique_idx = np.array(unique_idx)
+        self.ll_policies = [pols[i] for i in unique_idx]
+        self.pareto_vals = g_arr[unique_idx]
+        self.behaviors = bh_arr[unique_idx]
 
 
 def make_dirs(base_fpath):
@@ -60,7 +64,7 @@ def make_dirs(base_fpath):
     fpath_now = path.join(filepath, now_str)
     mkdir(fpath_now)
 
-    for rew in ['G']:  # 'D'
+    for rew in ['G']:  # , 'D']:  #
         fpath = path.join(fpath_now, rew)
         mkdir(fpath)
 
@@ -69,38 +73,42 @@ def make_dirs(base_fpath):
 
 def main(p, date_stamp):
 
-    base_fpath = path.join(getcwd(), 'data', f'{p.trial_num:03d}_{date_stamp}')
+    base_fpath = path.join(getcwd(), 'data', f'moo_{p.trial_num:03d}_{date_stamp}')
 
     # base_fpath = path.join(getcwd(), 'data', date_stamp)
-    data = unpack_data(base_fpath)
+    data = load_data(base_fpath)
     p.n_agents = 2
     p.thirds = False
-    if len(data) == 1 and len(data) < p.n_agents:
-        data = data * p.n_agents
     trials_fpath = make_dirs(base_fpath)
-    p.n_gen = 5000
-    p.n_policies = 300
+    p.n_gen = 500
+    p.n_policies = 100
 
-    for rew in ['G', 'D']:
+    for rew in ['G']:  #, 'D']:
         evo = CCEA_Top(p, rew, trials_fpath, data)
         evo.run_evolution()
 
 
-def unpack_data(base_fpath):
+def load_data(base_fpath):
     wts_fpath = path.join(base_fpath, 'weights')
     rew_str = 'multi'
+    gens_to_load = [i * 100 for i in range(int(p.n_gen / 100))]
+    gens_to_load.append(p.n_gen - 1)
     gen_num = p.n_gen - 1
     # gen_num = 300
-    pth = path.join(wts_fpath, f't{p.trial_num:03d}_{rew_str}weights_g{gen_num}.gz')
-    data = joblib.load(pth)
-    return data
+    all_data = []
+    for gen_num in gens_to_load:
+        pth = path.join(wts_fpath, f't{p.trial_num:03d}_{rew_str}weights_g{gen_num}.gz')
+        data = joblib.load(pth)[0]
+        for dp in data:
+            all_data.append(dp)
+    return all_data
 
 
 if __name__ == '__main__':
-    from parameters import p01 as p
-    date_stamp = '20230109_130036'
-    # for _ in range(10):
-    main(p, date_stamp)
+    from parameters import p02 as p
+    date_stamp = '20230110_181842'
+    for _ in range(3):
+        main(p, date_stamp)
 
     # This plays a noise when it's done so you don't have to babysit
     # import beepy
