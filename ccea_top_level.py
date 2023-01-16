@@ -7,7 +7,8 @@ from datetime import datetime
 # Custom packages
 from teaming.domain_hierarchy_policies import DomainHierarchy as Domain
 from ccea_binary import CCEA
-from learning.neuralnet import NeuralNetwork as NN
+# from learning.neuralnet import NeuralNetwork as NN
+from learning.neuralnet_no_hid import NeuralNetwork as NN
 
 
 class CCEA_Top(CCEA):
@@ -76,29 +77,28 @@ def main(p, date_stamp):
     base_fpath = path.join(getcwd(), 'data', f'moo_{p.trial_num:03d}_{date_stamp}')
 
     # base_fpath = path.join(getcwd(), 'data', date_stamp)
-    data = load_data(base_fpath)
+    data = load_data(p, base_fpath)
     p.n_agents = 2
     p.thirds = False
     trials_fpath = make_dirs(base_fpath)
-    p.n_gen = 500
     p.n_policies = 100
 
-    for _ in range(3):
-        for rew in ['G']:  #, 'D']:
-            evo = CCEA_Top(p, rew, trials_fpath, data)
-            evo.run_evolution()
+    for rew in ['G']:  #, 'D']:
+        p.n_gen = 500
+        evo = CCEA_Top(p, rew, trials_fpath, data)
+        evo.run_evolution()
 
 
-def load_data(base_fpath):
+def load_data(par, base_fpath):
     wts_fpath = path.join(base_fpath, 'weights')
     rew_str = 'multi'
-    gens_to_load = [i * 100 for i in range(int(p.n_gen / 100))]
-    gens_to_load.append(p.n_gen - 1)
-    gen_num = p.n_gen - 1
+    gens_to_load = [i * 100 for i in range(int(par.n_gen / 100))]
+    gens_to_load.append(par.n_gen - 1)
+    gen_num = par.n_gen - 1
     # gen_num = 300
     all_data = []
     for gen_num in gens_to_load:
-        pth = path.join(wts_fpath, f't{p.trial_num:03d}_{rew_str}weights_g{gen_num}.gz')
+        pth = path.join(wts_fpath, f't{par.trial_num:03d}_{rew_str}weights_g{gen_num}.gz')
         data = joblib.load(pth)[0]
         for dp in data:
             all_data.append(dp)
@@ -106,9 +106,10 @@ def load_data(base_fpath):
 
 
 if __name__ == '__main__':
-    from parameters import p02 as p
-    date_stamp = '20230110_181842'
-    main(p, date_stamp)
+    date_stamp = '20230113_164950'
+    for _ in range(1):
+        from parameters import p02 as params
+        main(params, date_stamp)
 
     # This plays a noise when it's done so you don't have to babysit
     # import beepy

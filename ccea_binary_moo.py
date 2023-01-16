@@ -30,7 +30,7 @@ class CCEA_MOO(CCEA):
         for gen in tqdm(self.generations):
             # Mutate weights for all species
             for spec in self.species:
-                spec.mutate_weights()
+                spec.mutate_weights_no_hid()
                 if self.thirds:
                     spec.add_new_pols()
 
@@ -61,11 +61,11 @@ class CCEA_MOO(CCEA):
             for idx, spec in enumerate(self.species):
                 if 'G' in self.rew_type:
                     # Use raw G because the scores may be more noisy (since it's divided by the greedy policy)
-                    spec.start_weights = spec.binary_tournament(np.array(raw_G))
+                    spec.binary_tournament(np.array(raw_G))
                 elif 'D' in self.rew_type:
-                    spec.start_weights = spec.binary_tournament(np.array(d_scores[idx]))
+                    spec.binary_tournament(np.array(d_scores[idx]))
                 elif 'multi' in self.rew_type:
-                    spec.start_weights = spec.binary_multi(np.array(multi_G), bh_dist, pareto)
+                    spec.binary_multi(np.array(multi_G), bh_dist, pareto)
                 # Reduce the learning rate
                 # spec.learning_rate /= 1.0001
 
@@ -123,16 +123,18 @@ class CCEA_MOO(CCEA):
         # Calculate the min distances between behaviors
         bh_distances = cdist(rm_times, rm_times)
         # Fill the diagonal with an arbitrary high number. Diagonal is distance to itself.
-        # np.fill_diagonal(bh_distances, 10)
+        np.fill_diagonal(bh_distances, 10)
         # This masks the zeros then calculates the minimum distance to the closest point
-        sum_bh_dist = np.sum(bh_distances, axis=1)
+        min_bh_dist = np.min(bh_distances, axis=1)
         # Bookkeeping
-        self.update_logs(normalized_G, raw_G, gen, self.stat_num)
+        self.update_logs(normalized_G, raw_G, gen)
 
-        return normalized_G, d_scores, raw_G, multi_G, sum_bh_dist, rm_times
+        return normalized_G, d_scores, raw_G, multi_G, min_bh_dist, rm_times
 
     def plot_it(self, x, y, iseff, gen):
         plt.clf()
+        plt.xlim([0, 10])
+        plt.ylim([0, 10])
         plt.scatter(x, y, c='red')
         plt.scatter(x[iseff], y[iseff], c="blue")
         plt.locator_params(axis="both", integer=True, tight=True)
@@ -163,7 +165,7 @@ class RunPool:
     def __init__(self, batch):
         self.batch = batch
         self.fpath = None
-        self.rewards_to_try = ['multi', 'G', 'D']
+        self.rewards_to_try = ['multi']  #, 'G', 'D']
         self.make_dirs()
 
     def make_dirs(self):
@@ -203,7 +205,8 @@ class RunPool:
 if __name__ == '__main__':
     # trials = param.BIG_BATCH_01
     from parameters import p02 as p
-    trials = [p] * p.n_stat_runs
+    p.thirds = True
+    trials = [p]
     pooling = RunPool(trials)
     pooling.main(trials[0])
 

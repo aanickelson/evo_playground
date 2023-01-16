@@ -6,7 +6,8 @@ import torch
 from os import getcwd, path
 
 # Custom packages
-from evo_playground.learning.neuralnet import NeuralNetwork as NN
+# from evo_playground.learning.neuralnet import NeuralNetwork as NN
+from evo_playground.learning.neuralnet_no_hid import NeuralNetwork as NN
 from teaming.domain import DiscreteRoverDomain as Domain
 import evo_playground.parameters as param
 
@@ -47,6 +48,17 @@ class Species:
             noise = self.sigma * torch.normal(-1, 1, size=wts[0].shape) * self.learning_rate
             noise2 = self.sigma * torch.normal(-1, 1, size=wts[1].shape) * self.learning_rate
             new_weights.append([wts[0] + noise, wts[1] + noise2])
+        # Have to do this separately otherwise it creates an infinite loop (whoopsies)
+        for wts_01 in new_weights:
+            self.weights.append(wts_01)
+
+    def mutate_weights_no_hid(self):
+        # Mutate each set of weights that was kept
+        new_weights = []
+        for wts in self.weights:
+            noise = self.sigma * torch.normal(-1, 1, size=wts[0].shape) * self.learning_rate
+            # noise2 = self.sigma * torch.normal(-1, 1, size=wts[1].shape) * self.learning_rate
+            new_weights.append([wts[0] + noise])
         # Have to do this separately otherwise it creates an infinite loop (whoopsies)
         for wts_01 in new_weights:
             self.weights.append(wts_01)
@@ -103,12 +115,6 @@ class Species:
             # Distance to the closest behavior
             bh0 = bh_dist[idx0]
             bh1 = bh_dist[idx1]
-
-            # Check if pareto optimal (will only keep one if both are pareto)
-            # if idx0 in pareto_idx:
-            #     keep_idx.append(idx0)
-            # elif idx1 in pareto_idx:
-            #     keep_idx.append(idx1)
 
             # The order of these does matter for comparisons (cannot combine first and last statements)
             # If they are equal, choose the one that is furthest from other behaviors

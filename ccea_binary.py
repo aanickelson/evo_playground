@@ -37,7 +37,7 @@ class CCEA:
         self.stat_num = 0
         self.species = None
         self.generations = range(self.n_gen)
-        self.raw_g = np.zeros((self.n_stat_runs, self.n_gen))
+        self.raw_g = np.zeros((self.n_stat_runs, self.n_gen)) - 1
         self.norm_G = np.zeros((self.n_stat_runs, self.n_gen))
         self.avg_score = np.zeros((self.n_stat_runs, self.n_gen))
         self.sterr_score = np.zeros((self.n_stat_runs, self.n_gen))
@@ -89,7 +89,7 @@ class CCEA:
 
             # Mutate weights for all species
             for spec in self.species:
-                spec.mutate_weights()
+                spec.mutate_weights_no_hid()
             one_gen_G = []
             for pol_num in range(self.p.n_policies):
                 # Reset the environment
@@ -195,8 +195,8 @@ class RunPool:
         for rew in self.rew_types:
             p.rew_str = rew
             # fpath = path.join(self.fpath, rew)
+            evo = CCEA(env, p, rew, self.fpath)
             for stat_nm in range(p.n_stat_runs):
-                evo = CCEA(env, p, rew, self.fpath)
                 evo.stat_num = stat_nm
                 evo.run_evolution()
 
@@ -208,12 +208,12 @@ class RunPool:
 if __name__ == '__main__':
     # trials = param.BIG_BATCH_01
     from parameters import p02 as p
-    p.n_stat_runs = 5
+    p.n_stat_runs = 10
     p.n_agents = 2
     p.thirds = False
-    p.n_gen = 500
+    p.n_gen = 1000
     p.n_policies = 100
     pooling = RunPool(p)
-    # pooling.main(trials[0])
+    pooling.main(pooling.batch[0])
     # pooling.main(trials[1])
-    pooling.run_pool()
+    # pooling.run_pool()
