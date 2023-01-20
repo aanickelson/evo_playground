@@ -41,3 +41,4 @@ class Parameters:
 
     # Evo learner
     n_gen = 600
+    n_top_gen = 500
