@@ -12,10 +12,9 @@ class Parameters:
     n_agents = 1
     n_agent_types = 1
     n_poi_types = 2
-    rooms = [[20, 0], [0, 20], [19, 1], [1, 19], [18, 2], [2, 18], [17, 3], [3, 17], [16, 4], [4, 16], [15, 5], [5, 15],
-             [14, 6], [6, 14], [13, 7], [7, 13], [12, 8], [8, 12], [11, 9], [9, 11], [10, 10]]
-    size = 15
-    time_threshold = 10  # How long before information drops out of the state
+    rooms = [[50, 50], [50, 50], [80, 20], [20, 80]]
+    size = 30
+    time_threshold = 15  # How long before information drops out of the state
     time_steps = 50
     sensor_range = 10
     rand_action_rate = 0.05
