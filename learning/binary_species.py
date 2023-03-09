@@ -86,8 +86,8 @@ class Species:
         # Compare two randomly matched policies and keep one
         keep_idx = []
         for j in range(int(len(scores)/2)):
-            sc0, idx0 = hq.heappop(pq)
-            sc1, idx1 = hq.heappop(pq)
+            _, idx0 = hq.heappop(pq)
+            _, idx1 = hq.heappop(pq)
             if scores[idx0] >= scores[idx1]:
                 keep_idx.append(idx0)
             else:
