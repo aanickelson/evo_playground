@@ -38,7 +38,7 @@ def load_data(path_nm, trial):
     except FileExistsError:
         pass
 
-    fpre = ['G', 'D', 'multi']
+    fpre = ['G']  #, 'D', 'multi']
     ext = ['raw_G']  # , 'norm_G']
 
     for e in ext:
@@ -65,22 +65,25 @@ def load_data(path_nm, trial):
 
 if __name__ == '__main__':
 
-    prefix = 'moo'
-    top_pol = True
-    data_date = '20230113_164950'
-    data_top = '20230114_123229'
+    # prefix = 'moo'
+    # top_pol = True
+    # data_date = '20230113_164950'
+    # data_top = '20230114_123229'
     #
-    # prefix = 'base'
-    # data_date = "20230114_124645"
-    # top_pol = False
+    prefix = 'base'
+    data_date = "20230309_152117"
+    dates = ['20230309_152351', '20230309_154358', '20230309_160407', '20230309_162415']
+    top_pol = False
 
-    trial_num = 2
-    if top_pol:
-        path_nm = path.join(getcwd(), 'data', f'{prefix}_{trial_num:03d}_{data_date}', 'top_pol', data_top)
-        # path_nm = path.join(getcwd(), 'data', f'{data_date}', 'top_pol', data_top)
-    else:
-        path_nm = path.join(getcwd(), 'data', f'{prefix}_{trial_num:03d}_{data_date}')
-        # path_nm = path.join(getcwd(), 'data', f'{data_date}')
 
-    load_data(path_nm, trial_num)
-    # path_nm = path.join(getcwd(), 'data', f'{trial_num:03d}_{data_date}')
+    for data_date in dates:
+        trial_num = 0
+        if top_pol:
+            path_nm = path.join(getcwd(), 'data', f'{prefix}_{trial_num:03d}_{data_date}', 'top_pol', data_top)
+            # path_nm = path.join(getcwd(), 'data', f'{data_date}', 'top_pol', data_top)
+        else:
+            path_nm = path.join(getcwd(), 'data', f'{prefix}_{trial_num:03d}_{data_date}')
+            # path_nm = path.join(getcwd(), 'data', f'{data_date}')
+
+        load_data(path_nm, trial_num)
+        # path_nm = path.join(getcwd(), 'data', f'{trial_num:03d}_{data_date}')

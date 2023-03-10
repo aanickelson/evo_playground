@@ -29,12 +29,13 @@ from evo_playground.learning.binary_species import Species
 
 
 class CCEA:
-    def __init__(self, env, p, rew_type, fpath):
+    def __init__(self, env, p, rew_type, fpath, coll_data):
         seed()
         self.p = p
         self.param_idx = p.param_idx
         self.n_agents = p.n_agents
         self.env = env
+        self.coll_data = coll_data
 
         self.n_gen = lp.n_gen
         self.generations = range(self.n_gen)
@@ -59,27 +60,26 @@ class CCEA:
         species = [Species(self.env, lp, self.nn_in, self.nn_hid, self.nn_out, self.thirds) for _ in range(self.n_agents)]
         return species
 
-    def save_data(self):
-        # attrs = [self.max_score, self.avg_score, self.sterr_score, self.avg_false, self.raw_g, self.multi_g]
-        # attr_names = ["max", "avg", "sterr", "false", 'avg_G', 'multi_g']
-        attrs = [self.norm_G, self.raw_g]
-        attr_names = ["norm_G", 'raw_G']
-        for j in range(len(attrs)):
-            nm = attr_names[j]
-            att = attrs[j]
-            filename = self.rew_type + "_trial{:03d}_{}".format(self.param_idx, nm)
-            ext = "npy"
-            path_nm = path.join(self.fpath, "{}.{}".format(filename, ext))
-
-            # do_not_overwrite(fp, filename, ext, att, isnp=True)
-            np.save(path_nm, att)
-
-    def update_logs(self, normalized_G, raw_G, i):
-        # TODO: these names suck
-        self.norm_G[self.stat_num][i] = max(normalized_G)
-        # self.avg_score[stat][i] = np.mean(scores)
-        # self.sterr_score[stat][i] = sem(scores)
-        self.raw_g[self.stat_num][i] = max(raw_G)
+    # def save_data(self):
+    #     # attrs = [self.max_score, self.avg_score, self.sterr_score, self.avg_false, self.raw_g, self.multi_g]
+    #     # attr_names = ["max", "avg", "sterr", "false", 'avg_G', 'multi_g']
+    #     attrs = [self.norm_G, self.raw_g]
+    #     attr_names = ["norm_G", 'raw_G']
+    #     for j in range(len(attrs)):
+    #         nm = attr_names[j]
+    #         att = attrs[j]
+    #         filename = self.rew_type + "_trial{:03d}_{}".format(self.param_idx, nm)
+    #         ext = "npy"
+    #         path_nm = path.join(self.fpath, "{}.{}".format(filename, ext))
+    #
+    #         # do_not_overwrite(fp, filename, ext, att, isnp=True)
+    #         np.save(path_nm, att)
+    #
+    # def update_logs(self, normalized_G, raw_G, i):
+    #     self.norm_G[self.stat_num][i] = max(normalized_G)
+    #     # self.avg_score[stat][i] = np.mean(scores)
+    #     # self.sterr_score[stat][i] = sem(scores)
+    #     self.raw_g[self.stat_num][i] = max(raw_G)
 
     def run_evolution(self):
         theoretical_max_g = self.p.n_pois
@@ -94,7 +94,7 @@ class CCEA:
 
             # Mutate weights for all species
             for spec in self.species:
-                spec.mutate_weights_no_hid()
+                spec.mutate_weights()
             one_gen_G = []
             for pol_num in range(lp.n_policies):
                 # Reset the environment
@@ -128,7 +128,7 @@ class CCEA:
             max_wts = [self.species[sp].weights[max_g] for sp in range(self.n_agents)]
 
             # Bookkeeping
-            self.update_logs(normalized_G, raw_G, gen)
+            self.coll_data.update_logs(normalized_G, raw_G, gen, self.stat_num)
 
             # Update the starting weights (the policy we keep between generations) for each species
             for idx, spec in enumerate(self.species):
@@ -144,7 +144,7 @@ class CCEA:
             # Bookkeeping - save data every 100 generations
             # Save models every 1000 generations
             if not gen % 100:
-                self.save_data()
+                self.coll_data.save_data()
 
                 for i, species in enumerate(self.species):
                     species.save_model(self.param_idx, self.stat_num, gen, self.rew_type, max_wts[i], species=i)
@@ -155,7 +155,7 @@ class CCEA:
         #     # 5% of the time, change the location of the POIs slightly
         #     self.env.move_pois()
 
-        self.save_data()
+        self.coll_data.save_data()
         # save the models
         for i, species in enumerate(self.species):
             species.save_model(self.param_idx, self.stat_num, gen, self.rew_type, max_wts[i], species=i)
@@ -168,13 +168,49 @@ class CCEA:
         # _ = self.env.run_sim(models)
 
 
+class CollectiveData:
+    def __init__(self, n_stat_runs, n_gen, n_agents, rew_type, fpath, param_idx):
+        self.raw_g = np.zeros((n_stat_runs, n_gen)) - 1
+        self.norm_G = np.zeros((n_stat_runs, n_gen)) - 1
+        self.avg_score = np.zeros((n_stat_runs, n_gen)) - 1
+        self.sterr_score = np.zeros((n_stat_runs, n_gen)) - 1
+        self.d = np.zeros((n_stat_runs, n_gen, n_agents)) - 1
+        self.rew_type = rew_type
+        self.fpath = fpath
+        self.param_idx = param_idx
+
+    def save_data(self):
+        # attrs = [self.max_score, self.avg_score, self.sterr_score, self.avg_false, self.raw_g, self.multi_g]
+        # attr_names = ["max", "avg", "sterr", "false", 'avg_G', 'multi_g']
+        attrs = [self.norm_G, self.raw_g]
+        attr_names = ["norm_G", 'raw_G']
+        for j in range(len(attrs)):
+            nm = attr_names[j]
+            att = attrs[j]
+            filename = self.rew_type + "_trial{:03d}_{}".format(self.param_idx, nm)
+            ext = "npy"
+            path_nm = path.join(self.fpath, "{}.{}".format(filename, ext))
+
+            # do_not_overwrite(fp, filename, ext, att, isnp=True)
+            np.save(path_nm, att)
+
+    def update_logs(self, normalized_G, raw_G, i, stat_num):
+        # TODO: these names suck
+        self.norm_G[stat_num][i] = max(normalized_G)
+        # self.avg_score[stat][i] = np.mean(scores)
+        # self.sterr_score[stat][i] = sem(scores)
+        self.raw_g[stat_num][i] = max(raw_G)
+
+
 class RunPool:
     def __init__(self, p):
         self.p = p
-        self.batch = [p]
+        self.batch = [[p, i] for i in range(lp.n_stat_runs)]
         self.fpath = None
         self.rew_types = ['G']
         self.make_dirs()
+        self.rew = 'G'
+        self.coll_data = CollectiveData(lp.n_stat_runs, lp.n_gen, p.n_agents, self.rew, path.join(self.fpath, self.rew), p.param_idx)
 
     def make_dirs(self):
         now = datetime.now()
@@ -191,7 +227,8 @@ class RunPool:
             fpath = path.join(filepath, rew)
             mkdir(fpath)
 
-    def main(self, p):
+    def main(self, vals):
+        p, stat_num = vals
         env = Domain(p)
         poi_fpath = path.join(self.fpath, 'poi_xy', f'poi_xy_trial{p.param_idx}')
         # env.save_poi_locs(poi_fpath)
@@ -200,10 +237,9 @@ class RunPool:
         for rew in self.rew_types:
             p.rew_str = rew
             # fpath = path.join(self.fpath, rew)
-            evo = CCEA(env, p, rew, self.fpath)
-            for stat_nm in range(lp.n_stat_runs):
-                evo.stat_num = stat_nm
-                evo.run_evolution()
+            evo = CCEA(env, p, rew, self.fpath, self.coll_data)
+            evo.stat_num = stat_num
+            evo.run_evolution()
 
     def run_pool(self):
         pool = Pool()
@@ -213,7 +249,8 @@ class RunPool:
 if __name__ == '__main__':
     # trials = param.BIG_BATCH_01
     from AIC.parameter import parameter as p
-    pooling = RunPool(p)
-    pooling.main(pooling.batch[0])
-    # pooling.main(trials[1])
-    # pooling.run_pool()
+    for _ in range(5):
+        pooling = RunPool(p)
+        pooling.main(pooling.batch[0])
+        # pooling.main(trials[1])
+        # pooling.run_pool()

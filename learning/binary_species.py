@@ -6,8 +6,8 @@ import torch
 from os import getcwd, path
 
 # Custom packages
-# from evo_playground.learning.neuralnet import NeuralNetwork as NN
-from evo_playground.learning.neuralnet_no_hid import NeuralNetwork as NN
+from evo_playground.learning.neuralnet import NeuralNetwork as NN
+# from evo_playground.learning.neuralnet_no_hid import NeuralNetwork as NN
 from teaming.domain import DiscreteRoverDomain as Domain
 import evo_playground.parameters as param
 
