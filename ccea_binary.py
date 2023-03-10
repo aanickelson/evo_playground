@@ -50,14 +50,13 @@ class CCEA:
         self.d = np.zeros((self.n_stat_runs, self.n_gen, self.n_agents))
         self.rew_type = rew_type
         self.base_fpath = fpath
-        self.thirds = lp.thirds
         self.nn_in = self.env.state_size()
         self.nn_hid = lp.hid
         self.nn_out = self.env.action_size()
         self.fpath = path.join(fpath, rew_type)
 
     def species_setup(self):
-        species = [Species(self.env, lp, self.nn_in, self.nn_hid, self.nn_out, self.thirds) for _ in range(self.n_agents)]
+        species = [Species(self.env, lp, self.nn_in, self.nn_hid, self.nn_out) for _ in range(self.n_agents)]
         return species
 
     # def save_data(self):
@@ -96,7 +95,7 @@ class CCEA:
             for spec in self.species:
                 spec.mutate_weights()
             one_gen_G = []
-            for pol_num in range(lp.n_policies):
+            for pol_num in range(len(self.species[0].weights)):
                 # Reset the environment
                 self.env.reset()
                 self.env.vis = False
@@ -123,17 +122,22 @@ class CCEA:
                 normalized_G[pol_num] = float(G) / theoretical_max_g
 
             # Index of the policies that performed best over G
-            max_g = np.argmax(raw_G)
+            max_g = np.max(raw_G)
+            argmax_g = np.argmax(raw_G)
             # Policies that performed best
-            max_wts = [self.species[sp].weights[max_g] for sp in range(self.n_agents)]
+            max_wts = [self.species[sp].weights[argmax_g] for sp in range(self.n_agents)]
 
             # Bookkeeping
             self.coll_data.update_logs(normalized_G, raw_G, gen, self.stat_num)
 
             # Update the starting weights (the policy we keep between generations) for each species
             for idx, spec in enumerate(self.species):
+                # If the best of this group is better than the previous best, replace the hall of famers
+                if max_g > spec.hof_score:
+                    spec.hof_score = max_g
+                    spec.hof_wts = spec.weights[argmax_g]
                 if 'G' in self.rew_type:
-                    # Use raw G because the scores may be more noisy (since it's divided by the greedy policy)
+                    # Use raw G because the scores may be more noisy
                     spec.binary_tournament(np.array(raw_G))
                 elif 'D' in self.rew_type:
                     spec.binary_tournament(np.array(d_scores[idx]))

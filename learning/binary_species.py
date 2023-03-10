@@ -13,7 +13,7 @@ import evo_playground.parameters as param
 
 
 class Species:
-    def __init__(self, env, p, nn_in, nn_hid, nn_out, thirds=False):
+    def __init__(self, env, p, nn_in, nn_hid, nn_out):
         self.n_pol = p.n_policies
         self.p = p
         self.env = env
@@ -24,21 +24,14 @@ class Species:
         self.nn_out = nn_out
         # self.model = NN(self.env.state_size(), self.p.hid, self.env.get_action_size())
         self.model = NN(nn_in, nn_hid, nn_out)
+        self.hof_score = 0
+        self.hof_wts = None
         self.weights = self._species_setup()
-        if thirds:
-            self.weights = self._species_setup_thirds()
-
 
     def _species_setup(self):
         # a set of randomly initilaized policies
         species = [NN(self.nn_in, self.nn_hid, self.nn_out).get_weights()
                    for _ in range(int(self.n_pol / 2))]
-        return species
-
-    def _species_setup_thirds(self):
-        # a set of randomly initilaized policies
-        species = [NN(self.nn_in, self.nn_hid, self.nn_out).get_weights()
-                   for _ in range(int(self.n_pol / 3))]
         return species
 
     def mutate_weights(self):
@@ -93,7 +86,8 @@ class Species:
             else:
                 keep_idx.append(idx1)
 
-        self.weights = [self.weights[k] for k in keep_idx]
+        self.weights = [self.weights[k] for k in keep_idx[:-1]]
+        self.weights.append(self.hof_wts)
 
     def binary_multi(self, scores, bh_dist, pareto):
 
@@ -143,8 +137,6 @@ class Species:
                     keep_idx.append(pick_one)
 
         div_by = 2
-        if self.p.thirds:
-            div_by = 3
         keep_vals = keep_idx[:int(self.n_pol / div_by)]
         self.weights = [self.weights[k] for k in keep_vals]
 
