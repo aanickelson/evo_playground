@@ -68,15 +68,16 @@ class Species:
         :param scores:
         :return:
         """
+        # Generate random numbers so the policies get randomly matched
         dummy_ranking = np.random.randint(0, 10000, len(scores))
 
-        # create priority queue to randomly match two policies
+        # create priority queue to sort by random numbers
         pq = []
         for i in range(len(scores)):
             pq.append([dummy_ranking[i], i])
         hq.heapify(pq)
 
-        # Compare two randomly matched policies and keep one
+        # Compare two randomly matched policies and keep the one that scored higher
         keep_idx = []
         for j in range(int(len(scores)/2)):
             _, idx0 = hq.heappop(pq)
@@ -86,8 +87,11 @@ class Species:
             else:
                 keep_idx.append(idx1)
 
-        self.weights = [self.weights[k] for k in keep_idx[:-1]]
-        self.weights.append(self.hof_wts)
+        # Keep the weights of the best performing policies
+        self.weights = [self.weights[k] for k in keep_idx]
+        # With hall of fame (one policy)
+        # self.weights = [self.weights[k] for k in keep_idx[:-1]]
+        # self.weights.append(self.hof_wts)
 
     def binary_multi(self, scores, bh_dist, pareto):
 

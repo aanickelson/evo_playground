@@ -16,7 +16,7 @@ def main(p):
     policies = []
     for i in range(env.n_agents):
         nn = NN(env.state_size(use_time=False), p.hid, env.get_action_size())
-        nn.set_weights(load_model(p.trial_num, 3000, p.fname_prepend, i))
+        nn.set_weights(load_model(p.param_idx, 3000, p.fname_prepend, i))
         policies.append(nn)
 
     G, _ = env.run_sim(policies)

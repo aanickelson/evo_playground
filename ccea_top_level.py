@@ -75,7 +75,7 @@ def make_dirs(base_fpath):
 
 def main(p, date_stamp):
 
-    base_fpath = path.join(getcwd(), 'data', f'moo_{p.trial_num:03d}_{date_stamp}')
+    base_fpath = path.join(getcwd(), 'data', f'moo_{p.param_idx:03d}_{date_stamp}')
 
     # base_fpath = path.join(getcwd(), 'data', date_stamp)
     data = load_data(base_fpath)

@@ -80,7 +80,7 @@ class CCEA_MOO(CCEA):
 
     def multiG_save_policies(self, pareto_wts, gen):
         # Pareto Weights are saved as Species x Policies (each policy is [[g1, g2], [wts]])
-        pth = path.join(self.base_fpath, 'weights', f't{self.p.trial_num:03d}_{self.p.rew_str}weights_g{gen}.gz')
+        pth = path.join(self.base_fpath, 'weights', f't{self.p.param_idx:03d}_{self.p.rew_str}weights_g{gen}.gz')
         joblib.dump(pareto_wts, pth)
 
     def test_policies(self, gen):
@@ -188,9 +188,9 @@ class RunPool:
 
     def main(self, p):
         env = Domain(p)
-        poi_fpath = path.join(self.fpath, 'poi_xy', f'poi_xy_trial{p.trial_num}')
+        poi_fpath = path.join(self.fpath, 'poi_xy', f'poi_xy_trial{p.param_idx}')
         env.save_poi_locs(poi_fpath)
-        print("TRIAL {}".format(p.trial_num))
+        print("TRIAL {}".format(p.param_idx))
 
         for rew in self.rewards_to_try:
             p.rew_str = rew

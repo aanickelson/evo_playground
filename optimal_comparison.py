@@ -38,7 +38,7 @@ def optimal_policy(env):
 
 if __name__ == '__main__':
     for p in params.TEST:
-        print("TRIAL {}".format(p.trial_num))
+        print("TRIAL {}".format(p.param_idx))
         captured = np.zeros(100)
 
         env = Domain(p)

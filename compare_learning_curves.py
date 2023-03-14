@@ -67,7 +67,7 @@ if __name__ == '__main__':
     # trials = param.BIG_BATCH_01
     # trials = [param.p596, param.p597, param.p598, param.p599]
     trials = [param.p614, param.p628, param.p629]  #, param.p530, param.p531]
-    trial_nums = [p.trial_num for p in trials]
+    trial_nums = [p.param_idx for p in trials]
 
 
 
@@ -84,7 +84,7 @@ if __name__ == '__main__':
             # for i in range(3):
             for pre in preps:
 
-                filename = "{}trial{:03d}".format(pre, p.trial_num)
+                filename = "{}trial{:03d}".format(pre, p.param_idx)
                 path_nm = path.join(getcwd(), 'data')
                 filename2 = filename + att
                 path_to_use = path.join(path_nm, "{}.csv".format(filename2))  # Done this way for csv so we can pass the filename to make the graphs

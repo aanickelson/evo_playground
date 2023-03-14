@@ -71,19 +71,18 @@ if __name__ == '__main__':
     # data_top = '20230114_123229'
     #
     prefix = 'base'
-    data_date = "20230309_152117"
-    dates = ['20230309_152351', '20230309_154358', '20230309_160407', '20230309_162415']
+    data_date = "20230313_184152"
     top_pol = False
+    dates = ['20230310_152006', '20230310_153829', '20230310_155623', '20230310_161343', '20230310_163017']
+    trial_num = 0
+    # for data_date in dates:
 
+    if top_pol:
+        path_nm = path.join(getcwd(), 'data', f'{prefix}_{trial_num:03d}_{data_date}', 'top_pol', data_top)
+        # path_nm = path.join(getcwd(), 'data', f'{data_date}', 'top_pol', data_top)
+    else:
+        path_nm = path.join(getcwd(), 'data', f'{prefix}_{trial_num:03d}_{data_date}')
+        # path_nm = path.join(getcwd(), 'data', f'{data_date}')
 
-    for data_date in dates:
-        trial_num = 0
-        if top_pol:
-            path_nm = path.join(getcwd(), 'data', f'{prefix}_{trial_num:03d}_{data_date}', 'top_pol', data_top)
-            # path_nm = path.join(getcwd(), 'data', f'{data_date}', 'top_pol', data_top)
-        else:
-            path_nm = path.join(getcwd(), 'data', f'{prefix}_{trial_num:03d}_{data_date}')
-            # path_nm = path.join(getcwd(), 'data', f'{data_date}')
-
-        load_data(path_nm, trial_num)
-        # path_nm = path.join(getcwd(), 'data', f'{trial_num:03d}_{data_date}')
+    load_data(path_nm, trial_num)
+    # path_nm = path.join(getcwd(), 'data', f'{trial_num:03d}_{data_date}')

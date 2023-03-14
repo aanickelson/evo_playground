@@ -100,12 +100,12 @@ class CCEA:
                 self.env.reset()
                 self.env.vis = False
                 # Pick one policy from each species
-                wts = [self.species[i].weights[pol_num] for i in range(self.n_agents)]
+                # wts = [self.species[i].weights[pol_num] for i in range(self.n_agents)]
 
                 # For each species
                 for idx, spec in enumerate(self.species):
                     # Set the current policy
-                    spec.model.set_weights(wts[idx])
+                    spec.model.set_weights(spec.weights[pol_num])
 
                 # Array of one NN per species to use as policies
                 models = [sp.model for sp in self.species]
@@ -117,7 +117,7 @@ class CCEA:
 
                 D = self.env.D()
                 # Bookkeeping
-                # d_scores[:, pol_num] = D
+                d_scores[:, pol_num] = np.sum(D, axis=1)
                 raw_G[pol_num] = G
                 normalized_G[pol_num] = float(G) / theoretical_max_g
 
@@ -186,8 +186,8 @@ class CollectiveData:
     def save_data(self):
         # attrs = [self.max_score, self.avg_score, self.sterr_score, self.avg_false, self.raw_g, self.multi_g]
         # attr_names = ["max", "avg", "sterr", "false", 'avg_G', 'multi_g']
-        attrs = [self.norm_G, self.raw_g]
-        attr_names = ["norm_G", 'raw_G']
+        attrs = [self.norm_G, self.raw_g, self.d]
+        attr_names = ["norm_G", 'raw_G', 'D']
         for j in range(len(attrs)):
             nm = attr_names[j]
             att = attrs[j]
@@ -253,7 +253,7 @@ class RunPool:
 if __name__ == '__main__':
     # trials = param.BIG_BATCH_01
     from AIC.parameter import parameter as p
-    for _ in range(5):
+    for _ in range(1):
         pooling = RunPool(p)
         pooling.main(pooling.batch[0])
         # pooling.main(trials[1])

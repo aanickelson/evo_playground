@@ -28,7 +28,7 @@ data_out_path = path.join(path_out_nm, "{}.csv".format(fname))  # Done this way 
 with open(data_out_path, 'w') as f:
     for p in params.BIG_BATCH_01:
         for pre in preps:
-            filename = "{}_timetrial{:02d}_avg_G".format(pre, p.trial_num)
+            filename = "{}_timetrial{:02d}_avg_G".format(pre, p.param_idx)
             path_nm = path.join(getcwd(), 'data')  #, "binary_rerun")
             data_path = path.join(path_nm, "{}.csv".format(filename))  # Done this way for csv so we can pass the filename to make the graphs
             try:
@@ -41,7 +41,7 @@ with open(data_out_path, 'w') as f:
                     if poi_type == poi_opt:
                         poi_types_to_save.append(i)
                         break
-            data_to_save = [p.trial_num, final_g_score, pre, p.n_agents, p.n_pois, poi_types_to_save]
+            data_to_save = [p.param_idx, final_g_score, pre, p.n_agents, p.n_pois, poi_types_to_save]
             # data_to_save = [p.trial_num, p.n_agents, p.n_pois, poi_types_to_save]
             data_to_save = str(data_to_save) + '\n'
             f.write(data_to_save)

@@ -66,7 +66,7 @@ if __name__ == '__main__':
     for p in trials:
         # for i in range(3):
         for pre in preps:
-            filename = "{}trial{:03d}".format(pre, p.trial_num)
+            filename = "{}trial{:03d}".format(pre, p.param_idx)
             path_nm = path.join(getcwd(), 'data')
             for att in attributes:
                 filename2 = filename + att

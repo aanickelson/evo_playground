@@ -23,7 +23,7 @@ class CCEA:
     def __init__(self, env, p):
         seed()
         self.n_gen = p.n_gen
-        self.trial_num = p.trial_num
+        self.trial_num = p.param_idx
         self.n_agents = p.n_agents
         self.p = p
         self.env = env
@@ -162,7 +162,7 @@ class CCEA:
 def main(p):
     for prepend in ['D_b', 'G_b']:
         p.fname_prepend = prepend
-        print("TRIAL {}".format(p.trial_num))
+        print("TRIAL {}".format(p.param_idx))
         env = Domain(p)
         evo = CCEA(env, p)
         evo.run_evolution()

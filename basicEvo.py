@@ -16,7 +16,7 @@ from evo_playground.parameters.parameters01 import Parameters as p1
 class BasicEvo:
     def __init__(self, env, p):
         self.n_gen = p.n_gen
-        self.trial_num = p.trial_num
+        self.trial_num = p.param_idx
         self.env = env
         self.evoNN = evoNN(self.env, p)
 

@@ -73,14 +73,14 @@ if __name__ == '__main__':
 
     for att in attributes:
         for p in trials:
-            fname_for_plt = f'comp {p.trial_num}_{att}'
+            fname_for_plt = f'comp {p.param_idx}_{att}'
             avgs = []
             sterrs = []
             # for i in range(3):
             for pre in preps:
                 for t in time_or_no:
 
-                    filename = "{}_{}trial{:03d}".format(pre, t, p.trial_num)
+                    filename = "{}_{}trial{:03d}".format(pre, t, p.param_idx)
                     path_nm = path.join(getcwd(), 'data', t)
                     filename2 = filename + att
                     path_to_use = path.join(path_nm, "{}.csv".format(filename2))  # Done this way for csv so we can pass the filename to make the graphs
