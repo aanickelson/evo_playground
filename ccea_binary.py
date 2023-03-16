@@ -6,24 +6,17 @@ https://github.com/AADILab/PyTorch-Evo-Strategies
 # Python packages
 from tqdm import tqdm
 import numpy as np
-from scipy.stats import sem, entropy
 from os import getcwd, path, mkdir
-from optimal_comparison import optimal_policy
 from multiprocessing import Process, Pool
 from random import seed
-import heapq as hq
-import torch
 from datetime import datetime
 
 
 # Custom packages
-import parameters as param
-from evo_playground.learning.evolve_population import EvolveNN as evoNN
 # from teaming.domain import DiscreteRoverDomain as Domain
 from AIC.aic import aic as Domain
-from AIC.run_wrapper import run_env
+from evo_playground.run_wrapper import run_env
 from parameters.learningparams00 import LearnParams as lp
-from evo_playground.learning.neuralnet import NeuralNetwork as NN
 from evo_playground.learning.binary_species import Species
 
 
@@ -143,7 +136,7 @@ class CCEA:
                     spec.binary_tournament(np.array(d_scores[idx]))
 
                 # Reduce the learning rate
-                spec.learning_rate /= 1.0001
+                spec.learning_rate /= 1.001
 
             # Bookkeeping - save data every 100 generations
             # Save models every 1000 generations

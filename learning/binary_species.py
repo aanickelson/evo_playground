@@ -8,21 +8,17 @@ from os import getcwd, path
 # Custom packages
 from evo_playground.learning.neuralnet import NeuralNetwork as NN
 # from evo_playground.learning.neuralnet_no_hid import NeuralNetwork as NN
-from teaming.domain import DiscreteRoverDomain as Domain
-import evo_playground.parameters as param
 
 
 class Species:
-    def __init__(self, env, p, nn_in, nn_hid, nn_out):
+    def __init__(self, p, nn_in, nn_hid, nn_out):
         self.n_pol = p.n_policies
         self.p = p
-        self.env = env
         self.sigma = p.sigma
         self.learning_rate = p.learning_rate
         self.nn_in = nn_in
         self.nn_hid = nn_hid
         self.nn_out = nn_out
-        # self.model = NN(self.env.state_size(), self.p.hid, self.env.get_action_size())
         self.model = NN(nn_in, nn_hid, nn_out)
         self.hof_score = 0
         self.hof_wts = None
@@ -50,7 +46,6 @@ class Species:
         new_weights = []
         for wts in self.weights:
             noise = self.sigma * torch.normal(-1, 1, size=wts[0].shape) * self.learning_rate
-            # noise2 = self.sigma * torch.normal(-1, 1, size=wts[1].shape) * self.learning_rate
             new_weights.append([wts[0] + noise])
         # Have to do this separately otherwise it creates an infinite loop (whoopsies)
         for wts_01 in new_weights:
@@ -68,20 +63,15 @@ class Species:
         :param scores:
         :return:
         """
-        # Generate random numbers so the policies get randomly matched
-        dummy_ranking = np.random.randint(0, 10000, len(scores))
-
-        # create priority queue to sort by random numbers
-        pq = []
-        for i in range(len(scores)):
-            pq.append([dummy_ranking[i], i])
-        hq.heapify(pq)
+        # Shuffle the indices to randomly pair them up
+        idxs = np.arange(len(scores))
+        np.random.shuffle(idxs)
 
         # Compare two randomly matched policies and keep the one that scored higher
         keep_idx = []
-        for j in range(int(len(scores)/2)):
-            _, idx0 = hq.heappop(pq)
-            _, idx1 = hq.heappop(pq)
+        for i in range(0, len(scores), 2):
+            idx0 = idxs[i]
+            idx1 = idxs[i+1]
             if scores[idx0] >= scores[idx1]:
                 keep_idx.append(idx0)
             else:

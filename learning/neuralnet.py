@@ -2,7 +2,7 @@
 Adapted from evolutionary code written by github user Sir-Batman
 https://github.com/AADILab/PyTorch-Evo-Strategies
 
-Structure and main functions for basic
+Structure and main functions for basic single layer linear Neural Network
 """
 
 import torch
@@ -15,8 +15,6 @@ class NeuralNetwork(nn.Module):
     def __init__(self, input_size, hid_size, out_size):
         super(NeuralNetwork, self).__init__()
         self.model = nn.Sequential(
-            # nn.Linear(input_size, out_size),
-            # nn.ReLU(inplace=True),
             nn.Linear(input_size, hid_size),
             nn.ReLU(inplace=True),
             nn.Linear(hid_size, out_size),

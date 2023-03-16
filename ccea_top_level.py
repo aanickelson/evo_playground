@@ -3,6 +3,7 @@ import joblib
 from os import path, getcwd, mkdir
 import numpy as np
 from datetime import datetime
+import torch
 
 # Custom packages
 from teaming.domain_hierarchy_policies import DomainHierarchy as Domain
@@ -12,40 +13,29 @@ from learning.neuralnet_no_hid import NeuralNetwork as NN
 
 
 class CCEA_Top(CCEA):
-    def __init__(self, p, rew_type, fpath, data, reselect=1):
+    def __init__(self, p, rew_type, fpath, fitnesses, bh, wts, reselect=1):
         self.env = Domain(p, reselect)
         super().__init__(self.env, p, rew_type, fpath)
         self.generations = range(p.n_top_gen)
-        self.data = data
         self.ll_policies = None
         self.pareto_vals = None
         self.behaviors = None
-        self.unpack_data()
+        self.unpack_data(fitnesses, bh, wts)
         self.env.setup(self.pareto_vals, self.ll_policies, self.behaviors)
         self.nn_in = self.env.global_st_size()
         self.nn_out = self.env.top_out_size()
 
-    def unpack_data(self):
-
-        g_arr = []
+    def unpack_data(self, fits, bhs, wts_arr):
         pols = []
-        bh_arr = []
-        for [gs, wts, bh] in self.data:
-            ag_g_arr = []
-            ag_pols = []
-            ag_bh = []
-            ag_g_arr.append(gs[0])
-            ag_bh.append(bh)
+        for wts in wts_arr:
             nn = NN(self.env.state_size(), self.p.hid, self.env.get_action_size())
-            nn.set_weights(wts)
-            ag_pols.append(nn)
-
-            g_arr.append(gs)
+            wts = np.reshape(wts, (8, 11))
+            torch_wts = [torch.from_numpy(wts)]
+            nn.set_weights(torch_wts)
             pols.append(nn)
-            bh_arr.append(bh)
 
-        g_arr = np.array(g_arr)
-        bh_arr = np.array(bh_arr)
+        g_arr = np.array(fits)
+        bh_arr = np.array(bhs)
         g_and_bh = np.concatenate((g_arr, bh_arr), axis=1)
         _, unique_idx = np.unique(g_and_bh, axis=0, return_index=True)
         unique_idx = np.array(unique_idx)
@@ -75,38 +65,61 @@ def make_dirs(base_fpath):
 
 def main(p, date_stamp):
 
-    base_fpath = path.join(getcwd(), 'data', f'moo_{p.param_idx:03d}_{date_stamp}')
+    base_fpath = path.join(getcwd(), 'data', f'qdpar_{p.trial_num:03d}_{date_stamp}')
 
     # base_fpath = path.join(getcwd(), 'data', date_stamp)
     data = load_data(base_fpath)
-    pareto_data = [d[0][0] for d in data]
-    bh_data = [d[2] for d in data]
-    plot_data(bh_data, pareto_data)
+    fitnesses = data[:, :2]
+    bh_data = data[:, 7:12]
+    wts = data[:, 12:]
+    is_eff = is_pareto_efficient_simple(fitnesses)
+
+    # Keep only the data that is on the pareto front
+    fitnesses_p = fitnesses[is_eff]
+    bh_p = bh_data[is_eff]
+    wts_p = wts[is_eff]
+
+    # plot_data(bh_data, pareto_data)
     p.n_agents = 2
     p.thirds = False
     trials_fpath = make_dirs(base_fpath)
     p.n_policies = 100
 
-    # for _ in range(3):
-    #     for rew in ['G']:  #, 'D']:
-    #         evo = CCEA_Top(p, rew, trials_fpath, data)
-    #         evo.run_evolution()
+    for _ in range(1):
+        for rew in ['G']:  #, 'D']:
+            evo = CCEA_Top(p, rew, trials_fpath, fitnesses_p, bh_p, wts_p)
+            evo.run_evolution()
+
+def is_pareto_efficient_simple(vals):
+    """
+    copied and modified from https://stackoverflow.com/questions/32791911/fast-calculation-of-pareto-front-in-python
+    Find the pareto-efficient points
+    :param costs: An (n_points, n_costs) array
+    :return: A (n_points, ) boolean array, indicating whether each point is Pareto efficient
+    """
+    costs = np.array(vals)
+    is_efficient = np.ones(costs.shape[0], dtype=bool)
+    for i, c in enumerate(costs):
+        if is_efficient[i]:
+            is_efficient[is_efficient] = np.any(costs[is_efficient] > c, axis=1)  # Keep any point with a lower cost
+            eff_add = np.all(costs == c, axis=1)
+            is_efficient += eff_add
+            is_efficient[i] = True  # And keep self
+    return is_efficient
 
 
 def load_data(base_fpath):
     wts_fpath = path.join(base_fpath, 'weights')
-    rew_str = 'multi'
-    gens_to_load = [i * 100 for i in range(int(p.n_gen / 100))]
-    gens_to_load.append(p.n_gen - 1)
-    gen_num = p.n_gen - 1
+    rew_str = 'qdpar'
+    # gens_to_load = [i * 100 for i in range(int(p.n_gen / 100))]
+    # gens_to_load.append(p.n_gen - 1)
+    # gen_num = p.n_gen - 1
     # gen_num = 300
-    all_data = []
-    for gen_num in gens_to_load:
-        pth = path.join(wts_fpath, f't{p.trial_num:03d}_{rew_str}weights_g{gen_num}.gz')
-        data = joblib.load(pth)[0]
-        for dp in data:
-            all_data.append(dp)
-    return all_data
+
+    gen_num = 500016
+    pth = path.join(wts_fpath, f't{p.trial_num:03d}_{rew_str}weights_{gen_num}.dat')
+    data = np.loadtxt(pth)
+    return data
 
 
 def plot_data(data_to_plt, pareto_data):
@@ -141,8 +154,8 @@ def plot_data(data_to_plt, pareto_data):
 
 
 if __name__ == '__main__':
-    from parameters import p02 as p
-    date_stamp = '20230110_181842'
+    from parameters import p06 as p
+    date_stamp = '20230214_153815'
     main(p, date_stamp)
 
     # This plays a noise when it's done so you don't have to babysit
