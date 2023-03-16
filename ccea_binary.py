@@ -35,7 +35,7 @@ class CCEA:
         self.n_stat_runs = lp.n_stat_runs
 
         self.stat_num = 0
-        self.species = None
+        self.species = self.species_setup()
         self.raw_g = np.zeros((self.n_stat_runs, self.n_gen)) - 1
         self.norm_G = np.zeros((self.n_stat_runs, self.n_gen))
         self.avg_score = np.zeros((self.n_stat_runs, self.n_gen))
@@ -49,7 +49,7 @@ class CCEA:
         self.fpath = path.join(fpath, rew_type)
 
     def species_setup(self):
-        species = [Species(self.env, lp, self.nn_in, self.nn_hid, self.nn_out) for _ in range(self.n_agents)]
+        species = [Species(lp, self.nn_in, self.nn_hid, self.nn_out) for _ in range(self.n_agents)]
         return species
 
     # def save_data(self):
@@ -75,7 +75,6 @@ class CCEA:
 
     def run_evolution(self):
         theoretical_max_g = self.p.n_pois
-        self.species = self.species_setup()
 
         for gen in tqdm(self.generations):
 

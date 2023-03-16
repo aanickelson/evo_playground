@@ -10,7 +10,7 @@ from datetime import datetime
 # Custom packages
 # from teaming.domain import DiscreteRoverDomain as Domain
 from AIC.aic import aic as Domain
-from evo_playground.run_wrapper import run_env
+# from evo_playground.run_wrapper import run_env
 from parameters.learningparams00 import LearnParams as lp
 from evo_playground.learning.binary_species import Species
 
