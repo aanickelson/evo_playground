@@ -4,6 +4,7 @@ https://github.com/AADILab/PyTorch-Evo-Strategies
 
 Structure and main functions for basic single layer linear Neural Network
 """
+import random
 
 import torch
 from torch import nn

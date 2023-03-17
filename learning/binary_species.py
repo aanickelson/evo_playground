@@ -27,7 +27,7 @@ class Species:
     def _species_setup(self):
         # a set of randomly initilaized policies
         species = [NN(self.nn_in, self.nn_hid, self.nn_out).get_weights()
-                   for _ in range(int(self.n_pol / 2))]
+                   for _ in range(int(self.n_pol))]
         return species
 
     def mutate_weights(self):
