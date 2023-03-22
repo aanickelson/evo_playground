@@ -41,34 +41,51 @@ class CCEA:
             fpath = path.join(self.fpath, nm, f'{self.p.param_idx:03d}_{self.stat_nm:02d}')
             np.save(fpath, self.data[i])
 
+    def random_pairs(self):
+        # Each policy is paired up randomly and tested three times
+        test_each = 3
+        idxs = np.zeros((test_each * lp.n_policies, self.p.n_agents), dtype=int)
+        for j in range(self.p.n_agents):
+            for i in range(test_each):
+                idx = np.arange(lp.n_policies)
+                np.random.shuffle(idx)
+                idxs[i * lp.n_policies: (i + 1) * lp.n_policies, j] = idx
+        return idxs
+
     def run_evo(self):
         for gen in tqdm(range(lp.n_gen)):
-            g_vec = np.zeros(lp.n_policies) - 1
-            d_vec = np.zeros((lp.n_policies, self.p.n_agents)) - 1
-            for pol_num in range(lp.n_policies):
+            g_vec = np.zeros((lp.n_policies, self.p.n_agents))
+            d_vec = np.zeros((lp.n_policies, self.p.n_agents))
+
+            # Creates random pairings of policies - tests each policy three times
+            pairs = self.random_pairs()
+
+            for pol_nums in pairs:
+                # pol_nums = [idxs[pol0], idxs[pol0 + 1]]
                 self.env.reset()
 
                 pols = []
-                for species in self.species:
-                    species.model.set_weights(species.weights[pol_num])
+                for i, species in enumerate(self.species):
+                    species.model.set_weights(species.weights[pol_nums[i]])
                     pols.append(species.model)
 
-                g_vec[pol_num] = np.sum(run_env(self.env, pols, self.p))
-                d_vec[pol_num] = np.sum(self.env.D(), axis=1)
+                G = np.sum(run_env(self.env, pols, self.p))
+                D = np.sum(self.env.D(), axis=1)
 
-            self.G[gen] = max(g_vec)
+                # Have to do this for each agent individually because their policy numbers are different
+                for ag in range(self.p.n_agents):
+                    g_vec[pol_nums[ag], ag] += G
+                    d_vec[pol_nums[ag], ag] += D[ag]
+
+            self.G[gen] = np.max(g_vec)
 
             for i, species in enumerate(self.species):
                 if self.rew == 'G':
-                    species.binary_tournament(g_vec)
+                    species.binary_tournament(g_vec[:, i])
                 elif self.rew == 'D':
                     species.binary_tournament((d_vec[:, i]))
 
                 species.mutate_weights()
-
-                # if not gen % 10:
-                #     species.weights = species.weights[:-10]
-                #     species.add_new_pols()
 
             if not gen % 200:
                 self.save_data()
@@ -106,14 +123,15 @@ class RunPool:
 if __name__ == '__main__':
     from evo_playground.parameters.parameters01 import Parameters as p01
     from evo_playground.parameters.parameters02 import Parameters as p02
+    from evo_playground.parameters.parameters03 import Parameters as p03
 
     rewards = ['G']  # , 'D']  # , 'multi_G']
     data_names = ['G', 'D', 'mG']
-    for params in [p01, p02]:
+    for params in [p02, p03]:
         if params.n_agents > 1:
             rewards = ['G', 'D']
         for reward in rewards:
             print(reward, ' - ',  params.param_idx)
             pooling = RunPool(params, reward, data_names)
-            # pooling.main(pooling.batch[0])
-            pooling.run_pool()
+            pooling.main(pooling.batch[0])
+            # pooling.run_pool()
