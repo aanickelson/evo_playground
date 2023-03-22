@@ -9,9 +9,9 @@ def init_fn(n):
 
 
 class Parameters:
-    param_idx = 0  # Makes it easy to differentiate results by parameter set
+    param_idx = 1  # Makes it easy to differentiate results by parameter set
 
-    n_agents = 2
+    n_agents = 1
     battery = 20
     time_steps = 50
     speed = 5.0
