@@ -247,6 +247,6 @@ if __name__ == '__main__':
     from AIC.parameter import parameter as p
     for _ in range(1):
         pooling = RunPool(p)
-        pooling.main(pooling.batch[0])
+        # pooling.main(pooling.batch[0])
         # pooling.main(trials[1])
         # pooling.run_pool()

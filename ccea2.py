@@ -44,7 +44,7 @@ class CCEA:
     def run_evo(self):
         for gen in tqdm(range(lp.n_gen)):
             g_vec = np.zeros(lp.n_policies) - 1
-
+            d_vec = np.zeros((lp.n_policies, self.p.n_agents)) - 1
             for pol_num in range(lp.n_policies):
                 self.env.reset()
 
@@ -53,17 +53,22 @@ class CCEA:
                     species.model.set_weights(species.weights[pol_num])
                     pols.append(species.model)
 
-                g_vec[pol_num] = run_env(self.env, pols, self.p)
+                g_vec[pol_num] = np.sum(run_env(self.env, pols, self.p))
+                d_vec[pol_num] = np.sum(self.env.D(), axis=1)
 
             self.G[gen] = max(g_vec)
 
-            for species in self.species:
-                species.binary_tournament(g_vec)
+            for i, species in enumerate(self.species):
+                if self.rew == 'G':
+                    species.binary_tournament(g_vec)
+                elif self.rew == 'D':
+                    species.binary_tournament((d_vec[:, i]))
+
                 species.mutate_weights()
 
-                if not gen % 10:
-                    species.weights = species.weights[:-10]
-                    species.add_new_pols()
+                # if not gen % 10:
+                #     species.weights = species.weights[:-10]
+                #     species.add_new_pols()
 
             if not gen % 200:
                 self.save_data()
@@ -99,9 +104,16 @@ class RunPool:
 
 
 if __name__ == '__main__':
-    from AIC.parameter import parameter as params
-    rewards = ['G', 'D', 'multi_G']
+    from evo_playground.parameters.parameters01 import Parameters as p01
+    from evo_playground.parameters.parameters02 import Parameters as p02
+
+    rewards = ['G']  # , 'D']  # , 'multi_G']
     data_names = ['G', 'D', 'mG']
-    pooling = RunPool(params, 'G', data_names)
-    # pooling.main(pooling.batch[0])
-    pooling.run_pool()
+    for params in [p01, p02]:
+        if params.n_agents > 1:
+            rewards = ['G', 'D']
+        for reward in rewards:
+            print(reward, ' - ',  params.param_idx)
+            pooling = RunPool(params, reward, data_names)
+            # pooling.main(pooling.batch[0])
+            pooling.run_pool()

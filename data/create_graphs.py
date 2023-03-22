@@ -37,9 +37,9 @@ def plot_data(means, stes, rew, trial, base_fpath):
 
 if __name__ == '__main__':
     from evo_playground.parameters.debugLP import LearnParams as lp
-    from AIC.parameter import parameter as p
+    from evo_playground.parameters.parameters02 import Parameters as p
 
-    fp = path.join(getcwd(), 'base_G_000_20230317_121025')
+    fp = path.join(getcwd(), 'base_G_002_20230322_135157')
     try:
         graphs_path_nm = path.join(fp, 'graphs')
         mkdir(graphs_path_nm)
@@ -47,6 +47,6 @@ if __name__ == '__main__':
         pass
     rew = 'G'
     filepath = path.join(fp, rew)
-    data = load_data(fp, lp.n_stat_runs, p.param_idx, rew)
+    data = load_data(fp, 5, p.param_idx, rew)
     mean, ste = process(data)
     plot_data([mean], [ste], rew, p.param_idx, fp)
