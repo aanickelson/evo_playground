@@ -3,14 +3,11 @@ from tqdm import tqdm
 import numpy as np
 from os import getcwd, path, mkdir
 from multiprocessing import Process, Pool, shared_memory, cpu_count
-from random import seed
 from datetime import datetime
-from time import sleep
 from torch import manual_seed
-
+from random import random
 
 # Custom packages
-# from teaming.domain import DiscreteRoverDomain as Domain
 from AIC.aic import aic as Domain
 from evo_playground.run_env import run_env
 from parameters.learningparams01 import LearnParams as lp
@@ -32,7 +29,7 @@ class CCEA:
         self.species = self.create_species()
 
     def create_species(self):
-        manual_seed(self.stat_nm)
+        manual_seed(int((self.stat_nm + random()) * 1000))
         return [Species(lp, self.env.state_size(), lp.hid, self.env.action_size())
                 for _ in range(self.p.n_agents)]
 
@@ -61,7 +58,6 @@ class CCEA:
             pairs = self.random_pairs()
 
             for pol_nums in pairs:
-                # pol_nums = [idxs[pol0], idxs[pol0 + 1]]
                 self.env.reset()
 
                 pols = []
@@ -86,6 +82,11 @@ class CCEA:
                     species.binary_tournament((d_vec[:, i]))
 
                 species.mutate_weights()
+
+                # Every 20 generations, add back random policies to maintain diversity in the species
+                if not gen % 20:
+                    species.weights = species.weights[:-5]
+                    species.add_new_pols()
 
             if not gen % 200:
                 self.save_data()
@@ -121,17 +122,16 @@ class RunPool:
 
 
 if __name__ == '__main__':
-    from evo_playground.parameters.parameters01 import Parameters as p01
-    from evo_playground.parameters.parameters02 import Parameters as p02
-    from evo_playground.parameters.parameters03 import Parameters as p03
+    # from evo_playground.parameters.parameters02 import Parameters as p02
+    from evo_playground.parameters.parameters04 import Parameters as p04
 
     rewards = ['G']  # , 'D']  # , 'multi_G']
     data_names = ['G', 'D', 'mG']
-    for params in [p02, p03]:
+    for params in [p04]:
         if params.n_agents > 1:
             rewards = ['G', 'D']
         for reward in rewards:
             print(reward, ' - ',  params.param_idx)
             pooling = RunPool(params, reward, data_names)
-            pooling.main(pooling.batch[0])
-            # pooling.run_pool()
+            # pooling.main(pooling.batch[0])
+            pooling.run_pool()

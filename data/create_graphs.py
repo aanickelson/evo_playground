@@ -37,16 +37,23 @@ def plot_data(means, stes, rew, trial, base_fpath):
 
 if __name__ == '__main__':
     from evo_playground.parameters.debugLP import LearnParams as lp
-    from evo_playground.parameters.parameters02 import Parameters as p
+    from evo_playground.parameters.parameters02 import Parameters as p2
+    from evo_playground.parameters.parameters05 import Parameters as p3
+    from evo_playground.parameters.parameters04 import Parameters as p4
+    from evo_playground.parameters.parameters05 import Parameters as p5
 
-    fp = path.join(getcwd(), 'base_G_002_20230322_135157')
-    try:
-        graphs_path_nm = path.join(fp, 'graphs')
-        mkdir(graphs_path_nm)
-    except FileExistsError:
-        pass
-    rew = 'G'
-    filepath = path.join(fp, rew)
-    data = load_data(fp, 5, p.param_idx, rew)
-    mean, ste = process(data)
-    plot_data([mean], [ste], rew, p.param_idx, fp)
+    base_pth = [[p4, 'base_D_004_20230323_123035'], [p4, 'base_G_004_20230323_105221']]
+
+    for [p, pth] in base_pth:
+
+        fp = path.join(getcwd(), pth)
+        try:
+            graphs_path_nm = path.join(fp, 'graphs')
+            mkdir(graphs_path_nm)
+        except FileExistsError:
+            pass
+        rew = 'G'
+        filepath = path.join(fp, rew)
+        data = load_data(fp, 5, p.param_idx, rew)
+        mean, ste = process(data)
+        plot_data([mean], [ste], rew, p.param_idx, fp)
