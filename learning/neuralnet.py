@@ -30,10 +30,23 @@ class NeuralNetwork(nn.Module):
         d = self.model.state_dict()
         return [d['0.weight'], d['2.weight']]
 
+    def get_biases(self):
+        d = self.model.state_dict()
+        return [d['0.bias'], d['2.bias']]
+
+    def get_model(self):
+        return self.model.state_dict()
+
     def set_weights(self, weights):
         d = self.model.state_dict()
         d['0.weight'] = weights[0]
         d['2.weight'] = weights[1]
+        self.model.load_state_dict(d)
+
+    def set_biases(self, biases):
+        d = self.model.state_dict()
+        d['0.bias'] = biases[0]
+        d['2.bias'] = biases[1]
         self.model.load_state_dict(d)
 
     def forward(self, x):
