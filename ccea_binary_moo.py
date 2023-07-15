@@ -14,7 +14,7 @@ import joblib
 from scipy.spatial.distance import cdist
 
 # Custom packages
-from teaming.domain import DiscreteRoverDomain as Domain
+from AIC.aic import aic
 from ccea_binary import CCEA
 
 

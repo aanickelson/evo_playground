@@ -4,7 +4,7 @@ import sys
 import numpy as np
 from torch import from_numpy
 
-from evo_playground.learning.neuralnet import NeuralNetwork as NN
+from evo_playground.support.neuralnet import NeuralNetwork as NN
 from pymap_elites_multiobjective.parameters.learningparams01 import LearnParams as lp
 from pymap_elites_multiobjective.scripts_data.run_env import run_env
 
@@ -42,9 +42,9 @@ class AgPol:
 
 
 class RoverWrapper:
-    def __init__(self, env, param):
+    def __init__(self, env):
         self.env = env
-        self.p = param
+        self.p = env.params
         self.agents = self.setup_ag()
         self.vis = False
         self.use_bh = True
@@ -58,7 +58,7 @@ class RoverWrapper:
             ag.append(AgPol(st_size, hid, act_size))
         return ag
 
-    def evaluate(self, x):
+    def _evaluate(self, x):
         self.env.reset()
         wts = x
         if self.p.n_agents == 1 and len(x) > 1:

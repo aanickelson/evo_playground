@@ -3,7 +3,7 @@ class LearnParams:
 
     param_idx = 1
 
-    n_stat_runs = 5
+    n_stat_runs = 1
 
     # Neural Network:
     hid = 30

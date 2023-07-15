@@ -2,7 +2,7 @@ from os import path, getcwd
 import torch
 import parameters
 from teaming.domain import DiscreteRoverDomain as Domain
-from learning.neuralnet import NeuralNetwork as NN
+from support.neuralnet import NeuralNetwork as NN
 
 
 def load_model(trial, gen, prepend, species=0):

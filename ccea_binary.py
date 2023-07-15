@@ -17,7 +17,7 @@ from datetime import datetime
 from AIC.aic import aic as Domain
 from evo_playground.run_wrapper import run_env
 from parameters.debugLP import LearnParams as lp
-from evo_playground.learning.binary_species import Species
+from evo_playground.support.binary_species import Species
 
 
 

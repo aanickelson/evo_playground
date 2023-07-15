@@ -11,7 +11,7 @@ from random import random
 from AIC.aic import aic as Domain
 from evo_playground.run_env import run_env
 from parameters.learningparams01 import LearnParams as lp
-from evo_playground.learning.binary_species import Species
+from evo_playground.support.binary_species import Species
 
 
 class CCEA:
@@ -82,11 +82,6 @@ class CCEA:
                     species.binary_tournament((d_vec[:, i]))
 
                 species.mutate_weights()
-
-                # Every 20 generations, add back random policies to maintain diversity in the species
-                if not gen % 20:
-                    species.weights = species.weights[:-5]
-                    species.add_new_pols()
 
             if not gen % 200:
                 self.save_data()

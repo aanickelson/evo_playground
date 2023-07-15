@@ -8,8 +8,8 @@ import torch
 # Custom packages
 from teaming.domain_hierarchy_policies import DomainHierarchy as Domain
 from ccea_binary import CCEA
-# from learning.neuralnet import NeuralNetwork as NN
-from learning.neuralnet_no_hid import NeuralNetwork as NN
+# from support.neuralnet import NeuralNetwork as NN
+from support.neuralnet_no_hid import NeuralNetwork as NN
 
 
 class CCEA_Top(CCEA):
