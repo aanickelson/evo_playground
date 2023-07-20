@@ -11,7 +11,6 @@ from multiprocessing import Process, Pool
 from random import seed
 from datetime import datetime
 
-
 # Custom packages
 # from teaming.domain import DiscreteRoverDomain as Domain
 from AIC.aic import aic as Domain

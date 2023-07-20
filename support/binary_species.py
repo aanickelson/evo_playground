@@ -134,6 +134,5 @@ class Species:
         keep_vals = keep_idx[:int(self.n_pol / div_by)]
         self.weights = [self.weights[k] for k in keep_vals]
 
-    def save_model(self, trial, stat, gen, prepend, wts, species=''):
-        pth = path.join(getcwd(), 'weights', 't{:03d}_{}_{}weights_s{}_g{}.pth'.format(trial, stat, prepend, species, gen))
+    def save_model(self, pth, wts):
         torch.save(wts, pth)
