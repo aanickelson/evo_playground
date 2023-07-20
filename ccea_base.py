@@ -123,7 +123,7 @@ class CCEA:
         self.env.reset()
 
 def main(stat_nm):
-    base_path = "/home/toothless/workspaces/pymap_elites_multiobjective/scripts_data/data/518_20230713_151107/112_run0/"
+    base_path = "/home/anna/PycharmProjects/pymap_elites_multiobjective/scripts_data/data/518_20230713_151107/111_run0"
     now = datetime.now()
     now_str = now.strftime("%Y%m%d_%H%M%S")
 
