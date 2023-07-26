@@ -58,7 +58,7 @@ class RoverWrapper:
             ag.append(AgPol(st_size, hid, act_size))
         return ag
 
-    def _evaluate(self, x):
+    def setup(self, x):
         self.env.reset()
         wts = x
         if self.p.n_agents == 1 and len(x) > 1:
@@ -71,12 +71,35 @@ class RoverWrapper:
         for i, w in enumerate(wts):
             self.agents[i].set_trained_network(w)
             models.append(self.agents[i].model)
+        return models
 
+    def _evaluate(self, x):
+        models = self.setup(x)
         out_vals = run_env(self.env, models, self.p, use_bh=self.use_bh, vis=self.vis)
-
-
         if self.use_bh:
             fitness, bh = out_vals
             return fitness, bh[0]
         else:
             return out_vals
+
+    def _evaluate_multiple(self, x):
+        n_eval = self.p.n_cf_evals
+        models = self.setup(x)
+        fit_vals = np.zeros((n_eval, self.p.n_poi_types))
+        bh_vals = np.zeros((n_eval, self.p.n_bh))
+        for i in range(n_eval):
+            self.env.reset()
+            out_vals = run_env(self.env, models, self.p, use_bh=self.use_bh, vis=self.vis)
+            if self.use_bh:
+                fitness, bh = out_vals
+                fit_vals[i] = fitness
+                bh_vals[i] = bh
+            else:
+                fit_vals[i] = out_vals
+
+        fits = np.average(fit_vals, axis=0)
+        bhs = np.average(bh_vals, axis=0)
+        if self.use_bh:
+            return fits, bhs
+        else:
+            return fits
