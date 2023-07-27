@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 
 if __name__ == '__main__':
     # File name
-    base_fname = '/home/anna/PycharmProjects/pymap_elites_multiobjective/scripts_data/data/518_20230713_151107/112_run0/top_20230718_150159'
+    base_fname = '/home/toothless/workspaces/pymap_elites_multiobjective/scripts_data/data/519_20230724_150229/211_run2/top_20230726_141921'
     # Get subfile names
     file_data = list(os.walk(base_fname))[0][2]
     n_gen = 3000

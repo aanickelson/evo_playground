@@ -123,18 +123,18 @@ class CCEA:
         self.env.reset()
 
 def main(stat_nm):
-    base_path = "/home/anna/PycharmProjects/pymap_elites_multiobjective/scripts_data/data/518_20230713_151107/111_run0"
+    base_path = "/home/toothless/workspaces/pymap_elites_multiobjective/scripts_data/data/519_20230724_150229/211_run2"
     now = datetime.now()
     now_str = now.strftime("%Y%m%d_%H%M%S")
 
-    top_wts_pth = base_path + f'top_{now_str}/'
+    top_wts_pth = base_path + f'/top_{now_str}/'
     try:
         mkdir(top_wts_pth)
     except FileExistsError:
         pass
 
-    wts_path = base_path + "weights_100000.dat"
-    cent_path = base_path + "centroids_2000_6.dat"
+    wts_path = base_path + "/weights_200000.dat"
+    cent_path = base_path + "/centroids_2000_6.dat"
     params = Params.p500
     # learnp.n_gen = 10
     bh_size = 6
