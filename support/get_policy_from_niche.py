@@ -3,13 +3,14 @@ import pymap_elites_multiobjective.parameters as Params
 from evo_playground.support.rover_wrapper import RoverWrapper
 import numpy as np
 from sklearn.neighbors import KDTree
+import copy
 
 
 class PolicyMap:
     def __init__(self, pname, cname, bh_size):
         self.bh_size = bh_size
 
-        self.centroids = self.load_data(cname)
+        self.centroids = self.load_data(cname)[:, :self.bh_size]
         self.kdt = KDTree(self.centroids, leaf_size=30, metric='euclidean')
 
         self.pol_data = self.load_data(pname)
@@ -24,11 +25,16 @@ class PolicyMap:
         data = np.loadtxt(fname)
         return data
 
+    def norm_fits(self, fits):
+        fits[:, 0] = fits[:, 0] / max(fits[:, 0])
+        fits[:, 1] = fits[:, 1] / max(fits[:, 1])
+        return fits
+
     def unpack_pol_data(self):
         """
         Unpack policy data to separate fitnesses, centroids, behaviors, and weights
         """
-        p_fits = self.pol_data[:, :2]
+        p_fits = self.norm_fits(self.pol_data[:, :2])
         p_cents = self.pol_data[:, 2:2 + self.bh_size]
         p_desc = self.pol_data[:, 2 + self.bh_size: 2 + (2 * self.bh_size)]
         p_wts = self.pol_data[:, 2 + (2 * self.bh_size):]
@@ -57,34 +63,37 @@ class PolicyMap:
         c = self.get_hash_from_cent(bh)
         return c, self.bh_dict[c]
 
-    def select_pol(self, pols):
+    def select_pol(self, pols, wts):
         """
         Select from the set of policies
         """
-        ch = np.random.choice(pols)
-        return self.p_wts[ch]
+        w = np.array(wts)
+        f = self.p_fits[pols]
+        # Calculate the Euclidean distance between the weights input and each fitness, then select the closest
+        diff = np.linalg.norm(abs(f - w), axis=1)
+        pol_num = pols[np.argmin(diff)]
+        return self.p_wts[pol_num]
 
-    def get_pol(self, bh):
+    def get_pol(self, output):
+        bh = output[:self.bh_size]
+        wts = output[self.bh_size:]
         _, p_idxs = self.get_pols_from_bh(bh)
-        tries = 0
-        # How to do closest distance if empty? Continually +/- v small values & retest until I find one?
-        while not p_idxs and tries < 50:
-            bh += np.random.uniform(-0.05, 0.05, self.bh_size)
-            _, p_idxs = self.get_pols_from_bh(abs(bh))
-            tries += 1
         if not p_idxs:
             return []
-        selected_pol = self.select_pol(p_idxs)
+        selected_pol = self.select_pol(p_idxs, wts)
         return selected_pol
 
 
 
 if __name__ == '__main__':
-    pol_file = "/pymap_elites_multiobjective/scripts_data/data/518_20230713_151107/111_run0/weights_100000.dat"
-    cent_file = "/pymap_elites_multiobjective/scripts_data/data/518_20230713_151107/111_run0/centroids_2000_6.dat"
+    pol_file = "/home/anna/PycharmProjects/pymap_elites_multiobjective/scripts_data/data/516_20230726_160858/219_run2/weights_200000.dat"
+    cent_file = "/home/anna/PycharmProjects/pymap_elites_multiobjective/scripts_data/data/516_20230726_160858/219_run2/new_centroids_2000_6.dat"
     bh_sz = 6
     pol_map = PolicyMap(pol_file, cent_file, bh_sz)
-    en = aic(Params.p500)
+    p = copy.deepcopy(Params.p219)
+    p.counter = 0
+    p.n_agents = 2
+    en = aic(p)
     wra = RoverWrapper(en)
     wra.vis = False
     wra.use_bh = False
@@ -94,8 +103,8 @@ if __name__ == '__main__':
     #     print(v)
     v1 = [0, 0, 0, 1, 1, 1]
     v2 = [1, 1, 1, 0, 0, 0]
-    p1 = pol_map.get_pol(v1)
-    p2 = pol_map.get_pol(v2)
-    if len(p1) > 0 and len(p2) > 0:
-        print(wra._evaluate([p1, p2]))
+    p1 = pol_map.get_pol(v1, [0.5, 0.5])
+    p2 = pol_map.get_pol(v2, [0.5, 0.5])
+    # if len(p1) > 0 and len(p2) > 0:
+    #     print(wra._evaluate([p1, p2]))
         # break

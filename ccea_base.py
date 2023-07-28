@@ -9,6 +9,7 @@ import numpy as np
 from os import getcwd, path, mkdir
 import multiprocessing
 from datetime import datetime
+import copy
 
 # Custom packages
 from evo_playground.support.binary_species import Species
@@ -62,7 +63,6 @@ class CCEA:
         # Run the simulation
         G = self.env.run(models)
         return G
-
 
     def tournament(self, rawG, dscores):
         # Index of the policies that performed best over G
@@ -123,7 +123,7 @@ class CCEA:
         self.env.reset()
 
 def main(stat_nm):
-    base_path = "/home/toothless/workspaces/pymap_elites_multiobjective/scripts_data/data/519_20230724_150229/211_run2"
+    base_path = "/home/anna/PycharmProjects/pymap_elites_multiobjective/scripts_data/data/516_20230726_160858/219_run2"
     now = datetime.now()
     now_str = now.strftime("%Y%m%d_%H%M%S")
 
@@ -135,12 +135,13 @@ def main(stat_nm):
 
     wts_path = base_path + "/weights_200000.dat"
     cent_path = base_path + "/centroids_2000_6.dat"
-    params = Params.p500
-    # learnp.n_gen = 10
+    p_base = Params.p219
+    params = copy.deepcopy(Params.p500)
+    params.ag_in_st = p_base.ag_in_st
     bh_size = 6
-    in_sz = 2
+    wts_size = 2
     en = TopPolEnv(params, learnp, wts_path, cent_path, bh_size)
-    ccea = CCEA(en, params, learnp, 'G', in_sz, bh_size, base_path, top_wts_pth, stat_nm)
+    ccea = CCEA(en, params, learnp, 'G', wts_size, bh_size + wts_size, base_path, top_wts_pth, stat_nm)
     ccea.run_evolution()
 
 

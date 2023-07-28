@@ -33,7 +33,7 @@ class TopPolEnv:
             else:
                 return -3
         if len(low_level_pols) < len(models):
-            print("something has gone wrong here")
+            print("there are fewer policies than there should be")
             return -2
 
         G = np.array(self.wrap._evaluate(low_level_pols))
