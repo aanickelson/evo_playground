@@ -2,6 +2,7 @@ from AIC.aic import aic
 import pymap_elites_multiobjective.parameters as Params
 from evo_playground.support.rover_wrapper import RoverWrapper
 import numpy as np
+from numpy import inf
 from sklearn.neighbors import KDTree
 import copy
 
@@ -68,9 +69,17 @@ class PolicyMap:
         Select from the set of policies
         """
         w = np.array(wts)
-        f = self.p_fits[pols]
-        # Calculate the Euclidean distance between the weights input and each fitness, then select the closest
-        diff = np.linalg.norm(abs(f - w), axis=1)
+        f: object = self.p_fits[pols]
+        if len(wts) > 1:
+            # Calculate the Euclidean distance between the weights input and each fitness, then select the closest
+            diff = np.linalg.norm(abs(f - w), axis=1)
+        else:
+            # Find the ratio and normalize between [0, 1]
+            f_ratio = f[:, 0] / f[:, 1]
+            f_ratio[f_ratio == inf] = max(f_ratio) + 5
+            norm = np.linalg.norm(f_ratio)
+            f = f_ratio / norm
+            diff = abs(f - w)
         pol_num = pols[np.argmin(diff)]
         return self.p_wts[pol_num]
 
