@@ -122,39 +122,48 @@ class CCEA:
         #     species.save_model(max_wts[i], self.l2_wts_pth + f"spec{i}_{self.lp.n_gen}.pth")
         self.env.reset()
 
-def main(stat_nm):
-    base_path = "/home/toothless/workspaces/pymap_elites_multiobjective/scripts_data/data/522_20230807_164058/319_run0"
+def main(batch_p):
+    [stat_nm, en, param, learnpar, rew, wt_sz, out_sz, base_pth, top_wts_pth] = batch_p
+    ccea = CCEA(en, param, learnpar, rew, wt_sz, out_sz, base_pth, top_wts_pth, stat_nm)
+    ccea.run_evolution()
+
+
+def multiprocess_main(batch_for_multi):
+    # cpus = multiprocessing.cpu_count() - 1
+    cpus = 3
+    with multiprocessing.Pool(processes=cpus) as pool:
+        pool.map(main, batch_for_multi)
+
+def setup():
+    base_path = "/home/toothless/workspaces/pymap_elites_multiobjective/scripts_data/data/522_20230807_164058/309_run0"
+    p_base = Params.p309
+
     now = datetime.now()
     now_str = now.strftime("%Y%m%d_%H%M%S")
 
-    top_wts_pth = base_path + f'/top_{now_str}/'
+    top_wts_path = base_path + f'/top_{now_str}/'
+    print(top_wts_path)
     try:
-        mkdir(top_wts_pth)
+        mkdir(top_wts_path)
     except FileExistsError:
         pass
 
     wts_path = base_path + "/weights_200000.dat"
     cent_path = base_path + "/centroids_2000_6.dat"
-    p_base = Params.p319
-    params = copy.deepcopy(Params.p500)
+    params = copy.deepcopy(Params.p600)
     params.ag_in_st = p_base.ag_in_st
     bh_size = 6
     wts_size = 2
     out_wts_size = 1
-    en = TopPolEnv(params, learnp, wts_path, cent_path, bh_size)
-    ccea = CCEA(en, params, learnp, 'G', wts_size, bh_size + out_wts_size, base_path, top_wts_pth, stat_nm)
-    ccea.run_evolution()
-
-
-def multiprocess_main(batch_for_multi):
-    cpus = multiprocessing.cpu_count() - 1
-    # cpus = 2
-    with multiprocessing.Pool(processes=cpus) as pool:
-        pool.map(main, batch_for_multi)
+    learnp = LearnParams
+    learnp.n_stat_runs = 3
+    learnp.n_gen = 500
+    env = TopPolEnv(params, learnp, wts_path, cent_path, bh_size)
+    batch = [[i, env, params, learnp, 'G', wts_size, bh_size + out_wts_size, base_path, top_wts_path] for i in range(learnp.n_stat_runs)]
+    return batch
 
 
 if __name__ == '__main__':
-    learnp = LearnParams
-    batch = np.arange(0, learnp.n_stat_runs)
-    multiprocess_main(batch)
+    b = setup()
+    multiprocess_main(b)
     # main(batch[0])

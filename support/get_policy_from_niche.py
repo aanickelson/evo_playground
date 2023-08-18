@@ -35,7 +35,8 @@ class PolicyMap:
         """
         Unpack policy data to separate fitnesses, centroids, behaviors, and weights
         """
-        p_fits = self.norm_fits(self.pol_data[:, :2])
+        # p_fits = self.norm_fits(self.pol_data[:, :2])
+        p_fits = self.pol_data[:, :2]
         p_cents = self.pol_data[:, 2:2 + self.bh_size]
         p_desc = self.pol_data[:, 2 + self.bh_size: 2 + (2 * self.bh_size)]
         p_wts = self.pol_data[:, 2 + (2 * self.bh_size):]
@@ -69,14 +70,16 @@ class PolicyMap:
         Select from the set of policies
         """
         w = np.array(wts)
-        f: object = self.p_fits[pols]
+        f: object = np.array(self.p_fits[pols])
         if len(wts) > 1:
             # Calculate the Euclidean distance between the weights input and each fitness, then select the closest
             diff = np.linalg.norm(abs(f - w), axis=1)
         else:
+            # avoid divide by 0 errors
+            f[f == 0] = 1.0e-4
             # Find the ratio and normalize between [0, 1]
-            f_ratio = f[:, 0] / f[:, 1]
-            f_ratio[f_ratio == inf] = max(f_ratio) + 5
+            f_ratio = np.array(f[:, 0] / f[:, 1])
+            f_ratio[f_ratio == inf] = max(f_ratio[f_ratio != inf]) + 5
             norm = np.linalg.norm(f_ratio)
             f = f_ratio / norm
             diff = abs(f - w)
