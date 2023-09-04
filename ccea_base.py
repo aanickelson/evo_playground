@@ -129,41 +129,44 @@ def main(batch_p):
 
 
 def multiprocess_main(batch_for_multi):
-    # cpus = multiprocessing.cpu_count() - 1
-    cpus = 3
+    cpus = multiprocessing.cpu_count() - 1
+    # cpus = 1
     with multiprocessing.Pool(processes=cpus) as pool:
         pool.map(main, batch_for_multi)
 
-def setup():
-    base_path = "/home/toothless/workspaces/pymap_elites_multiobjective/scripts_data/data/522_20230807_164058/309_run0"
-    p_base = Params.p309
+def setup(select_only_bh, select_only_obj):
+    base_path = "/home/toothless/workspaces/pymap_elites_multiobjective/scripts_data/data/537_20230904_081955/211101_run0"
+    p_base = Params.p211101
 
     now = datetime.now()
     now_str = now.strftime("%Y%m%d_%H%M%S")
 
-    top_wts_path = base_path + f'/top_{now_str}/'
+    top_wts_path = base_path + f'/top_{now_str}_{(not select_only_bh)*"o"}{(not select_only_obj)*"b"}/'
     print(top_wts_path)
     try:
         mkdir(top_wts_path)
     except FileExistsError:
         pass
 
-    wts_path = base_path + "/weights_200000.dat"
-    cent_path = base_path + "/centroids_2000_6.dat"
-    params = copy.deepcopy(Params.p600)
+    wts_path = base_path + "/weights_100000.dat"
+    cent_path = base_path + "/centroids_1000_2.dat"
+    params = copy.deepcopy(Params.p211101b)
     params.ag_in_st = p_base.ag_in_st
-    bh_size = 6
+    params.counter = 0
+    bh_size = 2
     wts_size = 2
-    out_wts_size = 1
+    out_wts_size = 2
     learnp = LearnParams
-    learnp.n_stat_runs = 3
-    learnp.n_gen = 500
-    env = TopPolEnv(params, learnp, wts_path, cent_path, bh_size)
+    learnp.n_stat_runs = 5
+    learnp.n_gen = 300
+
+    env = TopPolEnv(params, learnp, wts_path, cent_path, bh_size, select_only_bh, select_only_obj)
     batch = [[i, env, params, learnp, 'G', wts_size, bh_size + out_wts_size, base_path, top_wts_path] for i in range(learnp.n_stat_runs)]
     return batch
 
 
 if __name__ == '__main__':
-    b = setup()
-    multiprocess_main(b)
-    # main(batch[0])
+    for onlybh, onlyobj in [[False, False], [True, False], [False, True]]:
+        b = setup(onlybh, onlyobj)
+        multiprocess_main(b)
+        # main(b[0])

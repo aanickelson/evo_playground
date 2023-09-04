@@ -16,7 +16,7 @@ class PolicyMap:
 
         self.pol_data = self.load_data(pname)
         self.p_fits, self.p_cents, self.p_desc, self.p_wts = self.unpack_pol_data()
-
+        self.pol_idxs = np.arange(0, self.pol_data.shape[0])
         self.bh_dict = self.create_bh_dict()
 
     def load_data(self, fname):
@@ -70,29 +70,42 @@ class PolicyMap:
         Select from the set of policies
         """
         w = np.array(wts)
-        f: object = np.array(self.p_fits[pols])
+        f = np.array(self.p_fits[pols])
         if len(wts) > 1:
+            # this is the case where the output is [g0, g1] instead of g0/g1
             # Calculate the Euclidean distance between the weights input and each fitness, then select the closest
-            diff = np.linalg.norm(abs(f - w), axis=1)
+            abs_d = abs(f - w)
+            diff = np.sqrt(abs_d[:, 0]**2 + abs_d[:, 1]**2)
         else:
-            # avoid divide by 0 errors
-            f[f == 0] = 1.0e-4
+            # In this case, we're outputting g0/g1, so we have to avoid divide by 0 errors
+            f[f < 1.0e-3] = 1.0e-3
             # Find the ratio and normalize between [0, 1]
             f_ratio = np.array(f[:, 0] / f[:, 1])
+            # Remove infinities and set them to something close to the max
             f_ratio[f_ratio == inf] = max(f_ratio[f_ratio != inf]) + 5
-            norm = np.linalg.norm(f_ratio)
-            f = f_ratio / norm
-            diff = abs(f - w)
+            # Normalize it all between [0, 1]
+            # norm = np.linalg.norm(f_ratio)
+            norm = max(f_ratio)
+            norm_f = f_ratio / norm
+            diff = abs(norm_f - w)
+        # pick the one that is closest
         pol_num = pols[np.argmin(diff)]
         return self.p_wts[pol_num]
 
-    def get_pol(self, output):
-        bh = output[:self.bh_size]
-        wts = output[self.bh_size:]
-        _, p_idxs = self.get_pols_from_bh(bh)
-        if not p_idxs:
-            return []
-        selected_pol = self.select_pol(p_idxs, wts)
+    def get_pol(self, nn_out, only_bh, only_obj):
+        bh = nn_out[:self.bh_size]
+        wts = nn_out[self.bh_size:]
+        if only_obj:
+            selected_pol = self.select_pol(self.pol_idxs, wts)
+        else:
+            _, p_idxs = self.get_pols_from_bh(bh)
+            if not p_idxs:
+                return []
+            if only_bh:
+                pol_idx = np.random.choice(p_idxs)
+                selected_pol = self.p_wts[pol_idx]
+            else:
+                selected_pol = self.select_pol(p_idxs, wts)
         return selected_pol
 
 
