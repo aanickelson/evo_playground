@@ -9,30 +9,23 @@ import numpy as np
 from os import getcwd, path, mkdir
 import multiprocessing
 from datetime import datetime
-import copy
 
 # Custom packages
 from evo_playground.support.binary_species import Species
-from evo_playground.parameters.learningparams02 import LearnParams
-import pymap_elites_multiobjective.parameters as Params
 from evo_playground.ccea_top_pol_redo import TopPolEnv
 
 
 class CCEA:
-    def __init__(self, env, p, lp, rew_type, in_size, out_size, base_fpath, top_path, statnm):
+    def __init__(self, env, p, lp, rew_type, in_size, out_size, base_fpath, statnm):
         np.random.seed(statnm + int(datetime.now().timestamp()))
         self.p = p
         self.env = env
         self.lp = lp
         self.stat_num = statnm
-        # self.n_gen = lp.n_gen
         self.n_gen = self.lp.n_gen
         self.base_fpath = base_fpath
-        self.top_path = top_path
-        self.wts_path = self.base_fpath + "weights_100000.dat"
-        self.cent_path = self.base_fpath + "centroids_2000_6.dat"
-        self.l2_wts_pth = self.top_path + "top_level_wts"
-        self.fits_path = self.top_path + f"top_level_fits_{self.stat_num}.npy"
+        self.wts_pth = self.base_fpath + "wts"
+        self.fits_path = self.base_fpath + f"fits_{self.stat_num}.npy"
         self.raw_g = np.zeros(self.lp.n_gen) - 1
         self.d = np.zeros((self.lp.n_stat_runs, self.lp.n_gen, self.p.n_agents))
         self.rew_type = rew_type
@@ -122,9 +115,10 @@ class CCEA:
         #     species.save_model(max_wts[i], self.l2_wts_pth + f"spec{i}_{self.lp.n_gen}.pth")
         self.env.reset()
 
+
 def main(batch_p):
-    [stat_nm, en, param, learnpar, rew, wt_sz, out_sz, base_pth, top_wts_pth] = batch_p
-    ccea = CCEA(en, param, learnpar, rew, wt_sz, out_sz, base_pth, top_wts_pth, stat_nm)
+    [stat_nm, en, param, learnpar, rew, wt_sz, out_sz, base_pth] = batch_p
+    ccea = CCEA(en, param, learnpar, rew, wt_sz, out_sz, base_pth, stat_nm)
     ccea.run_evolution()
 
 
@@ -134,39 +128,3 @@ def multiprocess_main(batch_for_multi):
     with multiprocessing.Pool(processes=cpus) as pool:
         pool.map(main, batch_for_multi)
 
-def setup(select_only_bh, select_only_obj):
-    base_path = "/home/toothless/workspaces/pymap_elites_multiobjective/scripts_data/data/537_20230904_081955/211101_run0"
-    p_base = Params.p211101
-
-    now = datetime.now()
-    now_str = now.strftime("%Y%m%d_%H%M%S")
-
-    top_wts_path = base_path + f'/top_{now_str}_{(not select_only_bh)*"o"}{(not select_only_obj)*"b"}/'
-    print(top_wts_path)
-    try:
-        mkdir(top_wts_path)
-    except FileExistsError:
-        pass
-
-    wts_path = base_path + "/weights_100000.dat"
-    cent_path = base_path + "/centroids_1000_2.dat"
-    params = copy.deepcopy(Params.p211101b)
-    params.ag_in_st = p_base.ag_in_st
-    params.counter = 0
-    bh_size = 2
-    wts_size = 2
-    out_wts_size = 2
-    learnp = LearnParams
-    learnp.n_stat_runs = 5
-    learnp.n_gen = 300
-
-    env = TopPolEnv(params, learnp, wts_path, cent_path, bh_size, select_only_bh, select_only_obj)
-    batch = [[i, env, params, learnp, 'G', wts_size, bh_size + out_wts_size, base_path, top_wts_path] for i in range(learnp.n_stat_runs)]
-    return batch
-
-
-if __name__ == '__main__':
-    for onlybh, onlyobj in [[False, False], [True, False], [False, True]]:
-        b = setup(onlybh, onlyobj)
-        multiprocess_main(b)
-        # main(b[0])

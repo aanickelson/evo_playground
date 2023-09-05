@@ -1,7 +1,15 @@
+from datetime import datetime
+import numpy as np
+from os import getcwd, path, mkdir
+import copy
+
 from AIC.aic import aic
 from evo_playground.support.get_policy_from_niche import PolicyMap
 from evo_playground.support.rover_wrapper import RoverWrapper
-import numpy as np
+from evo_playground.ccea_base import *
+from evo_playground.parameters.learningparams02 import LearnParams
+import pymap_elites_multiobjective.parameters as Params
+
 
 class TopPolEnv:
     def __init__(self, p, lp, pfile, cfile, bh_sz, only_bh=False, only_obj=False):
@@ -65,3 +73,41 @@ class TopPolEnv:
 
     def reset(self):
         self.env.reset()
+
+
+def setup(select_only_bh, select_only_obj):
+    base_path = "/home/toothless/workspaces/pymap_elites_multiobjective/scripts_data/data/537_20230904_081955/211101_run0"
+    p_base = Params.p211101
+
+    now = datetime.now()
+    now_str = now.strftime("%Y%m%d_%H%M%S")
+
+    top_wts_path = base_path + f'/top_{now_str}_{(not select_only_bh)*"o"}{(not select_only_obj)*"b"}/'
+    print(top_wts_path)
+    try:
+        mkdir(top_wts_path)
+    except FileExistsError:
+        pass
+
+    wts_path = base_path + "/weights_100000.dat"
+    cent_path = base_path + "/centroids_1000_2.dat"
+    params = copy.deepcopy(Params.p211101b)
+    params.ag_in_st = p_base.ag_in_st
+    params.counter = 0
+    bh_size = 2
+    wts_size = 2
+    out_wts_size = 2
+    learnp = LearnParams
+    learnp.n_stat_runs = 5
+    learnp.n_gen = 300
+
+    env = TopPolEnv(params, learnp, wts_path, cent_path, bh_size, select_only_bh, select_only_obj)
+    batch = [[i, env, params, learnp, 'G', wts_size, bh_size + out_wts_size, top_wts_path] for i in range(learnp.n_stat_runs)]
+    return batch
+
+
+if __name__ == '__main__':
+    for onlybh, onlyobj in [[False, False], [True, False], [False, True]]:
+        b = setup(onlybh, onlyobj)
+        multiprocess_main(b)
+        # main(b[0])
