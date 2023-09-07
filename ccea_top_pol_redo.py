@@ -9,6 +9,7 @@ from evo_playground.support.rover_wrapper import RoverWrapper
 from evo_playground.ccea_base import *
 from evo_playground.parameters.learningparams02 import LearnParams
 import pymap_elites_multiobjective.parameters as Params
+from evo_playground.radians_G import G_exp
 
 
 class TopPolEnv:
@@ -31,23 +32,6 @@ class TopPolEnv:
     def D(self):
         return self.env.D()
 
-    def G_exp(self, gs, wts):
-        def rem_div_zero(v, min_val=1e-20):
-            vals = np.array(v)
-            vals[vals < min_val] = min_val
-            return vals
-
-        b = rem_div_zero(wts)
-        g = rem_div_zero(gs)
-        # Get the angle of the preferred balance and of the g balance
-        theta_wts = np.arctan(b[1] / b[0])
-        theta_gs = np.arctan(g[1] / g[0])
-        # Take the difference between the angles, then scale so closer to the angle has a higher value
-        # -10 is a scalar you can play with. Higher scalar values give a steeper gradient near the ideal tradeoff
-        exp_val = np.exp(-10 * abs(theta_wts - theta_gs))
-        # Then scale so further from the origin has a higher value
-        return exp_val * np.sqrt(g[0] ** 2 + g[1] ** 2)
-
     def run(self, models):
         total_G = 0
         for wt in self.moo_wts:
@@ -66,7 +50,7 @@ class TopPolEnv:
                 return -2
 
             G = np.array(self.wrap._evaluate(low_level_pols))
-            scalar_G = self.G_exp(G, wt)
+            scalar_G = G_exp(G, wt)
             total_G += scalar_G
         total_G = total_G / len(self.moo_wts)
         return total_G
@@ -102,7 +86,7 @@ def setup(select_only_bh, select_only_obj):
     learnp.n_gen = 300
 
     env = TopPolEnv(params, learnp, wts_path, cent_path, bh_size, select_only_bh, select_only_obj)
-    batch = [[i, env, params, learnp, 'G', wts_size, bh_size + out_wts_size, top_wts_path] for i in range(learnp.n_stat_runs)]
+    batch = [[env, params, learnp, 'G', wts_size, bh_size + out_wts_size, top_wts_path, i] for i in range(learnp.n_stat_runs)]
     return batch
 
 

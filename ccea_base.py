@@ -2,6 +2,7 @@
 Adapted from evolutionary code written by github user Sir-Batman
 https://github.com/AADILab/PyTorch-Evo-Strategies
 """
+import os
 
 # Python packages
 from tqdm import tqdm
@@ -11,8 +12,11 @@ import multiprocessing
 from datetime import datetime
 
 # Custom packages
+from evo_playground.run_env import AICWrapper
 from evo_playground.support.binary_species import Species
-from evo_playground.ccea_top_pol_redo import TopPolEnv
+from pymap_elites_multiobjective.parameters.learningparams01 import LearnParams as lp
+import pymap_elites_multiobjective.parameters as Params
+from evo_playground.radians_G import G_exp
 
 
 class CCEA:
@@ -24,8 +28,8 @@ class CCEA:
         self.stat_num = statnm
         self.n_gen = self.lp.n_gen
         self.base_fpath = base_fpath
-        self.wts_pth = self.base_fpath + "wts"
-        self.fits_path = self.base_fpath + f"fits_{self.stat_num}.npy"
+        self.wts_pth = self.base_fpath + "/wts.npy"
+        self.fits_path = self.base_fpath + f"/fits_{self.stat_num}.npy"
         self.raw_g = np.zeros(self.lp.n_gen) - 1
         self.d = np.zeros((self.lp.n_stat_runs, self.lp.n_gen, self.p.n_agents))
         self.rew_type = rew_type
@@ -90,7 +94,7 @@ class CCEA:
                 spec.mutate_weights()
 
             for p_num in range(self.lp.n_policies):
-                G = self.run_once(p_num)
+                G = G_exp(self.run_once(p_num), [0.5, 0.5])
                 # D = [G] * self.p.n_agents
                 # Bookkeeping
                 # d_scores[:, p_num] = np.sum(D, axis=1)
@@ -117,7 +121,7 @@ class CCEA:
 
 
 def main(batch_p):
-    [stat_nm, en, param, learnpar, rew, wt_sz, out_sz, base_pth] = batch_p
+    [en, param, learnpar, rew, wt_sz, out_sz, base_pth, stat_nm] = batch_p
     ccea = CCEA(en, param, learnpar, rew, wt_sz, out_sz, base_pth, stat_nm)
     ccea.run_evolution()
 
@@ -128,3 +132,35 @@ def multiprocess_main(batch_for_multi):
     with multiprocessing.Pool(processes=cpus) as pool:
         pool.map(main, batch_for_multi)
 
+
+def setup(param_set, b_path=None):
+    if not b_path:
+        b_path = os.getcwd()
+
+    now = datetime.now()
+    base_path = path.join(b_path, 'data')
+    if not os.path.exists(base_path):
+        mkdir(base_path)
+
+    now_str = now.strftime("%Y%m%d_%H%M%S")
+    dirpath = path.join(base_path, now_str)
+    mkdir(dirpath)
+    batch = []
+
+    for p in param_set:
+        env = AICWrapper(p)
+        filepath = path.join(dirpath, f'{p.param_idx}')
+        mkdir(filepath)
+        for i in range(lp.n_stat_runs):
+            batch.append([env, p, lp, 'G', env.state_size(), env.action_size(), filepath, i])
+
+    return batch
+
+
+if __name__ == '__main__':
+    param_set = [Params.p100000]
+    b = setup(param_set, '/home/anna/PycharmProjects/evo_playground/')
+    multiprocess_main(b)
+    import beepy
+    beepy.beep(sound=4)
+    # main(b[0])
