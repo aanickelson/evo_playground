@@ -17,7 +17,8 @@ class NeuralNetwork(nn.Module):
         super(NeuralNetwork, self).__init__()
         self.model = nn.Sequential(
             nn.Linear(input_size, hid_size),
-            nn.ReLU(inplace=True),
+            # nn.ReLU(inplace=True),
+            nn.Sigmoid(),
             nn.Linear(hid_size, out_size),
             nn.Sigmoid(),
         )

@@ -94,11 +94,14 @@ class CCEA:
                 spec.mutate_weights()
 
             for p_num in range(self.lp.n_policies):
-                G = G_exp(self.run_once(p_num), [0.5, 0.5])
+                G = self.run_once(p_num)
                 # D = [G] * self.p.n_agents
                 # Bookkeeping
                 # d_scores[:, p_num] = np.sum(D, axis=1)
-                raw_G[p_num] = G
+                try:
+                    raw_G[p_num] = G
+                except ValueError:
+                    raw_G[p_num] = np.sum(G)
 
             self.raw_g[gen] = np.max(raw_G)
 
@@ -159,8 +162,9 @@ def setup(param_set, b_path=None):
 
 if __name__ == '__main__':
     param_set = [Params.p100000]
-    b = setup(param_set, '/home/anna/PycharmProjects/evo_playground/')
+    b = setup(param_set, '/home/toothless/workspaces/evo_playground/')
     multiprocess_main(b)
+    # main(b[0])
+
     import beepy
     beepy.beep(sound=4)
-    # main(b[0])

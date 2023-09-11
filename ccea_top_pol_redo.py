@@ -52,7 +52,7 @@ class TopPolEnv:
             G = np.array(self.wrap._evaluate(low_level_pols))
             scalar_G = G_exp(G, wt)
             total_G += scalar_G
-        total_G = total_G / len(self.moo_wts)
+        # total_G = total_G / len(self.moo_wts)
         return total_G
 
     def reset(self):
@@ -60,9 +60,8 @@ class TopPolEnv:
 
 
 def setup(select_only_bh, select_only_obj):
-    base_path = "/home/toothless/workspaces/pymap_elites_multiobjective/scripts_data/data/537_20230904_081955/211101_run0"
-    p_base = Params.p211101
-
+    base_path = "/home/toothless/workspaces/pymap_elites_multiobjective/scripts_data/data/541_20230907_103856/200000_run0"
+    p_base = Params.p200000
     now = datetime.now()
     now_str = now.strftime("%Y%m%d_%H%M%S")
 
@@ -75,7 +74,7 @@ def setup(select_only_bh, select_only_obj):
 
     wts_path = base_path + "/weights_100000.dat"
     cent_path = base_path + "/centroids_1000_2.dat"
-    params = copy.deepcopy(Params.p211101b)
+    params = copy.deepcopy(Params.p200000b)
     params.ag_in_st = p_base.ag_in_st
     params.counter = 0
     bh_size = 2
@@ -93,5 +92,9 @@ def setup(select_only_bh, select_only_obj):
 if __name__ == '__main__':
     for onlybh, onlyobj in [[False, False], [True, False], [False, True]]:
         b = setup(onlybh, onlyobj)
-        multiprocess_main(b)
+        for b0 in b:
+            main(b0)
+
+        # multiprocess_main(b)
         # main(b[0])
+
