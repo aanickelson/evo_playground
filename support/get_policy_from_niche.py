@@ -1,6 +1,7 @@
 from AIC.aic import aic
 import pymap_elites_multiobjective.parameters as Params
 from evo_playground.support.rover_wrapper import RoverWrapper
+from evo_playground.radians_G import G_exp
 import numpy as np
 from numpy import inf
 from sklearn.neighbors import KDTree
@@ -65,31 +66,24 @@ class PolicyMap:
         c = self.get_hash_from_cent(bh)
         return c, self.bh_dict[c]
 
-    def select_pol(self, pols, wts):
+    def select_pol(self, pols, w):
         """
         Select from the set of policies
         """
-        w = np.array(wts)
+        w = np.array(w)
         f = np.array(self.p_fits[pols])
-        if len(wts) > 1:
+        if len(w) > 1:
             # this is the case where the output is [g0, g1] instead of g0/g1
-            # Calculate the Euclidean distance between the weights input and each fitness, then select the closest
-            abs_d = abs(f - w)
-            diff = np.sqrt(abs_d[:, 0]**2 + abs_d[:, 1]**2)
+            diff = []
+            for fit in f:
+                diff.append(G_exp(fit, w))
         else:
-            # In this case, we're outputting g0/g1, so we have to avoid divide by 0 errors
-            f[f < 1.0e-3] = 1.0e-3
-            # Find the ratio and normalize between [0, 1]
-            f_ratio = np.array(f[:, 0] / f[:, 1])
-            # Remove infinities and set them to something close to the max
-            f_ratio[f_ratio == inf] = max(f_ratio[f_ratio != inf]) + 5
-            # Normalize it all between [0, 1]
-            # norm = np.linalg.norm(f_ratio)
-            norm = max(f_ratio)
-            norm_f = f_ratio / norm
-            diff = abs(norm_f - w)
+            wts = np.array([w, 1 - w])
+            diff = []
+            for fit in f:
+                diff.append(G_exp(fit, wts))
         # pick the one that is closest
-        pol_num = pols[np.argmin(diff)]
+        pol_num = pols[np.argmax(diff)]
         return self.p_wts[pol_num]
 
     def get_pol(self, nn_out, only_bh, only_obj):

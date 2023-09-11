@@ -24,7 +24,7 @@ class TopPolEnv:
         self.lp = lp
         self.pfile = pfile
         self.cfile = cfile
-        self.moo_wts = np.array([[0.5, 0.5]])
+        self.moo_wts = np.array([[0.5, 0.5], [1., 0.], [0., 1.]])  # [0.7, 0.3], [0.3, 0.7],
 
     def G(self):
         return self.env.G()
@@ -59,21 +59,11 @@ class TopPolEnv:
         self.env.reset()
 
 
-def setup(select_only_bh, select_only_obj):
-    base_path = "/home/toothless/workspaces/pymap_elites_multiobjective/scripts_data/data/541_20230907_103856/200000_run0"
+def setup():
+    base_path = "/home/toothless/workspaces/pymap_elites_multiobjective/scripts_data/data/545_20230911_154331/200000_run0"
     p_base = Params.p200000
     now = datetime.now()
     now_str = now.strftime("%Y%m%d_%H%M%S")
-
-    top_wts_path = base_path + f'/top_{now_str}_{(not select_only_bh)*"o"}{(not select_only_obj)*"b"}/'
-    print(top_wts_path)
-    try:
-        mkdir(top_wts_path)
-    except FileExistsError:
-        pass
-
-    wts_path = base_path + "/weights_100000.dat"
-    cent_path = base_path + "/centroids_1000_2.dat"
     params = copy.deepcopy(Params.p200000b)
     params.ag_in_st = p_base.ag_in_st
     params.counter = 0
@@ -81,20 +71,30 @@ def setup(select_only_bh, select_only_obj):
     wts_size = 2
     out_wts_size = 2
     learnp = LearnParams
-    learnp.n_stat_runs = 5
-    learnp.n_gen = 300
+    learnp.n_stat_runs = 2
+    learnp.n_gen = 500
+    batch = []
+    for onlybh, onlyobj in [[False, False], [True, False], [False, True]]:
+        top_wts_path = base_path + f'/top_{now_str}_{(not onlybh)*"o"}{(not onlyobj)*"b"}/'
+        print(top_wts_path)
+        try:
+            mkdir(top_wts_path)
+        except FileExistsError:
+            pass
 
-    env = TopPolEnv(params, learnp, wts_path, cent_path, bh_size, select_only_bh, select_only_obj)
-    batch = [[env, params, learnp, 'G', wts_size, bh_size + out_wts_size, top_wts_path, i] for i in range(learnp.n_stat_runs)]
+        wts_path = base_path + "/weights_100000.dat"
+        cent_path = base_path + "/centroids_1000_2.dat"
+
+        env = TopPolEnv(params, learnp, wts_path, cent_path, bh_size, onlybh, onlyobj)
+        for i in range(learnp.n_stat_runs):
+            batch.append([env, params, learnp, 'G', wts_size, bh_size + out_wts_size, top_wts_path, i])
+    # batch = [[env, params, learnp, 'G', wts_size, bh_size + out_wts_size, top_wts_path, i] for i in range(learnp.n_stat_runs)]
     return batch
 
 
 if __name__ == '__main__':
-    for onlybh, onlyobj in [[False, False], [True, False], [False, True]]:
-        b = setup(onlybh, onlyobj)
-        for b0 in b:
-            main(b0)
 
-        # multiprocess_main(b)
-        # main(b[0])
+    b = setup()
+    multiprocess_main(b)
+    # main(b[0])
 

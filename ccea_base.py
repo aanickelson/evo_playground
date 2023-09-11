@@ -84,7 +84,8 @@ class CCEA:
     def run_evolution(self):
 
         for gen in tqdm(range(self.lp.n_gen)):
-
+        # for gen in range(self.lp.n_gen):
+            batteries = np.zeros(self.lp.n_policies)
             # Bookkeeping
             d_scores = np.zeros((self.p.n_agents, self.lp.n_policies))
             raw_G = np.zeros(self.lp.n_policies)
@@ -98,6 +99,7 @@ class CCEA:
                 # D = [G] * self.p.n_agents
                 # Bookkeeping
                 # d_scores[:, p_num] = np.sum(D, axis=1)
+                # batteries[p_num] = self.env.agents[0].battery
                 try:
                     raw_G[p_num] = G
                 except ValueError:
@@ -105,6 +107,7 @@ class CCEA:
 
             self.raw_g[gen] = np.max(raw_G)
 
+            # print(gen, " BATTERY: ", min(batteries), max(batteries), np.mean(batteries))
             # Policies that performed best
             max_wts = [self.species[sp].weights[np.argmax(raw_G)] for sp in range(self.p.n_agents)]
             self.tournament(raw_G, d_scores)
