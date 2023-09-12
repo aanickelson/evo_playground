@@ -10,6 +10,7 @@ import numpy as np
 from os import getcwd, path, mkdir
 import multiprocessing
 from datetime import datetime
+from time import time
 
 # Custom packages
 from evo_playground.run_env import AICWrapper
@@ -127,9 +128,11 @@ class CCEA:
 
 
 def main(batch_p):
+    start = time()
     [en, param, learnpar, rew, wt_sz, out_sz, base_pth, stat_nm] = batch_p
     ccea = CCEA(en, param, learnpar, rew, wt_sz, out_sz, base_pth, stat_nm)
     ccea.run_evolution()
+    print(time() - start, base_pth)
 
 
 def multiprocess_main(batch_for_multi):
