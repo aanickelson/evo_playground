@@ -32,35 +32,61 @@ class TopPolEnv:
     def D(self):
         return self.env.D()
 
-    def run(self, models):
+    def choose_pols(self, in_val, models):
+        low_level_pols = []
+        for i, policy in enumerate(models):
+            # Get the NN output (behavior)
+            bh_choice = policy(in_val).detach().numpy()
+            # Get a policy from a filled niche close to that behavior
+            pol_choice = self.pmap.get_pol(bh_choice, self.select_only_bh, self.select_only_obj)
+            if len(pol_choice) > 0:
+                low_level_pols.append(pol_choice)
+            else:
+                return -3
+        if len(low_level_pols) < len(models):
+            print("there are fewer policies than there should be")
+            return -2
+        return low_level_pols
+
+    def run(self, top_models):
         total_G = 0
         for wt in self.moo_wts:
-            low_level_pols = []
-            for i, policy in enumerate(models):
-                # Get the NN output (behavior)
-                bh_choice = policy(wt).detach().numpy()
-                # Get a policy from a filled niche close to that behavior
-                pol_choice = self.pmap.get_pol(bh_choice, self.select_only_bh, self.select_only_obj)
-                if len(pol_choice) > 0:
-                    low_level_pols.append(pol_choice)
-                else:
-                    return -3
-            if len(low_level_pols) < len(models):
-                print("there are fewer policies than there should be")
-                return -2
-
-            G = np.array(self.wrap._evaluate(low_level_pols))
+            G = np.array(self.run_env(wt, top_models))
             scalar_G = G_exp(G, wt)
             total_G += scalar_G
         # total_G = total_G / len(self.moo_wts)
         return total_G
+
+    def _evaluate(self, low_pol_vals):
+        # out_vals = run_env(self.env, models, self.p, use_bh=self.use_bh, vis=self.vis)
+        # if self.use_bh:
+        #     fitness, bh = out_vals
+        #     return fitness, bh[0]
+        # else:
+        #     return out_vals
+        pass
+
+    def run_env(self, wt_bal, top_models, n_ts_select=5):
+        for i in range(self.p.time_steps):
+            if not i % n_ts_select:
+                input_val = np.concatenate([wt_bal, self.env.G()])
+                ll_pol_vals = self.choose_pols(input_val, top_models)
+                low_level_pols = self.wrap.setup(ll_pol_vals)
+
+            state = self.env.state()
+            actions = []
+            for i, policy in enumerate(low_level_pols):
+                action = policy(state[i]).detach().numpy()
+                actions.append(action)
+            self.env.action(actions)
+        return self.env.G()
 
     def reset(self):
         self.env.reset()
 
 
 def setup():
-    base_path = "/home/toothless/workspaces/pymap_elites_multiobjective/scripts_data/data/545_20230911_154331/200000_run0"
+    base_path = "/home/anna/PycharmProjects/pymap_elites_multiobjective/scripts_data/data/545_20230911_154331/200000_run0"
     p_base = Params.p200000
     now = datetime.now()
     now_str = now.strftime("%Y%m%d_%H%M%S")
@@ -71,8 +97,8 @@ def setup():
     wts_size = 2
     out_wts_size = 2
     learnp = LearnParams
-    learnp.n_stat_runs = 2
-    learnp.n_gen = 5
+    learnp.n_stat_runs = 1
+    learnp.n_gen = 50
     batch = []
     for onlybh, onlyobj in [[False, True], [False, False], [True, False]]:
         top_wts_path = base_path + f'/top_{now_str}_{(not onlybh)*"o"}{(not onlyobj)*"b"}/'
@@ -87,7 +113,7 @@ def setup():
 
         env = TopPolEnv(params, learnp, wts_path, cent_path, bh_size, onlybh, onlyobj)
         for i in range(learnp.n_stat_runs):
-            batch.append([env, params, learnp, 'G', wts_size, bh_size + out_wts_size, top_wts_path, i])
+            batch.append([env, params, learnp, 'G', wts_size * 2, bh_size + out_wts_size, top_wts_path, i])
     # batch = [[env, params, learnp, 'G', wts_size, bh_size + out_wts_size, top_wts_path, i] for i in range(learnp.n_stat_runs)]
     return batch
 
