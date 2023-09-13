@@ -86,19 +86,19 @@ class TopPolEnv:
 
 
 def setup():
-    base_path = "/home/anna/PycharmProjects/pymap_elites_multiobjective/scripts_data/data/545_20230911_154331/200000_run0"
-    p_base = Params.p200000
+    base_path = "/home/toothless/workspaces/pymap_elites_multiobjective/scripts_data/data/546_20230912_163947/200100_run0"
+    p_base = Params.p200100
     now = datetime.now()
     now_str = now.strftime("%Y%m%d_%H%M%S")
-    params = copy.deepcopy(Params.p200000b)
+    params = copy.deepcopy(Params.p200100b)
     params.ag_in_st = p_base.ag_in_st
     params.counter = 0
     bh_size = 2
     wts_size = 2
     out_wts_size = 2
     learnp = LearnParams
-    learnp.n_stat_runs = 1
-    learnp.n_gen = 50
+    learnp.n_stat_runs = 2
+    learnp.n_gen = 500
     batch = []
     for onlybh, onlyobj in [[False, True], [False, False], [True, False]]:
         top_wts_path = base_path + f'/top_{now_str}_{(not onlybh)*"o"}{(not onlyobj)*"b"}/'
@@ -112,8 +112,15 @@ def setup():
         cent_path = base_path + "/centroids_1000_2.dat"
 
         env = TopPolEnv(params, learnp, wts_path, cent_path, bh_size, onlybh, onlyobj)
+        in_size = wts_size * 2
+        out_size = bh_size + out_wts_size
+        if onlybh:
+            out_size = bh_size
+        if onlyobj:
+            out_size = out_wts_size
+
         for i in range(learnp.n_stat_runs):
-            batch.append([env, params, learnp, 'G', wts_size * 2, bh_size + out_wts_size, top_wts_path, i])
+            batch.append([env, params, learnp, 'G', in_size, out_size, top_wts_path, i])
     # batch = [[env, params, learnp, 'G', wts_size, bh_size + out_wts_size, top_wts_path, i] for i in range(learnp.n_stat_runs)]
     return batch
 
@@ -121,8 +128,8 @@ def setup():
 if __name__ == '__main__':
 
     b = setup()
-    # multiprocess_main(b)
-    for bat in b:
-        main(bat)
+    multiprocess_main(b)
+    # for bat in b:
+    #     main(bat)
     # main(b[0])
 

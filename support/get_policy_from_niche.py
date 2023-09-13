@@ -114,11 +114,12 @@ class PolicyMap:
         return self.p_wts[pol_num]
 
     def get_pol(self, nn_out, only_bh, only_obj):
-        bh = nn_out[:self.bh_size]
-        wts = nn_out[self.bh_size:]
+
         if only_obj:
+            wts = nn_out
             selected_pol = self.select_pol(self.pareto_idxs, wts)
         else:
+            bh = nn_out[:self.bh_size]
             _, p_idxs = self.get_pols_from_bh(bh)
             if not p_idxs:
                 return []
@@ -126,6 +127,7 @@ class PolicyMap:
                 pol_idx = np.random.choice(p_idxs)
                 selected_pol = self.p_wts[pol_idx]
             else:
+                wts = nn_out[self.bh_size:]
                 selected_pol = self.select_pol(p_idxs, wts)
         return selected_pol
 
