@@ -5,6 +5,7 @@ from evo_playground.radians_G import G_exp
 import numpy as np
 from numpy import inf
 from sklearn.neighbors import KDTree
+import pymap_elites_multiobjective.scripts_data.often_used as util
 import copy
 
 
@@ -18,7 +19,11 @@ class PolicyMap:
         self.pol_data = self.load_data(pname)
         self.p_fits, self.p_cents, self.p_desc, self.p_wts = self.unpack_pol_data()
         self.pol_idxs = np.arange(0, self.pol_data.shape[0])
+        self.pareto_idxs = self.calc_pareto_data(self.p_fits)
         self.bh_dict = self.create_bh_dict()
+        self.theta_fits = None
+        self.exp_vals = None
+        self.g_exp_setup()
 
     def load_data(self, fname):
         """
@@ -42,6 +47,31 @@ class PolicyMap:
         p_desc = self.pol_data[:, 2 + self.bh_size: 2 + (2 * self.bh_size)]
         p_wts = self.pol_data[:, 2 + (2 * self.bh_size):]
         return p_fits, p_cents, p_desc, p_wts
+
+    def calc_pareto_data(self, fitnesses, layers=10):
+        fit = np.zeros(fitnesses.shape[0])
+        fits = fitnesses.copy()
+        for lay in range(layers, 0, -1):
+            pareto = util.is_pareto_efficient_simple(fits)
+            fit[pareto] = 1
+            fits[pareto] = [0, 0]
+        return np.nonzero(fit)[0]
+
+    def g_exp_setup(self):
+        self.p_fits = rem_div_zero(self.p_fits)
+        self.theta_fits = np.arctan(self.p_fits[:, 1] / self.p_fits[:, 0])
+        self.exp_vals = np.sqrt(self.p_fits[:, 0] ** 2 + self.p_fits[:, 1] ** 2)
+
+    def G_exp(self, pol_nums, desired_wts):
+        b = rem_div_zero(desired_wts)
+        # Get the angle of the preferred balance and of the g balance
+        theta_wts = np.arctan(b[1] / b[0])
+        # theta_gs = np.arctan(g[1] / g[0])
+        # Take the difference between the angles, then scale so closer to the angle has a higher value
+        # -10 is a scalar you can play with. Higher scalar values give a steeper gradient near the ideal tradeoff
+        exp_val = np.exp(-10 * abs(theta_wts - self.theta_fits[pol_nums]))
+        # Then scale so further from the origin has a higher value
+        return exp_val * self.exp_vals[pol_nums]
 
     def create_bh_dict(self):
         """
@@ -71,17 +101,14 @@ class PolicyMap:
         Select from the set of policies
         """
         w = np.array(w)
-        f = np.array(self.p_fits[pols])
+        # f = np.array(self.p_fits[pols])
         if len(w) > 1:
             # this is the case where the output is [g0, g1] instead of g0/g1
-            diff = []
-            for fit in f:
-                diff.append(G_exp(fit, w))
+            # diff = []
+            diff = self.G_exp(pols, w)
         else:
             wts = np.array([w, 1 - w])
-            diff = []
-            for fit in f:
-                diff.append(G_exp(fit, wts))
+            diff = self.G_exp(pols, wts)
         # pick the one that is closest
         pol_num = pols[np.argmax(diff)]
         return self.p_wts[pol_num]
@@ -90,7 +117,7 @@ class PolicyMap:
         bh = nn_out[:self.bh_size]
         wts = nn_out[self.bh_size:]
         if only_obj:
-            selected_pol = self.select_pol(self.pol_idxs, wts)
+            selected_pol = self.select_pol(self.pareto_idxs, wts)
         else:
             _, p_idxs = self.get_pols_from_bh(bh)
             if not p_idxs:
@@ -103,10 +130,15 @@ class PolicyMap:
         return selected_pol
 
 
+def rem_div_zero(v, min_val=1e-20):
+    vals = np.array(v)
+    vals[vals < min_val] = min_val
+    return vals
+
 
 if __name__ == '__main__':
     pol_file = "/home/anna/PycharmProjects/pymap_elites_multiobjective/scripts_data/data/516_20230726_160858/219_run2/weights_200000.dat"
-    cent_file = "/home/anna/PycharmProjects/pymap_elites_multiobjective/scripts_data/data/516_20230726_160858/219_run2/new_centroids_2000_6.dat"
+    cent_file = "/home/anna/PycharmProjects/pymap_elites_multiobjective/scripts_data/data/516_20230726_160858/219_run2/centroids_2000_6.dat"
     bh_sz = 6
     pol_map = PolicyMap(pol_file, cent_file, bh_sz)
     p = copy.deepcopy(Params.p219)

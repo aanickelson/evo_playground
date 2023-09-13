@@ -1,13 +1,13 @@
 import numpy as np
 
 
-def G_exp(gs, wts):
+def G_exp(gs, desired_wts):
     def rem_div_zero(v, min_val=1e-20):
         vals = np.array(v)
         vals[vals < min_val] = min_val
         return vals
 
-    b = rem_div_zero(wts)
+    b = rem_div_zero(desired_wts)
     g = rem_div_zero(gs)
     # Get the angle of the preferred balance and of the g balance
     theta_wts = np.arctan(b[1] / b[0])
