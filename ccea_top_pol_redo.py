@@ -100,7 +100,7 @@ def setup():
     learnp.n_stat_runs = 2
     learnp.n_gen = 500
     batch = []
-    for onlybh, onlyobj in [[False, True], [False, False], [True, False]]:
+    for onlybh, onlyobj in [[False, False], [True, False]]:  #[False, True],
         top_wts_path = base_path + f'/top_{now_str}_{(not onlybh)*"o"}{(not onlyobj)*"b"}/'
         print(top_wts_path)
         try:
@@ -128,8 +128,8 @@ def setup():
 if __name__ == '__main__':
 
     b = setup()
-    multiprocess_main(b)
-    # for bat in b:
-    #     main(bat)
+    # multiprocess_main(b)
+    for bat in b:
+        main(bat)
     # main(b[0])
 

@@ -128,11 +128,11 @@ class CCEA:
 
 
 def main(batch_p):
-    start = time()
+    # start = time()
     [en, param, learnpar, rew, wt_sz, out_sz, base_pth, stat_nm] = batch_p
     ccea = CCEA(en, param, learnpar, rew, wt_sz, out_sz, base_pth, stat_nm)
     ccea.run_evolution()
-    print(time() - start, base_pth)
+    # print(time() - start, base_pth)
 
 
 def multiprocess_main(batch_for_multi):

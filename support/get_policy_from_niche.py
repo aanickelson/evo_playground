@@ -20,7 +20,10 @@ class PolicyMap:
         self.p_fits, self.p_cents, self.p_desc, self.p_wts = self.unpack_pol_data()
         self.pol_idxs = np.arange(0, self.pol_data.shape[0])
         self.pareto_idxs = self.calc_pareto_data(self.p_fits)
-        self.bh_dict = self.create_bh_dict()
+        # Yes this is dumb you have to do it twice. But the first time is to see what centroids each value is in
+        # The second time re-sets it after removing the empty centroids.
+        self.bh_dict, self.centroids = self.create_bh_dict()
+        self.kdt = KDTree(self.centroids, leaf_size=30, metric='euclidean')
         self.theta_fits = None
         self.exp_vals = None
         self.g_exp_setup()
@@ -69,7 +72,7 @@ class PolicyMap:
         # theta_gs = np.arctan(g[1] / g[0])
         # Take the difference between the angles, then scale so closer to the angle has a higher value
         # -10 is a scalar you can play with. Higher scalar values give a steeper gradient near the ideal tradeoff
-        exp_val = np.exp(-10 * abs(theta_wts - self.theta_fits[pol_nums]))
+        exp_val = np.exp(-5. * abs(theta_wts - self.theta_fits[pol_nums]))
         # Then scale so further from the origin has a higher value
         return exp_val * self.exp_vals[pol_nums]
 
@@ -81,7 +84,9 @@ class PolicyMap:
         for i, c in enumerate(self.p_cents):
             hval = self.get_hash_from_cent(c)
             bh_dict[hval].append(i)
-        return bh_dict
+        bhd = {k:v for k, v in bh_dict.items() if v}
+        bhd_keys = [k for k, _ in bhd.items()]
+        return bhd, bhd_keys
 
     def get_hash_from_cent(self, centroid):
         niche_index = self.kdt.query([centroid], k=1)[1][0][0]
@@ -129,6 +134,7 @@ class PolicyMap:
             else:
                 wts = nn_out[self.bh_size:]
                 selected_pol = self.select_pol(p_idxs, wts)
+
         return selected_pol
 
 

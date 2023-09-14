@@ -42,12 +42,13 @@ class AgPol:
 
 
 class RoverWrapper:
-    def __init__(self, env):
+    def __init__(self, env, behs):
         self.env = env
         self.p = env.params
         self.agents = self.setup_ag()
         self.vis = False
         self.use_bh = True
+        self.behs = behs
 
     def setup_ag(self):
         st_size = self.env.state_size()
@@ -63,9 +64,12 @@ class RoverWrapper:
         wts = x
         if self.p.n_agents == 1 and len(x) > 1:
             wts = [x]
-        if len(wts) != self.p.n_agents:
-            print(f"given x is of length {len(x)}, should be {self.p.n_agents}")
-            return
+        try:
+            if len(wts) != self.p.n_agents:
+                print(f"given x is of length {len(x)}, should be {self.p.n_agents}")
+                return
+        except TypeError:
+            blerg = 10
 
         models = []
         for i, w in enumerate(wts):
@@ -89,7 +93,7 @@ class RoverWrapper:
         bh_vals = np.zeros((n_eval, self.p.n_bh))
         for i in range(n_eval):
             self.env.reset()
-            out_vals = run_env(self.env, models, self.p, use_bh=self.use_bh, vis=self.vis)
+            out_vals = run_env(self.env, models, self.p, self.behs, use_bh=self.use_bh, vis=self.vis)
             if self.use_bh:
                 fitness, bh = out_vals
                 fit_vals[i] = fitness

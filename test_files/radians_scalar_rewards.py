@@ -4,7 +4,7 @@ import matplotlib.colors as colors
 
 
 def f_exp(x):
-    return np.exp(-10*x)
+    return np.exp(-5.*x)
 
 
 def f_tanh(x):
