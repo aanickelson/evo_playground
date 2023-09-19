@@ -79,7 +79,7 @@ class RoverWrapper:
 
     def _evaluate(self, x):
         models = self.setup(x)
-        out_vals = run_env(self.env, models, self.p, use_bh=self.use_bh, vis=self.vis)
+        out_vals = run_env(self.env, models, self.p, self.behs, use_bh=self.use_bh, vis=self.vis)
         if self.use_bh:
             fitness, bh = out_vals
             return fitness, bh[0]
@@ -94,6 +94,7 @@ class RoverWrapper:
         for i in range(n_eval):
             self.env.reset()
             out_vals = run_env(self.env, models, self.p, self.behs, use_bh=self.use_bh, vis=self.vis)
+            # out_vals = run_env(self.env, models, self.p, use_bh=self.use_bh, vis=self.vis)
             if self.use_bh:
                 fitness, bh = out_vals
                 fit_vals[i] = fitness

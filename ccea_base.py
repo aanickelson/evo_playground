@@ -32,7 +32,7 @@ class CCEA:
         self.wts_pth = self.base_fpath + "/wts.npy"
         self.fits_path = self.base_fpath + f"/fits_{self.stat_num}.npy"
         self.raw_g = np.zeros(self.lp.n_gen) - 1
-        self.d = np.zeros((self.lp.n_stat_runs, self.lp.n_gen, self.p.n_agents))
+        self.d = np.zeros((self.lp.n_gen, self.p.n_agents))
         self.rew_type = rew_type
         self.nn_in = in_size
         self.nn_hid = lp.hid
@@ -96,17 +96,17 @@ class CCEA:
                 spec.mutate_weights()
 
             for p_num in range(self.lp.n_policies):
-                G = self.run_once(p_num)
+                G, D = self.run_once(p_num)
                 # D = [G] * self.p.n_agents
                 # Bookkeeping
                 # d_scores[:, p_num] = np.sum(D, axis=1)
                 # batteries[p_num] = self.env.agents[0].battery
-                try:
-                    raw_G[p_num] = G
-                except ValueError:
-                    raw_G[p_num] = np.sum(G)
+
+                raw_G[p_num] = G
+                d_scores[:, p_num] = D
 
             self.raw_g[gen] = np.max(raw_G)
+            self.d[gen] = np.max(d_scores, axis=1)
 
             # print(gen, " BATTERY: ", min(batteries), max(batteries), np.mean(batteries))
             # Policies that performed best

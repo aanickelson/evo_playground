@@ -1,3 +1,4 @@
+import os.path
 from datetime import datetime
 import numpy as np
 from os import getcwd, path, mkdir
@@ -10,12 +11,13 @@ from evo_playground.ccea_base import *
 from evo_playground.parameters.learningparams02 import LearnParams
 import pymap_elites_multiobjective.parameters as Params
 from evo_playground.radians_G import G_exp
+from itertools import combinations
 
 
 class TopPolEnv:
-    def __init__(self, p, lp, pfile, cfile, bh_sz, only_bh=False, only_obj=False):
+    def __init__(self, p, lp, pfile, cfile, bh_sz, bhstrs, only_bh=False, only_obj=False):
         self.env = aic(p)
-        self.wrap = RoverWrapper(self.env)
+        self.wrap = RoverWrapper(self.env, bhstrs)
         self.wrap.use_bh = False
         self.select_only_bh = only_bh
         self.select_only_obj = only_obj
@@ -50,12 +52,18 @@ class TopPolEnv:
 
     def run(self, top_models):
         total_G = 0
+        D_scores = np.zeros(self.p.n_agents)
         for wt in self.moo_wts:
             G = np.array(self.run_env(wt, top_models))
-            scalar_G = G_exp(G, wt)
+            # scalar_G = G_exp(G, wt)
+            scalar_G = np.sum(wt * G)
             total_G += scalar_G
+            D = np.array(self.env.D())
+            for i, ag_d in enumerate(D):
+                # D_scores[i] += G_exp(ag_d, wt)
+                D_scores[i] += np.sum(ag_d * wt)
         # total_G = total_G / len(self.moo_wts)
-        return total_G
+        return total_G, D_scores
 
     def _evaluate(self, low_pol_vals):
         # out_vals = run_env(self.env, models, self.p, use_bh=self.use_bh, vis=self.vis)
@@ -84,52 +92,81 @@ class TopPolEnv:
     def reset(self):
         self.env.reset()
 
+def get_bh_attrs():
+    bh_options = ['battery', 'distance', 'type sep', 'type combo', 'v or e', 'full act']
+    bh_combos = list(combinations(bh_options, 2))
+    bh_options_one = [['type sep'], ['type combo'], ['v or e'], ['full act']]
+    all_options = bh_options_one + bh_combos
+    bh_sizes = {'battery': 1, 'distance': 1, 'type sep': 4, 'type combo': 2,
+                'v or e': 2, 'full act': 10}
+    bh_strs = []
+    for c in all_options:
+        combo_str = ''
+        n_bh = 0
+        for c0 in c:
+            combo_str += c0 + '_'
+            n_bh += bh_sizes[c0]
+        bh_strs.append([c, combo_str[:-1], n_bh])
+    return bh_strs
+
 
 def setup():
-    base_path = "/home/toothless/workspaces/pymap_elites_multiobjective/scripts_data/data/546_20230912_163947/200100_run0"
-    p_base = Params.p200100
-    now = datetime.now()
-    now_str = now.strftime("%Y%m%d_%H%M%S")
-    params = copy.deepcopy(Params.p200100b)
+    base_path = "/home/toothless/workspaces/pymap_elites_multiobjective/scripts_data/data/554_20230914_175010"
+    learnp = LearnParams
+    param_num = 200000
+    p_base = Params.p200000
+    params = copy.deepcopy(Params.p200000b)
+    ll_pol_ngen = 100000
+    ll_pol_niches = 1000
+
+    rw_type = 'D'
     params.ag_in_st = p_base.ag_in_st
     params.counter = 0
-    bh_size = 2
     wts_size = 2
     out_wts_size = 2
-    learnp = LearnParams
+    n_runs = 2
     learnp.n_stat_runs = 2
     learnp.n_gen = 500
+
+    now = datetime.now()
+    now_str = now.strftime("%Y%m%d_%H%M%S")
+    bh_options = get_bh_attrs()
     batch = []
-    for onlybh, onlyobj in [[False, False], [True, False]]:  #[False, True],
-        top_wts_path = base_path + f'/top_{now_str}_{(not onlybh)*"o"}{(not onlyobj)*"b"}/'
-        print(top_wts_path)
-        try:
-            mkdir(top_wts_path)
-        except FileExistsError:
-            pass
+    for [bh_strs, bh_combo, bh_size] in bh_options:
+        for runnum in range(n_runs):
+            data_path = os.path.join(base_path, f'{param_num}_{bh_combo}_run{runnum}')
+            wts_path = data_path + f"/weights_{ll_pol_ngen}.dat"
+            cent_path = data_path + f"/centroids_{ll_pol_niches}_{bh_size}.dat"
+            if not os.path.exists(wts_path) or not os.path.exists(cent_path):
+                print(f'These paths do not exist \n   {wts_path} \n   {cent_path}')
+                continue
+            for onlybh, onlyobj in [[False, False]]:  #, [True, False], [False, True]]:
+                top_wts_path = data_path + f'/top_{now_str}_{(not onlybh)*"o"}{(not onlyobj)*"b"}/'
+                print(top_wts_path)
+                try:
+                    mkdir(top_wts_path)
+                except FileExistsError:
+                    pass
 
-        wts_path = base_path + "/weights_100000.dat"
-        cent_path = base_path + "/centroids_1000_2.dat"
+                env = TopPolEnv(params, learnp, wts_path, cent_path, bh_size, bh_strs, onlybh, onlyobj)
+                in_size = wts_size * 2
+                out_size = bh_size + out_wts_size
+                if onlybh:
+                    out_size = bh_size
+                if onlyobj:
+                    out_size = out_wts_size
 
-        env = TopPolEnv(params, learnp, wts_path, cent_path, bh_size, onlybh, onlyobj)
-        in_size = wts_size * 2
-        out_size = bh_size + out_wts_size
-        if onlybh:
-            out_size = bh_size
-        if onlyobj:
-            out_size = out_wts_size
-
-        for i in range(learnp.n_stat_runs):
-            batch.append([env, params, learnp, 'G', in_size, out_size, top_wts_path, i])
-    # batch = [[env, params, learnp, 'G', wts_size, bh_size + out_wts_size, top_wts_path, i] for i in range(learnp.n_stat_runs)]
+                for i in range(learnp.n_stat_runs):
+                    batch.append([env, params, learnp, rw_type, in_size, out_size, top_wts_path, i])
+            # batch = [[env, params, learnp, 'G', wts_size, bh_size + out_wts_size, top_wts_path, i] for i in range(learnp.n_stat_runs)]
     return batch
 
 
 if __name__ == '__main__':
 
     b = setup()
-    # multiprocess_main(b)
-    for bat in b:
-        main(bat)
+    multiprocess_main(b)
+    # for bat in b:
+    #     main(bat)
     # main(b[0])
 
