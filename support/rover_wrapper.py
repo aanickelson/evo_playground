@@ -8,8 +8,6 @@ from evo_playground.support.neuralnet import NeuralNetwork as NN
 from pymap_elites_multiobjective.parameters.learningparams01 import LearnParams as lp
 from pymap_elites_multiobjective.scripts_data.run_env import run_env
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 
 class AgPol:
     def __init__(self, st_size, hid, act_size):
@@ -23,10 +21,6 @@ class AgPol:
         self.model = NN(self.st_size, self.hid, self.act_size)
 
     def set_trained_network(self, x):
-        # Use these ONLY if you're using the old data (before 7/7/2023)
-        # w0_wts = from_numpy(np.reshape(x[:self.w0_size], (self.hid, self.st_size)))
-        # w2_wts = from_numpy(np.reshape(x[self.w0_size:], (self.act_size, self.hid)))
-
         # Use this block to set the weights AND the biases. Like a real puppet.
         cut0 = self.b0_size
         cut1 = cut0 + self.b2_size

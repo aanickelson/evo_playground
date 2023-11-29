@@ -4,12 +4,9 @@ https://github.com/AADILab/PyTorch-Evo-Strategies
 
 Structure and main functions for basic single layer linear Neural Network
 """
-import random
-
 import torch
-from torch import nn
+from torch import nn, from_numpy
 import numpy as np
-from os import getcwd, path
 
 
 class NeuralNetwork(nn.Module):
@@ -23,6 +20,13 @@ class NeuralNetwork(nn.Module):
             nn.Sigmoid(),
         )
         self.model.requires_grad_(False)
+        self.input_size = input_size
+        self.hid = hid_size
+        self.act_size = out_size
+        self.w0_size = self.input_size * self.hid
+        self.w2_size = self.hid * self.act_size
+        self.b0_size = self.hid
+        self.b2_size = self.act_size
 
     def run(self, x):
         return self.model(x)
@@ -37,6 +41,21 @@ class NeuralNetwork(nn.Module):
 
     def get_model(self):
         return self.model.state_dict()
+
+    def set_trained_network(self, x):
+        # Where to slice the array for the weights and biases
+        cut0 = self.b0_size
+        cut1 = cut0 + self.b2_size
+        cut2 = cut1 + self.w0_size
+
+        # Use this block to set the weights AND the biases. Like a real puppet.
+        b0_wts = from_numpy(np.array(x[:cut0]))
+        b1_wts = from_numpy(np.array(x[cut0:cut1]))
+        w0_wts = from_numpy(np.reshape(x[cut1:cut2], (self.hid, self.input_size)))
+        w2_wts = from_numpy(np.reshape(x[cut2:], (self.act_size, self.hid)))
+
+        self.set_biases([b0_wts, b1_wts])
+        self.set_weights([w0_wts, w2_wts])
 
     def set_weights(self, weights):
         d = self.model.state_dict()
