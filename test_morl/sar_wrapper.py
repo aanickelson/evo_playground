@@ -39,20 +39,24 @@ class SARWrap:
 
     def run(self, policy):
         st, _ = self.reset()
-        self.states[0] = st
+
         for ts in range(self.ts):
             pol_out = policy(st).detach().numpy()
+
+            # Bookkeeping for behaviors
+            self.states[ts] = self.interpolate(st, [self.st_low, self.st_high], [[0]*self.st_size, [1]*self.st_size])  # Change to be between [0, 1] for behaviors
+            self.acts[ts] = pol_out     # Policy output is between [0,1], which is what we need for behaviors
+
             # This changes the action to be between the lower and upper bounds for each item in the array
             action = self.interpolate(pol_out, [[0]*self.act_size, [1]*self.act_size], [self.act_low, self.act_high])
             st, vec_reward, terminated, truncated, info = self.env.step(action)
-
-            # Bookkeeping for behaviors
-            self.acts[ts] = pol_out     # Policy output is between [0,1], which is what we need for behaviors
-            self.states[ts + 1] = self.interpolate(st, [self.st_low, self.st_high], [[0]*self.st_size, [1]*self.st_size])  # Change to be between [0, 1] for behaviors
             if terminated or truncated:
                 break
+
+        # Only keep the parts that were filled in, i.e. the number of time steps the sim ran
         self.acts = self.acts[:ts]
         self.states = self.states[:ts]
+
         # MO Gym environments calculate the cumulative reward
         return self.env.return_queue[0]
 
@@ -111,3 +115,11 @@ if __name__ == '__main__':
 # mo-lunar-lander-v2
 # mo-hopper-v4
 # mo-halfcheetah-v4
+
+# Helpful links
+# https://mo-gymnasium.farama.org/environments/water-reservoir/
+# https://gymnasium.farama.org/api/wrappers/reward_wrappers/
+# https://pymoo.org/interface/minimize.html
+
+# Paper with a lot of the implementaiton details
+# https://openreview.net/forum?id=AwWaBXLIJE
