@@ -5,7 +5,7 @@ from mo_gymnasium.utils import MORecordEpisodeStatistics
 from evo_playground.support.neuralnet import NeuralNetwork as NN
 from evo_playground.ccea_base import CCEA
 from evo_playground.parameters.learningparams01 import LearnParams as lp
-from beepy import beep
+# from beepy import beep
 
 
 class SARWrap:
@@ -22,6 +22,7 @@ class SARWrap:
         self.st_low = self.env.observation_space.low
         self.st_high = self.env.observation_space.high
         self.bh_name = bh
+        self.fail_st = self.env.unwrapped.reward_space.low[0]
         self.model = NN(self.st_size, hid, self.act_size)
 
     def reset(self):
@@ -58,7 +59,12 @@ class SARWrap:
         self.states = self.states[:ts]
 
         # MO Gym environments calculate the cumulative reward
-        return self.env.return_queue[0]
+        rw = self.env.return_queue[0]
+        rw[0] /= 100
+        rw[1] /= 5000
+        # Divide by the length of the episode
+        rw[2:] /= info['episode']['l']
+        return rw
 
     def run_bh(self, x):
         self.model.set_trained_network(x)
@@ -107,7 +113,7 @@ if __name__ == '__main__':
     wrap = SARWrap(env)
     ccea = CCEA(wrap, params, lp, 'G', st_size, act_size, '/home/anna/PycharmProjects/evo_playground/test_morl/test_lander', 0)
     ccea.run_evolution()
-    beep(8)
+    # beep(8)
 
 # Cont environments:
 # water-reservoir-vo
