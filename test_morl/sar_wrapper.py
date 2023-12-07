@@ -11,23 +11,26 @@ from evo_playground.parameters.learningparams01 import LearnParams as lp
 class SARWrap:
     def __init__(self, env, hid, bh, ts=1000):
         self.env = env
-        self.st_size = self.env.observation_space.shape[0]
-        self.act_size = self.env.action_space.shape[0]
-        self.n_obj = self.env.unwrapped.reward_dim
         self.ts = ts
+        self.bh_name = bh
+
+        self.st_size = self.env.observation_space.shape[0]
         self.states = np.zeros((ts, self.st_size))
+        self.st_low = self.env.observation_space.low
+        self.st_high = self.env.observation_space.high
+
+        self.act_size = self.env.action_space.shape[0]
         self.acts = np.zeros((ts, self.act_size))
         self.act_low = self.env.action_space.low
         self.act_high = self.env.action_space.high
-        self.st_low = self.env.observation_space.low
-        self.st_high = self.env.observation_space.high
-        self.bh_name = bh
-        self.fail_st = self.env.unwrapped.reward_space.low[0]
+
+        self.n_obj = self.env.unwrapped.reward_dim
         self.model = NN(self.st_size, hid, self.act_size)
 
     def reset(self):
         self.states = np.zeros((self.ts, self.st_size))
         self.acts = np.zeros((self.ts, self.act_size))
+        self.env.reset_custom()
         return self.env.reset()
 
     def interpolate(self, vec, old_v, new_v):
@@ -58,13 +61,7 @@ class SARWrap:
         self.acts = self.acts[:ts]
         self.states = self.states[:ts]
 
-        # MO Gym environments calculate the cumulative reward
-        rw = self.env.return_queue[0]
-        rw[0] /= 100
-        rw[1] /= 5000
-        # Divide by the length of the episode
-        rw[2:] /= info['episode']['l']
-        return rw
+        return self.env.get_wrapper_attr('fin_rw')
 
     def run_bh(self, x):
         self.model.set_trained_network(x)
@@ -79,16 +76,17 @@ class SARWrap:
         return self.act_size
 
     def bh_size(self, bh_name):
-        sizes = {'avg st': self.st_size,                    # Average state
-                 'fin st': self.st_size,                    # Final state
+        sizes = {'avg st': self.env.get_wrapper_attr("st_bh_size"),                # Average state
+                 'fin st': self.env.get_wrapper_attr("st_bh_size"),                # Final state
                  'avg act': self.act_size,                  # Average action
                  'fin act': self.act_size,                  # Final action
                  'min avg max act': self.act_size * 3}      # Min, average, max actions
         return sizes[bh_name]
 
     def get_bh(self, bh_name):
-        bhs = {'avg st': np.mean(self.states, axis=0),      # Average state
-               'fin st': self.states[-1],                   # Final state
+        st_idx = self.env.get_wrapper_attr('st_bh_idxs')
+        bhs = {'avg st': np.mean(self.states, axis=0)[st_idx[0]:st_idx[1]],      # Average state
+               'fin st': self.states[-1][st_idx[0]:st_idx[1]],                   # Final state
                'avg act': np.mean(self.acts, axis=0),       # Average action
                'fin act': self.acts[-1],                    # Final action
                'min avg max act':                           # Min, average, max actions
