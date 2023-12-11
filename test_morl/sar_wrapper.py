@@ -65,7 +65,8 @@ class SARWrap:
         self.acts = self.acts[:ts]
         self.states = self.states[:ts]
 
-        return self.env.get_wrapper_attr('fin_rw')
+        # Replace nan with 0s
+        return np.nan_to_num(self.env.get_wrapper_attr('fin_rw'))
 
     def run_bh(self, x):
         self.model.set_trained_network(x)
