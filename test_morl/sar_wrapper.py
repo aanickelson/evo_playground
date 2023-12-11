@@ -7,6 +7,8 @@ from evo_playground.ccea_base import CCEA
 from evo_playground.parameters.learningparams01 import LearnParams as lp
 # from beepy import beep
 
+import warnings
+
 
 class SARWrap:
     def __init__(self, env, hid, bh, ts=1000):
@@ -30,7 +32,9 @@ class SARWrap:
     def reset(self):
         self.states = np.zeros((self.ts, self.st_size))
         self.acts = np.zeros((self.ts, self.act_size))
-        self.env.reset_custom()
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            self.env.reset_custom()
         return self.env.reset()
 
     def interpolate(self, vec, old_v, new_v):
