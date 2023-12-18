@@ -97,7 +97,7 @@ class SARWrap:
                'min avg max act':                           # Min, average, max actions
                    np.concatenate((np.min(self.acts, axis=0), np.mean(self.acts, axis=0), np.max(self.acts, axis=0)))}
 
-        return bhs[bh_name]
+        return np.nan_to_num(bhs[bh_name])
 
 
 class Params:
