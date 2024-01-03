@@ -18,8 +18,14 @@ class SARWrap:
 
         self.st_size = self.env.observation_space.shape[0]
         self.states = np.zeros((ts, self.st_size))
+        # Change these in case the low or high is inf
         self.st_low = self.env.observation_space.low
         self.st_high = self.env.observation_space.high
+
+        # Change these in case the low or high is inf
+        for i in range(len(self.st_low)):
+            self.st_low[i] = np.max([self.st_low[i], -50])
+            self.st_high[i] = np.min([self.st_high[i], 50])
 
         self.act_size = self.env.action_space.shape[0]
         self.acts = np.zeros((ts, self.act_size))
