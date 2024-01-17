@@ -6,7 +6,7 @@ from torch import from_numpy
 
 from evo_playground.support.neuralnet import NeuralNetwork as NN
 from pymap_elites_multiobjective.parameters.learningparams01 import LearnParams as lp
-from pymap_elites_multiobjective.scripts_data.run_env import run_env
+
 
 
 class AgPol:
@@ -36,13 +36,27 @@ class AgPol:
 
 
 class RoverWrapper:
-    def __init__(self, env, behs):
+    def __init__(self, env, bh):
         self.env = env
         self.p = env.params
         self.agents = self.setup_ag()
-        self.vis = False
-        self.use_bh = True
-        self.behs = behs
+        self.st_size = self.env.state_size()
+        self.ts = self.p.time_steps
+        self.states = np.zeros((self.ts, self.st_size))
+        self.act_size = self.env.action_size()
+        self.acts = np.zeros((self.ts, self.act_size))
+        self.n_obj = self.p.n_poi_types
+        self.st_bh_idxs = list(range(8, 17))
+
+        # This gets the appended portion of the descriptor, which indicates if we're using states (st) or actions (ac)
+        if 'auto ' in bh:
+            bh = 'auto ' + bh[-2:]
+        self.bh_name = bh
+
+    def reset(self):
+        self.states = np.zeros((self.ts, self.st_size))
+        self.acts = np.zeros((self.ts, self.act_size))
+        self.env.reset()
 
     def setup_ag(self):
         st_size = self.env.state_size()
@@ -54,7 +68,7 @@ class RoverWrapper:
         return ag
 
     def setup(self, x):
-        self.env.reset()
+        self.reset()
         wts = x
         if self.p.n_agents == 1 and len(x) > 1:
             wts = [x]
@@ -65,40 +79,101 @@ class RoverWrapper:
         except TypeError:
             blerg = 10
 
-        models = []
+        mods = []
         for i, w in enumerate(wts):
             self.agents[i].set_trained_network(w)
-            models.append(self.agents[i].model)
-        return models
+            mods.append(self.agents[i].model)
+        return mods
 
     def _evaluate(self, x):
         models = self.setup(x)
-        out_vals = run_env(self.env, models, self.p, self.behs, use_bh=self.use_bh, vis=self.vis)
-        if self.use_bh:
-            fitness, bh = out_vals
-            return fitness, bh[0]
-        else:
-            return out_vals
+        for i in range(self.p.time_steps):
+            state = self.env.state()
+            self.states[i] = state
+            actions = []
+            for i, policy in enumerate(models):
+                action = policy(state[i]).detach().numpy()
+                actions.append(action)
+                self.acts[i] = action
+            self.env.action(actions)
+        return self.env.G()
+
+    def run_bh(self, x):
+        G = self._evaluate(x)
+        bh = self.get_bh(self.bh_name)
+        return G, bh
+
+    def action_space(self, act_vec, p, n_move):
+        idx = np.argmax(act_vec[:-n_move])
+        poi_type = int(np.floor(idx / p.n_sensors))
+        return np.concatenate(([poi_type], act_vec[-n_move:]))
+
+    def bh_size(self, bh_name):
+        # May decide to only use a subset of the state for the behaviors
+        # In some domains, part of the state can be binary, which is unhelpful for behaviors
+        st_to_use_size = len(self.st_bh_idxs)
+        sizes = {'avg st': st_to_use_size,                      # Average state
+                 'fin st': st_to_use_size,                      # Final state
+                 'avg act': self.act_size,                  # Average action
+                 'fin act': self.act_size,                  # Final action
+                 'min max st': st_to_use_size * 2,              # Min and max states
+                 'min avg max st': st_to_use_size * 3,          # Min, average, and max states
+                 'min max act': self.act_size * 2,          # Min and max actions
+                 'min avg max act': self.act_size * 3,      # Min, average, max actions
+                 'auto ac': self.acts.size,
+                 'auto st': st_to_use_size * self.p.time_steps    # Auto-encoder will use all states as an input, so we return that to find the behavoir
+                 }
+        return sizes[bh_name]
+
+    def get_bh(self, bh_name):
+        # Sometimes use a subset of the total state
+        # For example if the state has binary values or is too big to use as a behavior
+        st_idx = self.st_bh_idxs
+        states_to_use = self.states[:, st_idx]
+        bhs = {'avg st': np.mean(states_to_use, axis=0),      # Average state
+               'fin st': states_to_use[-1],                   # Final state
+               'avg act': np.mean(self.acts, axis=0),       # Average action
+               'fin act': self.acts[-1],                    # Final action
+               'min max st':                                # Min max states
+                   np.concatenate((np.min(states_to_use, axis=0),
+                                   np.max(states_to_use, axis=0))),
+               'min avg max st':                           # Min, average, max states
+                   np.concatenate((np.min(states_to_use, axis=0),
+                                   np.mean(states_to_use, axis=0),
+                                   np.max(states_to_use, axis=0))),
+               'min max act':                               # Min max actions
+                   np.concatenate((np.min(self.acts, axis=0),
+                                   np.max(self.acts, axis=0))),
+               'min avg max act':                           # Min, average, max actions
+                   np.concatenate((np.min(self.acts, axis=0),
+                                   np.mean(self.acts, axis=0),
+                                   np.max(self.acts, axis=0))),
+               'auto ac': np.ndarray.flatten(self.acts),
+               'auto st': np.ndarray.flatten(states_to_use)}
+
+        return np.nan_to_num(bhs[bh_name])
 
     def _evaluate_multiple(self, x):
-        n_eval = self.p.n_cf_evals
-        models = self.setup(x)
-        fit_vals = np.zeros((n_eval, self.p.n_poi_types))
-        bh_vals = np.zeros((n_eval, self.p.n_bh))
-        for i in range(n_eval):
-            self.env.reset()
-            out_vals = run_env(self.env, models, self.p, self.behs, use_bh=self.use_bh, vis=self.vis)
-            # out_vals = run_env(self.env, models, self.p, use_bh=self.use_bh, vis=self.vis)
-            if self.use_bh:
-                fitness, bh = out_vals
-                fit_vals[i] = fitness
-                bh_vals[i] = bh
-            else:
-                fit_vals[i] = out_vals
+        # n_eval = self.p.n_cf_evals
+        # models = self.setup(x)
+        # fit_vals = np.zeros((n_eval, self.p.n_poi_types))
+        # bh_vals = np.zeros((n_eval, self.p.n_bh))
+        # for i in range(n_eval):
+        #     self.env.reset()
+        #     out_vals = self.run_env(models)
+        #     # out_vals = run_env(self.env, models, self.p, use_bh=self.use_bh, vis=self.vis)
+        #     if self.use_bh:
+        #         fitness, bh = out_vals
+        #         fit_vals[i] = fitness
+        #         bh_vals[i] = bh
+        #     else:
+        #         fit_vals[i] = out_vals
+        #
+        # fits = np.average(fit_vals, axis=0)
+        # bhs = np.average(bh_vals, axis=0)
+        # if self.use_bh:
+        #     return fits, bhs
+        # else:
+        #     return fits
+        pass
 
-        fits = np.average(fit_vals, axis=0)
-        bhs = np.average(bh_vals, axis=0)
-        if self.use_bh:
-            return fits, bhs
-        else:
-            return fits
