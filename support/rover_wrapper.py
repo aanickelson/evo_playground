@@ -47,6 +47,7 @@ class RoverWrapper:
         self.acts = np.zeros((self.ts, self.act_size))
         self.n_obj = self.p.n_poi_types
         self.st_bh_idxs = list(range(8, 17))
+        self.act_bh_idxs = [8, 9]
 
         # This gets the appended portion of the descriptor, which indicates if we're using states (st) or actions (ac)
         if 'auto ' in bh:
@@ -91,9 +92,10 @@ class RoverWrapper:
             state = self.env.state()
             self.states[i] = state
             actions = []
-            for i, policy in enumerate(models):
-                action = policy(state[i]).detach().numpy()
+            for j, policy in enumerate(models):
+                action = policy(state[j]).detach().numpy()
                 actions.append(action)
+                # THIS ASSUMES THERE IS ONLY ONE AGENT
                 self.acts[i] = action
             self.env.action(actions)
         return self.env.G()
@@ -112,15 +114,16 @@ class RoverWrapper:
         # May decide to only use a subset of the state for the behaviors
         # In some domains, part of the state can be binary, which is unhelpful for behaviors
         st_to_use_size = len(self.st_bh_idxs)
+        act_to_use_size = len(self.act_bh_idxs)
         sizes = {'avg st': st_to_use_size,                      # Average state
                  'fin st': st_to_use_size,                      # Final state
-                 'avg act': self.act_size,                  # Average action
-                 'fin act': self.act_size,                  # Final action
+                 'avg act': act_to_use_size,                  # Average action
+                 'fin act': act_to_use_size,                  # Final action
                  'min max st': st_to_use_size * 2,              # Min and max states
                  'min avg max st': st_to_use_size * 3,          # Min, average, and max states
-                 'min max act': self.act_size * 2,          # Min and max actions
-                 'min avg max act': self.act_size * 3,      # Min, average, max actions
-                 'auto ac': self.acts.size,
+                 'min max act': act_to_use_size * 2,          # Min and max actions
+                 'min avg max act': act_to_use_size * 3,      # Min, average, max actions
+                 'auto ac': act_to_use_size,
                  'auto st': st_to_use_size * self.p.time_steps    # Auto-encoder will use all states as an input, so we return that to find the behavoir
                  }
         return sizes[bh_name]
@@ -128,12 +131,13 @@ class RoverWrapper:
     def get_bh(self, bh_name):
         # Sometimes use a subset of the total state
         # For example if the state has binary values or is too big to use as a behavior
-        st_idx = self.st_bh_idxs
-        states_to_use = self.states[:, st_idx]
+
+        states_to_use = self.states[:, self.st_bh_idxs]
+        acts_to_use = self.acts[:, self.act_bh_idxs]
         bhs = {'avg st': np.mean(states_to_use, axis=0),      # Average state
                'fin st': states_to_use[-1],                   # Final state
-               'avg act': np.mean(self.acts, axis=0),       # Average action
-               'fin act': self.acts[-1],                    # Final action
+               'avg act': np.mean(acts_to_use, axis=0),       # Average action
+               'fin act': acts_to_use[-1],                    # Final action
                'min max st':                                # Min max states
                    np.concatenate((np.min(states_to_use, axis=0),
                                    np.max(states_to_use, axis=0))),
@@ -142,13 +146,13 @@ class RoverWrapper:
                                    np.mean(states_to_use, axis=0),
                                    np.max(states_to_use, axis=0))),
                'min max act':                               # Min max actions
-                   np.concatenate((np.min(self.acts, axis=0),
-                                   np.max(self.acts, axis=0))),
+                   np.concatenate((np.min(acts_to_use, axis=0),
+                                   np.max(acts_to_use, axis=0))),
                'min avg max act':                           # Min, average, max actions
-                   np.concatenate((np.min(self.acts, axis=0),
-                                   np.mean(self.acts, axis=0),
-                                   np.max(self.acts, axis=0))),
-               'auto ac': np.ndarray.flatten(self.acts),
+                   np.concatenate((np.min(acts_to_use, axis=0),
+                                   np.mean(acts_to_use, axis=0),
+                                   np.max(acts_to_use, axis=0))),
+               'auto ac': np.ndarray.flatten(acts_to_use),
                'auto st': np.ndarray.flatten(states_to_use)}
 
         return np.nan_to_num(bhs[bh_name])
