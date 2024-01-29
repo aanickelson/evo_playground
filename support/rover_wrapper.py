@@ -123,7 +123,7 @@ class RoverWrapper:
                  'min avg max st': st_to_use_size * 3,          # Min, average, and max states
                  'min max act': act_to_use_size * 2,          # Min and max actions
                  'min avg max act': act_to_use_size * 3,      # Min, average, max actions
-                 'auto ac': act_to_use_size,
+                 'auto ac': act_to_use_size * self.p.time_steps,
                  'auto st': st_to_use_size * self.p.time_steps    # Auto-encoder will use all states as an input, so we return that to find the behavoir
                  }
         return sizes[bh_name]
