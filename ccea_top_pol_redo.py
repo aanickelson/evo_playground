@@ -1,16 +1,12 @@
 import os.path
-from datetime import datetime
-import numpy as np
-from os import getcwd, path, mkdir
 import copy
 
 from AIC.aic import aic
 from evo_playground.support.get_policy_from_niche import PolicyMap
-from evo_playground.support.rover_wrapper import RoverWrapper
+from pymap_elites_multiobjective.scripts_data.rover_wrapper import RoverWrapper
 from evo_playground.ccea_base import *
 from evo_playground.parameters.learningparams02 import LearnParams
 import pymap_elites_multiobjective.parameters as Params
-from evo_playground.radians_G import G_exp
 from itertools import combinations
 
 

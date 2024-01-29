@@ -1,9 +1,7 @@
 from AIC.aic import aic
 import pymap_elites_multiobjective.parameters as Params
-from evo_playground.support.rover_wrapper import RoverWrapper
-from evo_playground.radians_G import G_exp
+from pymap_elites_multiobjective.scripts_data.rover_wrapper import RoverWrapper
 import numpy as np
-from numpy import inf
 from sklearn.neighbors import KDTree
 import pymap_elites_multiobjective.scripts_data.often_used as util
 import copy
